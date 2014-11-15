@@ -1,0 +1,9 @@
+<h1>Post Index</h1>
+<a href="#" ng-click='test()' class="btn">LOg</a>
+<ul>
+    <li ng-repeat="post in posts">
+    <h3>{{post.title}}</h3>
+    <p>{{post.body}}</p>
+    <p><em>{{post.created_at}}</em></p>
+    </li>
+</ul>

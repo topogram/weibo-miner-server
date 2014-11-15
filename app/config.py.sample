@@ -1,0 +1,7 @@
+DEBUG = True
+WTF_CSRF_ENABLED = False
+SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/topogram.sqlite'
+UPLOAD_FOLDER ="/tmp/data"
+
+SENDGRID_USERNAME = ""
+SENDGRID_PASSWORD = ""

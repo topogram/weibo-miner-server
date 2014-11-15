@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html ng-app="Blog" ng-controller="ApplicationCtrl">
+    <head>
+        <meta charset="utf-8" />
+        <title>Topogram</title>
+ 
+        <link rel="stylesheet" type="text/css" href="./bower_components/bootstrap/dist/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="./css/theme.css">
+        <link rel="stylesheet" type="text/css" href="./css/styles.css">
+    </head>
+    <body>
+ 
+        <div class="blog-masthead">
+            <div class="container">
+                <nav role="navigation" class="navbar-tools navbar-default navbar-tools navbar-fixed-top navbar-inverse">
+                    <div class="container-fluid">
+                      <!-- Brand and toggle get grouped for better mobile display-->
+                      <div class="navbar-header">
+                        <button type="button" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
+                      </div>
+
+                         <ul class="nav navbar-nav">
+                            <li>
+                                <a href="/" class="navbar-brand" ng-class="{active: isActive('/')}">Topogram</a>
+                            </li>
+                        </ul>
+                        <ul class="nav navbar-nav">
+                            <li ng-if="isLogged()">
+                                <a class="blog-nav-item" href="#/datasets"  ng-class="{active: isActive('/datasets/create')}">Datasets</a>
+                            </li>
+                            <li ng-if="isLogged()">
+                                <a class="blog-nav-item" href="#/datasets/create"  ng-class="{active: isActive('/datasets/create')}">Upload a dataset</a>
+                            </li>
+                        </ul>
+
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><a href="#">Help</a></li>
+                            <li><a href="#">About</a></li>
+                            <li class="divider-vertical"></li>
+                            <li ng-if="isLogged()">
+                                <a href="#/sessions/destroy">Logout</a>
+                            </li>
+                            <li ng-if="!isLogged()">
+                                <a href="#/users/create" title="Register">Register</a>
+                            </li>
+                            <li ng-if="!isLogged()"><a href="#/sessions/create" ng-class="{active: isActive('/sessions/create')}">Login</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Subscribe to success flash messages. -->
+        <div flash-alert="success" active-class="in alert" class="fade">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <strong class="alert-heading">Congrats!</strong>
+            <span class="alert-message">{{flash.message}}</span>
+        </div>
+
+        <!-- Subscribe to error flash messages. -->
+        <div flash-alert="error" active-class="in alert" class="fade">
+            <strong class="alert-heading">Boo!</strong>
+            <span class="alert-message">{{flash.message}}</span>
+        </div>
+
+        <div class="container main-view">
+ 
+            <div ng-view></div>
+ 
+        </div><!-- /.container -->
+ 
+        <div class="blog-footer">
+            <p>Application built by <a href="https://twitter.com/clemsos">@clemsos</a> using Flask and AngularJS.</p>
+            <p>
+                <a href="#">Back to top</a>
+            </p>
+        </div>
+ 
+        <script type="text/javascript" src="./bower_components/angularjs/angular.js"></script>
+        <script type="text/javascript" src="./bower_components/angular-route/angular-route.js"></script>
+        <script type="text/javascript" src="./bower_components/lodash/dist/lodash.js"></script>
+        <script type="text/javascript" src="./bower_components/restangular/dist/restangular.js"></script>
+        <script type="text/javascript" src="./bower_components/angular-local-storage/angular-local-storage.js"></script>
+        
+        <script type="text/javascript" src="./bower_components/angular-flash/dist/angular-flash.js"></script>
+        <script type="text/javascript" src="./bower_components/angular-file-upload/angular-file-upload.js"></script>
+
+        <!-- <script type="text/javascript" src="./bower_components/jquery/dist/jquery.js"></script>
+        <script type="text/javascript" src="./bower_components/bootstrap/dist/js/bootstrap.js"></script>
+ -->
+        <script type="text/javascript" src="./js/main.js"></script>
+        <script type="text/javascript" src="./js/routes.js"></script>
+        <script type="text/javascript" src="./js/controllers/HomeDetailCtrl.js"></script>
+        <script type="text/javascript" src="./js/controllers/ApplicationCtrl.js"></script>
+        <script type="text/javascript" src="./js/controllers/SessionCreateCtrl.js"></script>
+        <script type="text/javascript" src="./js/controllers/SessionDestroyCtrl.js"></script>
+        <script type="text/javascript" src="./js/controllers/UserCreateCtrl.js"></script>
+        <script type="text/javascript" src="./js/controllers/DatasetCreateCtrl.js"></script>
+        <script type="text/javascript" src="./js/controllers/DatasetViewCtrl.js"></script>
+        <script type="text/javascript" src="./js/controllers/DatasetIndexCtrl.js"></script>
+
+        <script type="text/javascript" src="./js/factories/Session.js"></script>
+        <script type="text/javascript" src="./js/factories/User.js"></script>
+        <script type="text/javascript" src="./js/factories/Dataset.js"></script>
+        <script type="text/javascript" src="./js/services/AuthService.js"></script>
+        <script type="text/javascript" src="./js/directives/match.js"></script>
+ 
+    </body>
+</html>

@@ -1,0 +1,4 @@
+Thanks {{ name }}! You're all set!
+We're sending you a confirmation email just for your records. We'll see you the night of October 24th!
+<p>P.S - Here's a map to the Red Lantern: http://goo.gl/maps/5Sszt
+Feel free to reply to this email with any questions!

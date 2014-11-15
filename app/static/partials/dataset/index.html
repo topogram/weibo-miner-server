@@ -1,0 +1,14 @@
+<p>Datasets : {{posts.length}} </p>
+<table ng-table="" class="table table-striped">
+  <tbody>
+    <tr ng-repeat="post in posts">
+      <td data-title="'title'" sortable="'title'"> <a href="#/datasets/{{post.id}}" role="button">{{post.title}}</a></td>
+      <td data-title="'description'">{{post.description}}</td>
+      <td data-title="'slug'" sortable="'slug'"> <a href="#/datasets/{{post.id}}" role="button">{{ post.filepath }}</a></td>
+      <td data-title="'created_at'" sortable="'created_at'">{{post.created_at | date:'medium'}}</td>
+      <td data-title="'modified_at'" sortable="'modified_at'">{{post.modified_at | date:'medium'}}</td>
+      <td data-title="'Modify'"><a href="#/datasets/{{post.id}}" role="button" disabled="disabled" class="btn btn-default btn-sm">Edit</a></td>
+      <td data-title="'Delete'"><a href="/datasets/{{post.id}}" role="button" class="btn btn-primary btn-sm">Delete</a></td>
+    </tr>
+  </tbody>
+</table>
