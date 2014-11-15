@@ -18,7 +18,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 ASSETS_DIR=os.path.join(basedir, 'static')
 
 app = Flask(__name__)
-app.config.from_object('app.config')
+app.config.from_object('config')
 app._static_folder = ASSETS_DIR
  
 # flask-sqlalchemy
