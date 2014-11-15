@@ -23,6 +23,8 @@ Currently supported :
  
 # Deploy
 
+Run locally 
+
     git clone
     virtualenv venv
     . venv/bin/activate
