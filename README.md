@@ -1,5 +1,5 @@
     
-    Under Development
+    Under Development : see [topogram miner](https://github.com/topogram/topogram-miner) for the core tech
 
 # Topogram
 
