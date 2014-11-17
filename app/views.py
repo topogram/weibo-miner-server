@@ -1,9 +1,13 @@
 import os 
+import csv
 
 from flask import g
 from flask.ext import restful
 from flask_restful_swagger import swagger
 from werkzeug import secure_filename
+
+from lib.elastic import *
+import uuid
 
 from server import app, api, db, flask_bcrypt, auth
 from models import User, Dataset
@@ -74,25 +78,49 @@ class DatasetListView(restful.Resource):
         if not form.validate_on_submit():
             return form.errors, 422
 
-        print form.title
-        print form.dataset.data
+        # add file 
         fileName = secure_filename(form.dataset.data.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], fileName)
         form.dataset.data.save(file_path)
-        print file_path
 
-        print form.title
+        # index to elasticsearch
+        print fileName
+        es_index_name=fileName[0:-4] + "_"+ str(uuid.uuid4())
+        build_es_index_from_csv(file_path,es_index_name)
+
+        # index file
         dataset = Dataset(form.title.data, form.type.data, form.description.data,str(file_path))
+
         db.session.add(dataset)
         db.session.commit()
         
         return DatasetSerializer(dataset).data, 201
- 
+
 class DatasetView(restful.Resource):
     def get(self, id):
         datasets = Dataset.query.filter_by(id=id).first()
-        return DatasetSerializer(datasets).data
- 
+        desc= DatasetSerializer(datasets).data
+        
+        # get csv sample
+        csv_file = csv.reader(open(desc["filepath"]))
+        csv_sample=[]
+        fieldnames=csv_file.next() # get name
+
+        for line in range(0,10):
+            row={}
+            for i,rec in enumerate(csv_file.next()):
+                row[fieldnames[i]] = rec
+            csv_sample.append(row)
+        desc["csvSample"] = csv_sample
+        return desc
+
+    def delete(self, id):
+        dataset = Dataset.query.filter_by(id=id).first()
+        db.session.delete(dataset)
+        db.session.commit()
+        return '{"ok" : post deleted"}', 204
+
+
 api.add_resource(UserView, '/api/v1/users')
 api.add_resource(SessionView, '/api/v1/sessions')
 api.add_resource(DatasetListView, '/api/v1/datasets')

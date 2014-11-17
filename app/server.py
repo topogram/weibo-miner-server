@@ -10,28 +10,36 @@ from flask.ext.bcrypt import Bcrypt
 from flask.ext.httpauth import HTTPBasicAuth
 from flask_restful_swagger import swagger
 from flask.ext.uploads import UploadSet, configure_uploads, DATA, UploadNotAllowed
+# from flask.ext.elastic import Elastic
+from flask.ext.elasticsearch import ElasticSearch
+
+print ElasticSearch
 
 from flask import render_template, jsonify, send_from_directory, request, make_response
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-
 ASSETS_DIR=os.path.join(basedir, 'static')
 
 app = Flask(__name__)
 app.config.from_object('config')
+# print app.config
 app._static_folder = ASSETS_DIR
  
 # flask-sqlalchemy
 db = SQLAlchemy(app)
  
 # flask-restful
-api = swagger.docs(Api(app), apiVersion='0.1', api_spec_url="/api/v1/spec")
+api = swagger.docs(Api(app), apiVersion='0.1', api_spec_url="/api/v1/spec", resourcePath="/api/v1/spec")
 
 # flask-bcrypt
 flask_bcrypt = Bcrypt(app)
  
 # flask-httpauth
 auth = HTTPBasicAuth()
+
+# elastic search
+elastic = ElasticSearch(app)
+
 
 # create data dir if it doesn't exist
 try:

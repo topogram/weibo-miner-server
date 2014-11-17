@@ -1,7 +1,16 @@
+import os 
+
 DEBUG = True
 WTF_CSRF_ENABLED = False
-SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/topogram.sqlite'
-UPLOAD_FOLDER ="/tmp/data"
+
+if "UPLOAD_FOLDER" in os.environ:
+    UPLOAD_FOLDER=os.environ.get('TOPOGRAM_SQLALCHEMY_DATABASE_URI')
+else: UPLOAD_FOLDER ="/tmp/data"
+
+# SQLite
+if "TOPOGRAM_SQLALCHEMY_DATABASE_URI" in os.environ:
+    SQLALCHEMY_DATABASE_URI=os.environ.get('TOPOGRAM_SQLALCHEMY_DATABASE_URI')
+else: SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/topogram.sqlite'
 
 SENDGRID_USERNAME = ""
 SENDGRID_PASSWORD = ""

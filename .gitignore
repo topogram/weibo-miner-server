@@ -1,6 +1,7 @@
 tests
 venv
 bower_components
+uploads
 
 config.py
 *.sqlite

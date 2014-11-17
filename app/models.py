@@ -19,6 +19,7 @@ class User(db.Model):
 
 @swagger.model
 class Dataset(db.Model):
+    "Datasets (csv files) ..."
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
     type = db.Column(db.String(120), nullable=False)

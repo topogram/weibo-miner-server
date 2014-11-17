@@ -1,0 +1,33 @@
+<h3>{{dataset.title}}</h3>
+<p>{{dataset.description}}</p>
+<p>{{dataset.filepath}}</p>
+<p><strong>type</strong> : {{dataset.type}}</p>
+<p><em></em></p>
+
+<section class="row">
+  <div class="col-md-4">
+    <dl class="dl-horizontal">
+      <dt>Creation date</dt>
+      <dd>{{dataset.created_at | date:medium}}</dd>
+      <dt>Search query</dt>
+      <dd>{{post.term}} in {{post.index}}</dd>
+    </dl>
+  </div>
+  <div class="col-md-4">
+    <div ng-if="post.messages == 0">
+      <button ng-click="getData(&quot;mongo&quot;)" class="btn btn-primary">Extract data</button>
+    </div>
+    <div ng-if="post.messages != 0">
+      <p>{{post.messages}} messages</p><a target="_blank" href="/api/meme/{{post._id}}/download.csv" download="{{post.name}}.csv" class="btn btn-default"> Download messages as CSV</a>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div ng-if="post.times == 0">
+      <button ng-disabled="{{post.messages==0}}" ng-click="analyzeData()" class="btn btn-primary">Analyze data</button>
+    </div>
+    <div ng-if="post.times != 0">
+      <p>{{post.times}} timeframes</p>
+    </div>
+  </div>
+</section>
+<section ng-if="post.times != 0" class="results"><a href="/meme/{{post._id}}" class="btn btn-primary"></a></section>

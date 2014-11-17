@@ -40,7 +40,7 @@ Topogram.config(function($routeProvider, RestangularProvider) {
     $routeProvider
         .when('/', {
             controller: 'HomeDetailCtrl',
-            templateUrl: partialsDir + '/home/detail.html'
+            templateUrl: partialsDir + '/home/index.html'
         })
         .when('/sessions/create', {
             controller: 'SessionCreateCtrl',

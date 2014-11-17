@@ -1,4 +1,13 @@
 function DatasetViewCtrl($scope, $routeParams, Restangular, flash) {
-    $scope.dataset = Restangular.one('datasets',$routeParams.datasetId).get().$object;
-    console.log($scope.dataset);
+
+    Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
+        console.log(dataset);
+        $scope.columns = [];
+        for (colHeader in dataset.csvSample[0]) {
+            console.log(colHeader);
+            $scope.columns.push({"title": colHeader, 'field': colHeader})
+        };
+        $scope.dataset = dataset;
+
+    });
 }

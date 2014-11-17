@@ -8,7 +8,7 @@
       <td data-title="'created_at'" sortable="'created_at'">{{post.created_at | date:'medium'}}</td>
       <td data-title="'modified_at'" sortable="'modified_at'">{{post.modified_at | date:'medium'}}</td>
       <td data-title="'Modify'"><a href="#/datasets/{{post.id}}" role="button" disabled="disabled" class="btn btn-default btn-sm">Edit</a></td>
-      <td data-title="'Delete'"><a href="/datasets/{{post.id}}" role="button" class="btn btn-primary btn-sm">Delete</a></td>
+      <td data-title="'Delete'"><a href="#" ng-click="delete(post)" role="button" class="btn btn-primary btn-sm">Delete</a></td>
     </tr>
   </tbody>
 </table>
