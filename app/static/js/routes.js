@@ -85,14 +85,14 @@ Topogram.config(function($routeProvider, RestangularProvider) {
                 redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
             }
         })
-        .when('/memes', {
-            controller: 'MemeIndexCtrl',
-            templateUrl: partialsDir + '/memes/index.html',
-            resolve: {
-                redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
-            }
-        })
-        .when('/memes/:memeId', {
+        // .when('/memes', {
+        //     controller: 'MemeIndexCtrl',
+        //     templateUrl: partialsDir + '/memes/index.html',
+        //     resolve: {
+        //         redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
+        //     }
+        // })
+        .when('/datasets/:datasetId/memes/:memeId', {
             controller: 'MemeViewCtrl',
             templateUrl: partialsDir + '/memes/view.html',
             resolve: {

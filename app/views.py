@@ -148,14 +148,14 @@ class MemeListView(restful.Resource):
 class MemeView(restful.Resource):
 
     @auth.login_required
-    def get(self, id):
-        meme = Meme.query.filter_by(id=id).first()
+    def get(self, dataset_id, meme_id):
+        meme = Meme.query.filter_by(id=meme_id).first()
         meme= MemeSerializer(meme).data
         return meme
 
     @auth.login_required
-    def delete(self, id):
-        meme = Meme.query.filter_by(id=id).first()
+    def delete(self, dataset_id, meme_id):
+        meme = Meme.query.filter_by(id=meme_id).first()
         db.session.delete(meme)
         db.session.commit()
         return '{"ok" : post deleted"}', 204
@@ -168,12 +168,14 @@ class MemesByDataset(restful.Resource):
         memes = MemeSerializer(memes, many=True).data
         return memes
 
+
+
 api.add_resource(UserView, '/api/v1/users')
 api.add_resource(SessionView, '/api/v1/sessions')
 
 api.add_resource(DatasetListView, '/api/v1/datasets')
 api.add_resource(DatasetView, '/api/v1/datasets/<int:id>')
 api.add_resource(MemesByDataset, '/api/v1/datasets/<int:id>/memes')
+api.add_resource(MemeView, '/api/v1/datasets/<int:dataset_id>/memes/<int:meme_id>')
 
 api.add_resource(MemeListView, '/api/v1/memes')
-api.add_resource(MemeView, '/api/v1/memes/<int:id>')

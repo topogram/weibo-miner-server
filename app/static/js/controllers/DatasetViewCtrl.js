@@ -1,4 +1,4 @@
-function DatasetViewCtrl($scope, $routeParams, $location, Restangular, flash) {
+function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular, flash) {
 
     Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
             // console.log(memes);
@@ -10,13 +10,13 @@ function DatasetViewCtrl($scope, $routeParams, $location, Restangular, flash) {
             $scope.memes = memes;
     });
 
-    // $scope.delete = function(meme) {
-    //     // console.log($scope.memes);
-    //     meme.remove().then(function() {
-    //         $timeout(function() {
-    //             $location.path("/memes");
-    //         })
-    //         $scope.posts = _.without($scope.memes, meme);
-    //     });
-    // }
+    $scope.delete = function(meme) {
+        
+        meme.remove().then(function() {
+            $timeout(function() {
+                $location.path("/datasets/"+ $scope.dataset.id);
+            })
+            $scope.posts = _.without($scope.memes, meme);
+        });
+    }
 }
