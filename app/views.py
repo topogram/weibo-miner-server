@@ -10,9 +10,9 @@ from lib.elastic import *
 import uuid
 
 from server import app, api, db, flask_bcrypt, auth
-from models import User, Dataset
-from forms import UserCreateForm, SessionCreateForm, DatasetCreateForm
-from serializers import UserSerializer, DatasetSerializer
+from models import User, Dataset, Meme
+from forms import UserCreateForm, SessionCreateForm, DatasetCreateForm, MemeCreateForm
+from serializers import UserSerializer, DatasetSerializer, MemeSerializer
 import sendgrid
 
 mailer = sendgrid.SendGridClient(app.config['SENDGRID_USERNAME'],
@@ -42,7 +42,6 @@ class UserView(restful.Resource):
         db.session.commit()
         return UserSerializer(user).data
 
-
 def send_welcome_email(to, name):
     subject = "Welcome to Topogram.io"
     txt_template = jinja_env.get_template('emails/confirm.txt')
@@ -63,10 +62,13 @@ class SessionView(restful.Resource):
  
         user = User.query.filter_by(email=form.email.data).first()
         if user and flask_bcrypt.check_password_hash(user.password, form.password.data):
+            # auth !
             return UserSerializer(user).data, 201
         return '', 401
  
 class DatasetListView(restful.Resource):
+
+    @auth.login_required
     def get(self):
         datasets = Dataset.query.all()
         return DatasetSerializer(datasets, many=True).data
@@ -89,7 +91,7 @@ class DatasetListView(restful.Resource):
         build_es_index_from_csv(file_path,es_index_name)
 
         # index file
-        dataset = Dataset(form.title.data, form.type.data, form.description.data,str(file_path))
+        dataset = Dataset(form.title.data, form.type.data, form.description.data, es_index_name, str(file_path))
 
         db.session.add(dataset)
         db.session.commit()
@@ -97,6 +99,8 @@ class DatasetListView(restful.Resource):
         return DatasetSerializer(dataset).data, 201
 
 class DatasetView(restful.Resource):
+
+    @auth.login_required
     def get(self, id):
         datasets = Dataset.query.filter_by(id=id).first()
         desc= DatasetSerializer(datasets).data
@@ -114,14 +118,51 @@ class DatasetView(restful.Resource):
         desc["csvSample"] = csv_sample
         return desc
 
+    @auth.login_required
     def delete(self, id):
         dataset = Dataset.query.filter_by(id=id).first()
         db.session.delete(dataset)
         db.session.commit()
         return '{"ok" : post deleted"}', 204
 
+class MemeListView(restful.Resource):
+    @auth.login_required
+    def get(self):
+        memes = Meme.query.all()
+        return MemeSerializer(memes, many=True).data
+
+    @auth.login_required
+    def post(self):
+        form = MemeCreateForm()
+
+        if not form.validate_on_submit():
+            return form.errors, 422
+
+
+        meme = Meme(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data)
+
+        db.session.add(meme)
+        db.session.commit()
+        return MemeSerializer(meme).data
+
+class MemeView(restful.Resource):
+
+    @auth.login_required
+    def get(self, id):
+        meme = Meme.query.filter_by(id=id).first()
+        meme= MemeSerializer(meme).data
+        return meme
+
+    @auth.login_required
+    def delete(self, id):
+        meme = Meme.query.filter_by(id=id).first()
+        db.session.delete(meme)
+        db.session.commit()
+        return '{"ok" : post deleted"}', 204
 
 api.add_resource(UserView, '/api/v1/users')
 api.add_resource(SessionView, '/api/v1/sessions')
 api.add_resource(DatasetListView, '/api/v1/datasets')
 api.add_resource(DatasetView, '/api/v1/datasets/<int:id>')
+api.add_resource(MemeListView, '/api/v1/memes')
+api.add_resource(MemeView, '/api/v1/memes/<int:id>')

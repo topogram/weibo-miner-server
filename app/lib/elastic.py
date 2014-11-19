@@ -6,7 +6,7 @@ from ..server import app,elastic
 import pandas as pd
 import uuid
 
-def build_es_index_from_csv(raw_data_path, es_index_name, data_type="messages" ):
+def build_es_index_from_csv(raw_data_path, es_index_name, data_type="message" ):
 
     # size of CSV chunk to process
     chunksize=1000
@@ -28,6 +28,9 @@ def build_es_index_from_csv(raw_data_path, es_index_name, data_type="messages" )
     # parse file
     for i,df in enumerate(csvfile):
         
+        # fix the date formatting
+        df["created_at"]=df["created_at"].str.replace(" ", "T")
+
         # get records
         records=df.where(pd.notnull(df), None).T.to_dict()
 

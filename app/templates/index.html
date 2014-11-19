@@ -26,7 +26,7 @@
                         </ul>
                         <ul class="nav navbar-nav">
                             <li ng-if="isLogged()">
-                                <a class="blog-nav-item" href="#/datasets"  ng-class="{active: isActive('/datasets/create')}">Datasets</a>
+                                <a class="blog-nav-item" href="#/datasets"  ng-class="{active: isActive('/datasets/create')}">Your Datasets</a>
                             </li>
                             <li ng-if="isLogged()">
                                 <a class="blog-nav-item" href="#/datasets/create"  ng-class="{active: isActive('/datasets/create')}">Upload a dataset</a>
@@ -86,9 +86,15 @@
         <script type="text/javascript" src="./bower_components/angular-file-upload/angular-file-upload.js"></script>
         <script type="text/javascript" src="./bower_components/ng-table/ng-table.js"></script>
 
-        <!-- <script type="text/javascript" src="./bower_components/jquery/dist/jquery.js"></script>
+        <script type="text/javascript" src="./bower_components/elasticsearch/elasticsearch.js"></script>
+        <script type="text/javascript" src="./bower_components/elasticsearch/elasticsearch.angular.js"></script>
+
+        <script type="text/javascript" src="./bower_components/d3/d3.js"></script>
+        
+        <script type="text/javascript" src="./bower_components/jquery/dist/jquery.js"></script>
+
         <script type="text/javascript" src="./bower_components/bootstrap/dist/js/bootstrap.js"></script>
- -->
+
         <script type="text/javascript" src="./js/main.js"></script>
         <script type="text/javascript" src="./js/routes.js"></script>
         <script type="text/javascript" src="./js/controllers/HomeDetailCtrl.js"></script>
@@ -104,7 +110,11 @@
         <script type="text/javascript" src="./js/factories/User.js"></script>
         <script type="text/javascript" src="./js/factories/Dataset.js"></script>
         <script type="text/javascript" src="./js/services/AuthService.js"></script>
+        <script type="text/javascript" src="./js/services/SearchService.js"></script>
+
         <script type="text/javascript" src="./js/directives/match.js"></script>
+        <script type="text/javascript" src="./js/directives/timeSeries.js"></script>
+
  
     </body>
 </html>

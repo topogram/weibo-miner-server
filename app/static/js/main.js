@@ -4,7 +4,8 @@ window.Topogram = angular.module('Blog', [
                                  'LocalStorageModule',
                                  'angular-flash.service',
                                  'angular-flash.flash-alert-directive',
-                                 'angularFileUpload'
+                                 'angularFileUpload',
+                                 'elasticsearch'
                                  ])
 .run(function($location, Restangular, AuthService) {
     Restangular.setFullRequestInterceptor(function(element, operation, route, url, headers, params, httpConfig) {

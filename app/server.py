@@ -13,8 +13,6 @@ from flask.ext.uploads import UploadSet, configure_uploads, DATA, UploadNotAllow
 # from flask.ext.elastic import Elastic
 from flask.ext.elasticsearch import ElasticSearch
 
-print ElasticSearch
-
 from flask import render_template, jsonify, send_from_directory, request, make_response
 
 basedir = os.path.abspath(os.path.dirname(__file__))

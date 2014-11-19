@@ -9,6 +9,8 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, info={'validators': Email()})
     password = db.Column(db.String(80), nullable=False)
     datasets = db.relationship('Dataset', backref='user', lazy='dynamic')
+    memes = db.relationship('Meme', backref='user', lazy='dynamic')
+    memes = db.relationship('Meme', backref='user', lazy='dynamic')
  
     def __init__(self, email, password):
         self.email = email
@@ -23,17 +25,46 @@ class Dataset(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
     type = db.Column(db.String(120), nullable=False)
-    description = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text)
     filepath = db.Column(db.String(120))
+    index_name = db.Column(db.String(150))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     created_at = db.Column(db.DateTime, default=db.func.now())
+    memes = db.relationship('Meme', backref='dataset', lazy='dynamic')
 
-    def __init__(self, title, type, description, filepath):
+    def __init__(self, title, type, description, index_name, filepath):
         self.title = title
         self.description = description
         self.type = type
         self.filepath = filepath
+        self.index_name = index_name
         self.user_id = g.user.id
  
     def __repr__(self):
         return '<Dataset %r>' % self.title
+
+class Meme(db.Model):
+    "Memes are visualisation of selected ..."
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.Text)
+    es_index_name = db.Column(db.String(200), nullable=False)
+    es_query = db.Column(db.String(150), nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
+
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+    def __init__(self, dataset_id, description, es_index_name, es_query):
+        # print dataset_id, description, es_index_name, es_query
+        # print g.user.id, g.dataset_id
+        self.description = description
+        self.es_query = es_query
+        self.es_index_name = es_index_name
+        self.dataset_id = dataset_id
+        self.user_id = g.user.id
+ 
+    def __repr__(self):
+        return '<Meme %r>' % self.id
+
+
