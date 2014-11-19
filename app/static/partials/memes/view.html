@@ -1,0 +1,35 @@
+<h1>{{meme.dataset.title}} <small>{{meme.dataset.description}}</small></h1>
+
+<section class="row">
+  <div class="col-md-4">
+    <dl class="dl-horizontal">
+      <dt>Data source</dt>
+      <dd><a href="#/dataset/{{ meme.dataset.id }}">{{ meme.dataset.title}}</a></dd>
+      <dt>Data type</dt>
+      <dd>{{meme.dataset.type}}</dd>
+      <dt>Creation date</dt>
+      <dd>{{meme.created_at | date:medium}}</dd>
+      <dt>Search query</dt>
+      <dd>{{meme.es_query}} in {{meme.es_index_name}}</dd>
+      <dt>Count</dt>
+      <dd>{{meme.records_count}} messages</dd>
+    </dl>
+  </div>
+  <div class="col-md-4">
+    <div ng-if="meme.records_count == 0">
+      <button ng-click="getData(&quot;mongo&quot;)" class="btn btn-primary">Extract data</button>
+    </div>
+    <div ng-if="meme.messages != 0">
+      <p></p><a target="_blank" href="/api/meme/{{post._id}}/download.csv" download="{{post.name}}.csv" class="btn btn-default" disabled> Download messages as CSV</a>
+    </div>
+  </div>
+  <!-- <div class="col-md-4">
+    <div ng-if="post.times == 0">
+      <button ng-disabled="{{post.messages==0}}" ng-click="analyzeData()" class="btn btn-primary">Analyze data</button>
+    </div>
+    <div ng-if="post.times != 0">
+      <p>{{post.times}} timeframes</p>
+    </div>
+   --></div>
+</section>
+<section ng-if="post.times != 0" class="results"><a href="/meme/{{post._id}}" class="btn btn-primary"></a></section>
