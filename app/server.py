@@ -10,8 +10,8 @@ from flask.ext.bcrypt import Bcrypt
 from flask.ext.httpauth import HTTPBasicAuth
 from flask_restful_swagger import swagger
 from flask.ext.uploads import UploadSet, configure_uploads, DATA, UploadNotAllowed
-# from flask.ext.elastic import Elastic
 from flask.ext.elasticsearch import ElasticSearch
+from flask.ext.pymongo import PyMongo
 
 from flask import render_template, jsonify, send_from_directory, request, make_response
 
@@ -38,6 +38,8 @@ auth = HTTPBasicAuth()
 # elastic search
 elastic = ElasticSearch(app)
 
+# flask mongo 
+mongo = PyMongo(app)
 
 # create data dir if it doesn't exist
 try:

@@ -15,4 +15,4 @@ class MemeSerializer(Serializer):
     dataset = fields.Nested(DatasetSerializer)
  
     class Meta:
-        fields = ("id", "description", "es_index_name", "es_query", "user", "dataset","dataset_id", "user_id", "created_at")
+        fields = ("id", "description", "es_index_name", "es_query", "user", "dataset","dataset_id", "user_id", "created_at", "data_mongo_id", "records_count")

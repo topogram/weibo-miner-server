@@ -50,19 +50,25 @@ class Meme(db.Model):
     es_index_name = db.Column(db.String(200), nullable=False)
     es_query = db.Column(db.String(150), nullable=False)
 
+    data_mongo_id = db.Column(db.String(150))
+    records_count = db.Column(db.Integer)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
     created_at = db.Column(db.DateTime, default=db.func.now())
 
-    def __init__(self, dataset_id, description, es_index_name, es_query):
+    def __init__(self, dataset_id, description, es_index_name, es_query, data_mongo_id,records_count):
         # print dataset_id, description, es_index_name, es_query
         # print g.user.id, g.dataset_id
         self.description = description
         self.es_query = es_query
         self.es_index_name = es_index_name
+        self.data_mongo_id = data_mongo_id
+        self.records_count = records_count
         self.dataset_id = dataset_id
         self.user_id = g.user.id
+
  
     def __repr__(self):
         return '<Meme %r>' % self.id

@@ -29,5 +29,7 @@ Run locally
     virtualenv venv
     . venv/bin/activate
     pip install -r requirements.txt
-    python run.py
+    
+    pip install -r dev_requirements.txt
+    python dev_run.py db 
 

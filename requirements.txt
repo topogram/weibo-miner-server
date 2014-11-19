@@ -28,6 +28,4 @@ sendgrid==1.2.0
 flask-restful-swagger
 pandas
 -e git://github.com/jcrafford/flask-elasticsearch.git#egg=Flask-ElasticSearch-dev
-
-
-
+Flask-PyMongo==0.3.0

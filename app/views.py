@@ -138,8 +138,14 @@ class MemeListView(restful.Resource):
         if not form.validate_on_submit():
             return form.errors, 422
 
+        data_mongo_id=mongo.db.memes.insert({
+                    "es_query" : form.es_query.data,
+                    "es_index" : str(form.es_index_name.data),
+                    "messages" :[]})
 
-        meme = Meme(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data)
+        records_count = es2mongo(form.es_query.data, str(form.es_index_name.data),  data_mongo_id)
+
+        meme = Meme(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data, str(data_mongo_id), records_count)
 
         db.session.add(meme)
         db.session.commit()
@@ -167,8 +173,6 @@ class MemesByDataset(restful.Resource):
         memes = Meme.query.filter_by(dataset_id=id).all()
         memes = MemeSerializer(memes, many=True).data
         return memes
-
-
 
 api.add_resource(UserView, '/api/v1/users')
 api.add_resource(SessionView, '/api/v1/sessions')
