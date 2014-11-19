@@ -1,86 +1,52 @@
-<h2>Search for messages</h2>
+<div class="page-header">
+  <h1>{{dataset.title}} <small>{{dataset.description}}</small></h1>
+</div>
+
+<!-- <h4>index data</h4> -->
+<!-- <p><strong>Index</strong> : {{dataset.index_name}}</p>
+  <p><strong>type</strong> : {{dataset.type}}</p> -->
+
 <div class="row">
-  <section class="col-md-8 searchField">
-    <form ng-submit="search()" role="form" class="form-inline"><span class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></span>
+  <form ng-submit="search()" role="form">
+
+    <div class="col-md-6 searchField form-inline">
       <input ng-model="searchTerm" type="search" name="title" class="form-control"/>
-      <select ng-model="index" ng-options="index for index in indices" class="form-control"></select>
       <button type="submit" class="btn btn-default">Get results</button>
-    </form>
-  </section>
-  <section class="col-md-4 utils">
-    <p>
-      <button data-toggle="modal" data-target="#saveModal" class="btn btn-primary">Save query</button>
-    </p>
-  </section>
+      <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p>
+    </div>
+    <div class="col-md-6 utils form-group" ng-hide="!messages.length">
+      <label for="inputDesc">Description</label>
+      <textarea id="inputDesc" ng-model="description" placeholder="What is this visualization about?" rows="3" class="form-control"></textarea>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default">Cancel</button>
+        <a type="submit" ng-click="createMeme()" class="btn btn-primary">Visualize</a>
+      </div>
+    </div>
+  </form>
 </div>
 
 <section class="results">
-  <h3 ng-hide="tweets.length" class="no-recipes">No results</h3>
-  <article ng-hide="!tweets.length" class="recipe">
+  <h3 ng-hide="messages.length" class="no-recipes">No results</h3>
+  <article ng-hide="!messages.length" class="recipe">
     <h3>Total : {{ totalResults }} results<small> in {{ index }}</small></h3>
+
     <timeserie timeserie="" time-data="timeData" start="start" end="end" meme-name="searchTerm"></timeserie>
-    <div ng-cloak="" ng-hide="allResults" class="load-more"><a ng-click="loadMore()" class="btn btn-default">View more results...</a></div>
-    <table ng-table="" class="table table-striped table-condensed">
-      <tbody></tbody>
-      <tr ng-repeat="tweet in tweets">
-        <td data-title="'mid'" sortable="'mid'">{{tweet.mid}}</td>
-        <td data-title="'text'">{{tweet.text}}</td>
-        <td data-title="'created_at'" sortable="'created_at'">{{tweet.created_at | date:'medium'}}</td>
-        <td data-title="'uid'">{{tweet.uid}}</td>
-        <td data-title="'source'">{{tweet.source}}</td>
-        <td data-title="'image'">{{tweet.image}}</td>
-        <td data-title="'geo'">{{tweet.geo}}</td>
-        <td data-title="'deleted_last_seen'">{{tweet.deleted_last_seen}}</td>
-        <td data-title="'permission_denied'">{{tweet.permission_denied}}</td>
-      </tr>
+
+    <table ng-table show-filter="true" class="table table-condensed">
+      <thead>
+        <tr>
+          <th ng-repeat="column in columns" class="text-center sortable" ng-class="{ 'sort-asc': tableParams.isSortBy(column.field, 'asc'), 'sort-desc': tableParams.isSortBy(column.field, 'desc') }" ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">  {{column.field}}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="row in messages">
+          <td ng-repeat="column in columns">
+            {{row[column.field]}}
+          </td>
+        </tr>
+      </tbody>
     </table>
+    <div ng-cloak="" ng-hide="allResults" class="load-more"><a ng-click="loadMore()" class="btn btn-default">View more results...</a></div>
   </article>
 </section>
-<!-- Modal-->
-<div id="saveModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" data-dismiss="modal" class="close"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-        <h4 id="myModalLabel" class="modal-title">Save search <small>for later use</small></h4>
-      </div>
-      <div class="modal-body">
-        <form role="form" name="memeForm" ng-submit="submitMeme(memeForm.$valid)" class="form-horizontal">
-          <div class="form-group">
-            <label for="inputQuery" class="col-sm-2 control-label">Query</label>
-            <div class="col-sm-10">
-              <input id="inputQuery" disabled="disabled" placeholder="{{searchTerm}}" class="form-control"/>
-            </div>
-            <label for="inputIndex" class="col-sm-2 control-label">Index</label>
-            <div class="col-sm-10">
-              <input id="inputIndex" disabled="disabled" placeholder="{{index}}" class="form-control"/>
-            </div>
-          </div>
-          <div ng-class="{ 'has-error' : memeForm.title.$invalid &amp;&amp; !memeForm.title.$pristine }" class="form-group">
-            <label for="inputTitle" class="col-sm-2 control-label">Title</label>
-            <div class="col-sm-10">
-              <input id="inputTitle" type="text" placeholder="Title..." ng-model="title" ng-change="slugify(title)" ng-required="true" ng-minlength="3" class="form-control"/>
-            </div>
-            <p ng-show="memeForm.title.$invalid &amp;&amp; !memeForm.title.$pristine" class="help-block">A title is required.</p>
-          </div>
-          <div class="form-group">
-            <label for="inputSlug" class="col-sm-2 control-label">Nickname</label>
-            <div class="col-sm-10">
-              <input id="inputSlug" type="text" placeholder="{{slug}}" class="form-control"/>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="imputDesc" class="col-sm-2 control-label">Description</label>
-            <div class="col-sm-10">
-              <textarea id="imputDesc" placeholder="{{description}}" class="form-control"></textarea>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" data-dismiss="modal" class="btn btn-default">Close</button>
-            <button type="submit" ng-disabled="memeForm.$invalid" class="btn btn-primary">Save changes</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>

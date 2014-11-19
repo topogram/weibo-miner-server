@@ -1,0 +1,28 @@
+<h3>{{dataset.title}}</h3>
+<p>{{dataset.description}}</p>
+
+
+<!-- <h4>Memes</h4> -->
+<a href="#/datasets/{{ dataset.id }}/memes/create" class="btn btn-primary">Create New Meme</a>
+<br>
+
+<table ng-table="" class="table table-striped">
+  <thead>
+    <tr>
+      <th>Query</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="post in memes">
+      <!-- <td data-title="'title'" sortable="'title'"> <a href="#/datasets/{{post.id}}" role="button">{{ post.dataset.title }}</a></td> -->
+      <td data-title="'query'">{{post.es_query}}</td>
+      <td data-title="'description'">{{post.description}}</td>
+      <td data-title="'created_at'" sortable="'created_at'">{{post.created_at | date:'medium'}}</td>
+      <td data-title="'View'"><a href="#/memes/{{post.id}}" role="button" class="btn btn-default btn-sm">View</a></td>
+      <td data-title="'Delete'"><a href="#" ng-click="delete(post)" role="button" class="btn btn-primary btn-sm" disabled>Delete</a></td>
+      <!-- <td data-title="'modified_at'" sortable="'modified_at'">{{post.modified_at | date:'medium'}}</td> -->
+      <!-- <td data-title="'Modify'"><a href="#/datasets/{{post.id}}" role="button" disabled="disabled" class="btn btn-default btn-sm">Edit</a></td> -->
+    </tr>
+  </tbody>
+</table>

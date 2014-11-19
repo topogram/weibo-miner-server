@@ -160,9 +160,20 @@ class MemeView(restful.Resource):
         db.session.commit()
         return '{"ok" : post deleted"}', 204
 
+class MemesByDataset(restful.Resource):
+
+    def get(self, id):
+        print id, type(id)
+        memes = Meme.query.filter_by(dataset_id=id).all()
+        memes = MemeSerializer(memes, many=True).data
+        return memes
+
 api.add_resource(UserView, '/api/v1/users')
 api.add_resource(SessionView, '/api/v1/sessions')
+
 api.add_resource(DatasetListView, '/api/v1/datasets')
 api.add_resource(DatasetView, '/api/v1/datasets/<int:id>')
+api.add_resource(MemesByDataset, '/api/v1/datasets/<int:id>/memes')
+
 api.add_resource(MemeListView, '/api/v1/memes')
 api.add_resource(MemeView, '/api/v1/memes/<int:id>')

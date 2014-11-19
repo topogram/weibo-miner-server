@@ -59,21 +59,42 @@ Topogram.config(function($routeProvider, RestangularProvider) {
         })
         .when('/datasets/create', {
             controller: 'DatasetCreateCtrl',
-            templateUrl: partialsDir + '/dataset/create.html',
+            templateUrl: partialsDir + '/datasets/create.html',
             resolve: {
                 redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
             }
         })
         .when('/datasets', {
             controller: 'DatasetIndexCtrl',
-            templateUrl: partialsDir + '/dataset/index.html',
+            templateUrl: partialsDir + '/datasets/index.html',
             resolve: {
                 redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
             }
         })
         .when('/datasets/:datasetId', {
             controller: 'DatasetViewCtrl',
-            templateUrl: partialsDir + '/dataset/view.html',
+            templateUrl: partialsDir + '/datasets/view.html',
+            resolve: {
+                redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
+            }
+        })
+        .when('/datasets/:datasetId/memes/create', {
+            controller: 'MemeCreateCtrl',
+            templateUrl: partialsDir + '/memes/create.html',
+            resolve: {
+                redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
+            }
+        })
+        .when('/memes', {
+            controller: 'MemeIndexCtrl',
+            templateUrl: partialsDir + '/memes/index.html',
+            resolve: {
+                redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
+            }
+        })
+        .when('/memes/:memeId', {
+            controller: 'MemeViewCtrl',
+            templateUrl: partialsDir + '/memes/view.html',
             resolve: {
                 redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
             }
