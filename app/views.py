@@ -6,14 +6,18 @@ from flask.ext import restful
 from flask_restful_swagger import swagger
 from werkzeug import secure_filename
 
+from datetime import datetime
+
 from lib.elastic import *
 import uuid
+from bson import ObjectId
 
-from server import app, api, db, flask_bcrypt, auth
+from server import app, api, db, flask_bcrypt, auth, mongo
 from models import User, Dataset, Meme
 from forms import UserCreateForm, SessionCreateForm, DatasetCreateForm, MemeCreateForm
 from serializers import UserSerializer, DatasetSerializer, MemeSerializer
 import sendgrid
+
 
 mailer = sendgrid.SendGridClient(app.config['SENDGRID_USERNAME'],
                            app.config['SENDGRID_PASSWORD'],
@@ -143,7 +147,7 @@ class MemeListView(restful.Resource):
                     "es_index" : str(form.es_index_name.data),
                     "messages" :[]})
 
-        records_count = es2mongo(form.es_query.data, str(form.es_index_name.data),  data_mongo_id)
+        records_count = es2topogram(form.es_query.data, str(form.es_index_name.data),  data_mongo_id)
 
         meme = Meme(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data, str(data_mongo_id), records_count)
 
@@ -181,5 +185,91 @@ api.add_resource(DatasetListView, '/api/v1/datasets')
 api.add_resource(DatasetView, '/api/v1/datasets/<int:id>')
 api.add_resource(MemesByDataset, '/api/v1/datasets/<int:id>/memes')
 api.add_resource(MemeView, '/api/v1/datasets/<int:dataset_id>/memes/<int:meme_id>')
+
+
+class MemeTimeFramesList(restful.Resource):
+    
+    def get(self, dataset_id, meme_id):
+        meme = Meme.query.filter_by(id=meme_id).first()
+        meme= MemeSerializer(meme).data
+        meme_data=mongo.db.memes.find_one({ "_id" : ObjectId(meme["data_mongo_id"]) })
+        # print meme_data["timeframes"]
+        rep=[ {"count":0, "timestamp":d["time"]} for d in meme_data["timeframes"]]
+
+        return sorted(rep, key=lambda k: k['timestamp'])
+
+class MemeTimeFramesView(restful.Resource):
+    def get(self, dataset_id, meme_id, start, end):
+        print  start, end
+        meme = Meme.query.filter_by(id=meme_id).first()
+        meme= MemeSerializer(meme).data
+        meme_data=mongo.db.memes.find_one({ "_id" : ObjectId(meme["data_mongo_id"]) })
+
+        # init
+        dataService={}
+        dataService["citations"]={}
+        dataService["words"]={}
+
+        dataService["citations"]["nodes"]=[]
+        dataService["citations"]["edges"]=[]
+        dataService["citations"]["index"]=[]
+
+        dataService["words"]["nodes"]=[]
+        dataService["words"]["edges"]=[]
+        dataService["words"]["index"]=[]
+
+        # dataService["wordsProvince"]={}
+        # dataService["geo"]=[]
+
+        # gather relevant timeframes
+        for tf in meme_data["timeframes"]:
+
+            d=tf["data"]
+
+            current=datetime.fromtimestamp(int(tf["time"]))
+            ts_start=datetime.fromtimestamp(start)
+            ts_end=datetime.fromtimestamp(end)
+
+            if current > ts_start and current < ts_end: 
+
+                for cited in d["cited_nodes"]:
+                    if cited["name"] not in dataService["citations"]["index"]:
+                        dataService["citations"]["nodes"].append(cited);
+                        dataService["citations"]["index"].append(cited["name"]);
+
+                for edge in d["cited_edges"]:
+
+                    if edge["source"] in dataService["citations"]["index"] and edge["target"] in dataService["citations"]["index"]:
+
+                        existing_edge=next((item for item in dataService["citations"]["edges"] if item["source"] == edge["source"] and item["target"] == edge["target"]), None)
+
+                        if existing_edge:
+                            existing_edge["weight"]=existing_edge["weight"]+1
+                        else :
+                            dataService["citations"]["edges"].append(edge)
+
+
+                for cited in d["words_nodes"]:
+                    if cited["name"] not in dataService["words"]["index"]:
+                        dataService["words"]["nodes"].append(cited);
+                        dataService["words"]["index"].append(cited["name"]);
+
+                for edge in d["words_edges"]:
+
+                    if edge["source"] in dataService["words"]["index"] and edge["target"] in dataService["words"]["index"]:
+
+                        existing_edge=next((item for item in dataService["words"]["edges"] if item["source"] == edge["source"] and item["target"] == edge["target"]), None)
+
+                        if existing_edge:
+                            existing_edge["weight"]=existing_edge["weight"]+1
+                        else :
+                            dataService["words"]["edges"].append(edge)
+
+
+        return dataService
+
+api.add_resource(MemeTimeFramesList, '/api/v1/datasets/<int:dataset_id>/memes/<int:meme_id>/timeframes')
+
+api.add_resource(MemeTimeFramesView, '/api/v1/datasets/<int:dataset_id>/memes/<int:meme_id>/timeframes/<int:start>/<int:end>')
 
 api.add_resource(MemeListView, '/api/v1/memes')
