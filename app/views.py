@@ -266,7 +266,7 @@ class MemeTimeFramesView(restful.Resource):
                             dataService["words"]["edges"].append(edge)
 
 
-        return dataService
+        return [dataService]
 
 api.add_resource(MemeTimeFramesList, '/api/v1/datasets/<int:dataset_id>/memes/<int:meme_id>/timeframes')
 

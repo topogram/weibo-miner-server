@@ -14,7 +14,7 @@
       <dt>Messages Count</dt>
       <dd>{{meme.records_count}} messages</dd>
       <dt>Timeframe Count</dt>
-      <dd><!-- {{meme.records_count}} --> timeframes</dd>
+      <dd>{{timeframes.length}} timeframes</dd>
     </dl>
   </div>
   <div class="col-md-4">
@@ -25,13 +25,35 @@
       <p></p><a target="_blank" href="/api/meme/{{post._id}}/download.csv" download="{{post.name}}.csv" class="btn btn-default" disabled> Download search as CSV</a>
     </div>
   </div>
-  <!-- <div class="col-md-4">
-    <div ng-if="post.times == 0">
-      <button ng-disabled="{{post.messages==0}}" ng-click="analyzeData()" class="btn btn-primary">Analyze data</button>
-    </div>
-    <div ng-if="post.times != 0">
-      <p>{{post.times}} timeframes</p>
-    </div>
-   --></div>
+
 </section>
-<!-- <section ng-if="post.times != 0" class="results"><a href="/meme/{{post._id}}" class="btn btn-primary"></a></section> -->
+
+
+<div class="row">
+  <div class="col-xs-9 col-sm-9">
+    <words start="start" end="end" class="words-container"></words>
+  </div>
+  <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+    <p><small>Hit Shift+W to save</small></p>
+    <div class="wordpie-container"></div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-9 col-sm-9">
+    <citations start="start" end="end" class="words-container"></citations>
+  </div>
+
+  <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveCitations(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+    <p><small>Hit Shift+C to save</small></p>
+    <!-- <div class="pie-container"></div> -->
+  </div>
+</div>
+
+
+<div id="timeline" u="" class="row well">
+  <timeslider id="time-slider" model="timeframe" type="text" data-slider-min="0" data-slider-step="1" data-slider-orientation="horizontal" data-slider-selection="after" data-slider-tooltip="show"></timeslider>
+  <div timeserie="" time-data="timeSeriesData" start="start" end="end" meme-name="memeName" class="time-container"></div>
+  <p><a href="#" ng-click="playAll(); $event.preventDefault()" class="btn btn-default"><span class="glyphicon glyphicon-play"></span>Play</a><a href="#" ng-click="stop(); $event.preventDefault()" class="btn btn-default"><span class="glyphicon glyphicon-stop"></span>Stop</a><b>Start: {{start | date:'medium'}}</b><b>End: {{end | date:'medium'}}</b></p>
+</div>
+

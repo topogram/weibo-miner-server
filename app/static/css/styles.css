@@ -23,3 +23,7 @@
     cursor: inherit;
     display: block;
 }
+
+#timeline .slider {
+    width: 960px;
+}
