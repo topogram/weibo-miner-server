@@ -11,8 +11,10 @@
       <dd>{{meme.created_at | date:medium}}</dd>
       <dt>Search query</dt>
       <dd>{{meme.es_query}} in {{meme.es_index_name}}</dd>
-      <dt>Count</dt>
+      <dt>Messages Count</dt>
       <dd>{{meme.records_count}} messages</dd>
+      <dt>Timeframe Count</dt>
+      <dd><!-- {{meme.records_count}} --> timeframes</dd>
     </dl>
   </div>
   <div class="col-md-4">
@@ -20,7 +22,7 @@
       <button ng-click="getData(&quot;mongo&quot;)" class="btn btn-primary">Extract data</button>
     </div>
     <div ng-if="meme.messages != 0">
-      <p></p><a target="_blank" href="/api/meme/{{post._id}}/download.csv" download="{{post.name}}.csv" class="btn btn-default" disabled> Download messages as CSV</a>
+      <p></p><a target="_blank" href="/api/meme/{{post._id}}/download.csv" download="{{post.name}}.csv" class="btn btn-default" disabled> Download search as CSV</a>
     </div>
   </div>
   <!-- <div class="col-md-4">
@@ -32,4 +34,4 @@
     </div>
    --></div>
 </section>
-<section ng-if="post.times != 0" class="results"><a href="/meme/{{post._id}}" class="btn btn-primary"></a></section>
+<!-- <section ng-if="post.times != 0" class="results"><a href="/meme/{{post._id}}" class="btn btn-primary"></a></section> -->

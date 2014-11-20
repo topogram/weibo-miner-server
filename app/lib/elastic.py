@@ -49,7 +49,6 @@ def build_es_index_from_csv(raw_data_path, es_index_name, data_type="message" ):
         except :
             print "error with elasticsearch"
 
-
 def es2mongo(query, index_name, data_mongo_id):
     t0=time()
     chunksize=1000
