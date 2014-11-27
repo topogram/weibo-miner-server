@@ -12,6 +12,8 @@ from flask_restful_swagger import swagger
 from flask.ext.uploads import UploadSet, configure_uploads, DATA, UploadNotAllowed
 from flask.ext.elasticsearch import ElasticSearch
 from flask.ext.pymongo import PyMongo
+from flask.ext.script import Manager
+from flask.ext.migrate import Migrate, MigrateCommand
 
 from flask import render_template, jsonify, send_from_directory, request, make_response
 
@@ -25,7 +27,8 @@ app._static_folder = ASSETS_DIR
  
 # flask-sqlalchemy
 db = SQLAlchemy(app)
- 
+migrate = Migrate(app, db)
+
 # flask-restful
 api = swagger.docs(Api(app), apiVersion='0.1', api_spec_url="/api/v1/spec", resourcePath="/api/v1/spec")
 
@@ -40,6 +43,10 @@ elastic = ElasticSearch(app)
 
 # flask mongo 
 mongo = PyMongo(app)
+
+# manager
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 # create data dir if it doesn't exist
 try:

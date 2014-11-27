@@ -2,7 +2,6 @@ tests
 venv
 bower_components
 uploads
-migrations
 
 config.py
 *.sqlite
