@@ -1,16 +1,14 @@
-import os 
-
 DEBUG = True
 WTF_CSRF_ENABLED = False
 
-if "UPLOAD_FOLDER" in os.environ:
-    UPLOAD_FOLDER=os.environ.get('TOPOGRAM_SQLALCHEMY_DATABASE_URI')
-else: UPLOAD_FOLDER ="/tmp/data"
+UPLOAD_FOLDER ="/tmp/uploads"
+SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/db.sqlite'
 
-# SQLite
-if "TOPOGRAM_SQLALCHEMY_DATABASE_URI" in os.environ:
-    SQLALCHEMY_DATABASE_URI=os.environ.get('TOPOGRAM_SQLALCHEMY_DATABASE_URI')
-else: SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/topogram.sqlite'
+TOPOGRAM_ES_HOST='http://localhost:9200/'
 
 SENDGRID_USERNAME = ""
 SENDGRID_PASSWORD = ""
+
+ELASTICSEARCH_URL="http://localhost:9200"
+
+MONGO_URI = "mongodb://localhost:27017/topogram"
