@@ -6,6 +6,12 @@ Topogram.factory('Session', function(Restangular) {
                 .one('sessions')
                 .withHttpConfig({bypassErrorInterceptor: bypassErrorInterceptor})
                 .customPOST(data);
+        },
+        destroy : function(data) {
+            // console.log('closing session');
+            return Restangular
+                .one('sessions')
+                .remove()
         }
     };
     return Session;

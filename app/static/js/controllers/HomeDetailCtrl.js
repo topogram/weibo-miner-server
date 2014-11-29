@@ -1,6 +1,5 @@
 function HomeDetailCtrl($scope, Restangular, flash) {
-    
-    $scope.posts = Restangular.all('datasets').getList().$object;
+    // $scope.posts = Restangular.all('datasets').getList().$object;
 
     $scope.test = function() {
 

@@ -12,25 +12,32 @@ from lib.elastic import *
 import uuid
 from bson import ObjectId
 
-from server import app, api, db, flask_bcrypt, auth, mongo
+from flask_login import login_required, logout_user, current_user, login_user
+
+from server import app, api, db, flask_bcrypt, mongo, login_manager
 from models import User, Dataset, Meme
 from forms import UserCreateForm, SessionCreateForm, DatasetCreateForm, MemeCreateForm
 from serializers import UserSerializer, DatasetSerializer, MemeSerializer
+from itsdangerous import URLSafeTimedSerializer
 import sendgrid
-
 
 mailer = sendgrid.SendGridClient(app.config['SENDGRID_USERNAME'],
                            app.config['SENDGRID_PASSWORD'],
                            secure=True)
 
-@auth.verify_password
-def verify_password(email, password):
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return False
-    g.user = user
-    return flask_bcrypt.check_password_hash(user.password, password)
- 
+# @auth.verify_password
+# def verify_password(email, password):
+#     user = User.query.filter_by(email=email).first()
+#     if not user:
+#         return False
+#     g.user = user
+#     return flask_bcrypt.check_password_hash(user.password, password)
+
+@app.before_request
+def before_request():
+    print current_user
+    g.user = current_user
+
 class UserView(restful.Resource):
     def post(self):
         form = UserCreateForm()
@@ -46,6 +53,16 @@ class UserView(restful.Resource):
         db.session.commit()
         return UserSerializer(user).data
 
+    def get(self):
+        # print "calling /api/users/get"
+        try:
+            users = User.query.all()
+            return UserSerializer(users, many=True).data
+            
+        except Exception as e:
+            print e
+            return '', 500
+
 def send_welcome_email(to, name):
     subject = "Welcome to Topogram.io"
     txt_template = jinja_env.get_template('emails/confirm.txt')
@@ -60,24 +77,57 @@ def send_welcome_email(to, name):
 
 class SessionView(restful.Resource):
     def post(self):
+        # print "create session"
         form = SessionCreateForm()
         if not form.validate_on_submit():
             return form.errors, 422
- 
+
         user = User.query.filter_by(email=form.email.data).first()
+        # print user
         if user and flask_bcrypt.check_password_hash(user.password, form.password.data):
             # auth !
+            login_user(user, remember=True)
             return UserSerializer(user).data, 201
         return '', 401
- 
+
+    def delete(self):
+        print"destroying session"
+        logout_user()
+        return 'session destroyed', 201
+
+############################################################
+# flask login api call back methods
+############################################################
+login_serializer = URLSafeTimedSerializer(app.secret_key)
+
+@login_manager.user_loader
+def load_user(userid):
+    return User.query.filter(User.id == userid).first()
+
+@login_manager.token_loader
+def load_token(token):
+    max_age = app.config["REMEMBER_COOKIE_DURATION"].total_seconds()
+    #Decrypt the Security Token, data = [username, hashpass]
+    data = login_serializer.loads(token, max_age=max_age)
+    #Find the User
+    user = User.query.filter(User.id == data[0]).first()
+    
+    print 'calling load_token()-->', data
+    print 'query user and got->', user
+    
+    if user and data[1] == user.password:
+        return user
+    return None
+
 class DatasetListView(restful.Resource):
 
-    @auth.login_required
+    @login_required
     def get(self):
+        # print current_user
         datasets = Dataset.query.all()
         return DatasetSerializer(datasets, many=True).data
  
-    @auth.login_required
+    @login_required
     def post(self):
 
         form = DatasetCreateForm()
@@ -104,7 +154,7 @@ class DatasetListView(restful.Resource):
 
 class DatasetView(restful.Resource):
 
-    @auth.login_required
+    @login_required
     def get(self, id):
         datasets = Dataset.query.filter_by(id=id).first()
         desc= DatasetSerializer(datasets).data
@@ -122,7 +172,7 @@ class DatasetView(restful.Resource):
         desc["csvSample"] = csv_sample
         return desc
 
-    @auth.login_required
+    @login_required
     def delete(self, id):
         dataset = Dataset.query.filter_by(id=id).first()
         db.session.delete(dataset)
@@ -130,12 +180,12 @@ class DatasetView(restful.Resource):
         return '{"ok" : post deleted"}', 204
 
 class MemeListView(restful.Resource):
-    @auth.login_required
+    @login_required
     def get(self):
         memes = Meme.query.all()
         return MemeSerializer(memes, many=True).data
 
-    @auth.login_required
+    @login_required
     def post(self):
         form = MemeCreateForm()
 
@@ -157,13 +207,13 @@ class MemeListView(restful.Resource):
 
 class MemeView(restful.Resource):
 
-    @auth.login_required
+    @login_required
     def get(self, dataset_id, meme_id):
         meme = Meme.query.filter_by(id=meme_id).first()
         meme= MemeSerializer(meme).data
         return meme
 
-    @auth.login_required
+    @login_required
     def delete(self, dataset_id, meme_id):
         meme = Meme.query.filter_by(id=meme_id).first()
         db.session.delete(meme)

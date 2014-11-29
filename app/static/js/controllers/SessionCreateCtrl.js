@@ -5,18 +5,19 @@ function SessionCreateCtrl($scope, $location, $timeout, AuthService, flash) {
     $scope.loginInfo = {};
 
     $scope.submitLoginForm = function () {
-        console.log($scope.loginInfo);
-        console.log(AuthService.login($scope.loginInfo));
+        // console.log($scope.loginInfo);
+        // console.log(AuthService.login($scope.loginInfo));
         AuthService.login($scope.loginInfo).then(function(logInfo) {
+            console.log(logInfo);
             $timeout(function() {
                 $location.path("/");
                 $scope.isLoggedIn = true;
                 $scope.$apply();
             })
 
-        }, function(resp) {
-            console.log(resp);
-            flash.sucess = "Login failed";
+        }, function(err) {
+            console.log(err);
+            flash.error = "Login failed : ("+ err.status+") "+ err.statusText;
         });
     }
 }

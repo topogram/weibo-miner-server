@@ -25,7 +25,8 @@ window.Topogram = angular.module('Blog', [
                     $location.path('/sessions/create');
                     break;
                 default:
-                    throw new Error('No handler for status code ' + response.status);
+                    // throw new Error('No handler for status code ' + response.status);
+                    return response
             }
             return false;
         }
