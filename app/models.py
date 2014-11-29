@@ -28,8 +28,8 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False, info={'validators': Email()})
     password = db.Column(db.String(80), nullable=False)
+    role = db.Column(db.String(120))
     datasets = db.relationship('Dataset', backref='user', lazy='dynamic')
-    memes = db.relationship('Meme', backref='user', lazy='dynamic')
     memes = db.relationship('Meme', backref='user', lazy='dynamic')
     active = db.Column(db.Boolean, unique=False, default=True)
     registered_on = db.Column(db.DateTime, default=db.func.now())
@@ -38,10 +38,11 @@ class User(db.Model, UserMixin):
         self.email = email
         self.password = flask_bcrypt.generate_password_hash(password)
         self.active = is_active
+        self.role = "user"
  
     def __repr__(self):
         # return '<User %r>' % self.email
-        return "<User('%d', '%s')>" % (self.id, self.email)
+        return "<User('%d', '%s', '%s')>" % (self.id, self.email, self.role)
 
     def get_auth_token(self):
         """

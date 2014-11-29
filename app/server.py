@@ -16,9 +16,9 @@ from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 
 # from flask.ext.httpauth import HTTPBasicAuth
-from flask_login import (LoginManager, login_required, login_user, 
+from flask.ext.login import (LoginManager, login_required, login_user, 
                          current_user, logout_user, UserMixin)
-
+from flask.ext.principal import Principal
 from flask import render_template, jsonify, send_from_directory, request, make_response
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -42,14 +42,14 @@ api = swagger.docs(Api(app), apiVersion='0.1', api_spec_url="/api/v1/spec", reso
 
 # flask-bcrypt
 flask_bcrypt = Bcrypt(app)
- 
-# flask-httpauth
-# auth = HTTPBasicAuth()
 
 #Flask-Login Login Manager
 login_manager = LoginManager()
 app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=14)
 login_manager.init_app(app)
+
+# User Rights
+principals = Principal(app)
 
 # elastic search
 elastic = ElasticSearch(app)

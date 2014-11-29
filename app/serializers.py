@@ -2,7 +2,7 @@ from marshmallow import Serializer, fields
  
 class UserSerializer(Serializer):
     class Meta:
-        fields = ("id", "email")
+        fields = ("id", "email", "role")
  
 class DatasetSerializer(Serializer):
     user = fields.Nested(UserSerializer)

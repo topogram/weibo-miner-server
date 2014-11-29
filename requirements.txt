@@ -34,3 +34,4 @@ Flask-PyMongo==0.3.0
 Flask-Migrate
 Flask-Script
 Flask-Login
+Flask-Principal

@@ -9,6 +9,7 @@ function UserCreateCtrl($scope, $location, flash, Restangular) {
         Restangular.all('users').post($scope.loginInfo).then(function(resp) {
             // console.log(resp);
             $location.path("/");
+            flash.success = "Thanks! You have been succesfully registered.";
         }, function(response) {
             console.log(response);
             flash.error = "Error", response.status, " : ", response.status;

@@ -13,6 +13,7 @@ import uuid
 from bson import ObjectId
 
 from flask_login import login_required, logout_user, current_user, login_user
+from flask import session
 
 from server import app, api, db, flask_bcrypt, mongo, login_manager
 from models import User, Dataset, Meme
@@ -21,17 +22,38 @@ from serializers import UserSerializer, DatasetSerializer, MemeSerializer
 from itsdangerous import URLSafeTimedSerializer
 import sendgrid
 
+from flask.ext.principal import Permission, RoleNeed
+from flask.ext.principal import Principal, Identity, AnonymousIdentity, identity_changed, identity_loaded, RoleNeed, UserNeed
+
+# roles
+admin_role = RoleNeed('admin')
+user_role  = RoleNeed('user')
+
+# permissions
+admin_permission = Permission(admin_role)
+user_permission = Permission(user_role)
+
 mailer = sendgrid.SendGridClient(app.config['SENDGRID_USERNAME'],
                            app.config['SENDGRID_PASSWORD'],
                            secure=True)
 
-# @auth.verify_password
-# def verify_password(email, password):
-#     user = User.query.filter_by(email=email).first()
-#     if not user:
-#         return False
-#     g.user = user
-#     return flask_bcrypt.check_password_hash(user.password, password)
+@identity_loaded.connect_via(app)
+def on_identity_loaded(sender, identity):
+    # Set the identity user object
+    identity.user = current_user
+
+    # Add the UserNeed to the identity
+    if hasattr(current_user, 'id'):
+        identity.provides.add(UserNeed(current_user.id))
+
+    # Assuming the User model has a list of roles, update the
+    # identity with the roles that the user provides
+    if hasattr(current_user, 'role'):
+        identity.provides.add(RoleNeed(current_user.role))
+
+    if hasattr(current_user, 'roles'):
+        for role in current_user.roles:
+            identity.provides.add(RoleNeed(role.name))
 
 @app.before_request
 def before_request():
@@ -53,8 +75,9 @@ class UserView(restful.Resource):
         db.session.commit()
         return UserSerializer(user).data
 
+    @login_required
+    @admin_permission.require(http_exception=403)
     def get(self):
-        # print "calling /api/users/get"
         try:
             users = User.query.all()
             return UserSerializer(users, many=True).data
@@ -85,14 +108,29 @@ class SessionView(restful.Resource):
         user = User.query.filter_by(email=form.email.data).first()
         # print user
         if user and flask_bcrypt.check_password_hash(user.password, form.password.data):
-            # auth !
+            
+            # User is auth with falsk-login
             login_user(user, remember=True)
+
+             # Tell Flask-Principal the identity changed
+            identity_changed.send(app, identity=Identity(user.id))
+
             return UserSerializer(user).data, 201
         return '', 401
 
     def delete(self):
-        print"destroying session"
-        logout_user()
+        # print"destroying session"
+
+        # Remove the user information from the session
+        logout_user() 
+
+        # Remove session keys set by Flask-Principal
+        for key in ('identity.name', 'identity.auth_type'):
+            session.pop(key, None)
+
+        # Tell Flask-Principal the user is anonymous
+        identity_changed.send(app,identity=AnonymousIdentity())
+
         return 'session destroyed', 201
 
 ############################################################
