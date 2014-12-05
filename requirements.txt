@@ -36,3 +36,5 @@ Flask-Script
 Flask-Login
 Flask-Principal
 Flask-Admin
+pymysql
+MySQL-python

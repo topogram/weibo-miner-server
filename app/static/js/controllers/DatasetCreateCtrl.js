@@ -5,9 +5,8 @@ function DatasetCreateCtrl($scope, $timeout, $location, Restangular,FileUploader
         console.log(topotypes);
     })
 
-    $scope.dataset = {
-        "type": "weibo"
-    };
+    $scope.dataset = {};
+    
     // FILE UPLOAD
     var uploader = $scope.uploader = new FileUploader({
             url: '//localhost:5000/api/v1/datasets',

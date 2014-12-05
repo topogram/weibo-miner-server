@@ -73,22 +73,27 @@ class Dataset(db.Model):
     "Datasets (csv files) ..."
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
-    type = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
     filepath = db.Column(db.String(120))
     index_name = db.Column(db.String(150))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     created_at = db.Column(db.DateTime, default=db.func.now())
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    topotype_id = db.Column(db.Integer, db.ForeignKey('topotype.id'), nullable=False)
+
     memes = db.relationship('Meme', backref='dataset', lazy='dynamic')
 
-    def __init__(self, title, type, description, index_name, filepath):
+    # topotype = db.relationship('Topotype', backref='dataset', lazy='dynamic')
+
+    def __init__(self, title, topotype_id, description, index_name, filepath):
+        print topotype_id, type(topotype_id)
         self.title = title
         self.description = description
-        self.type = type
+        self.topotype_id = int(topotype_id)
         self.filepath = filepath
         self.index_name = index_name
         self.user_id = g.user.id
- 
+
     def __repr__(self):
         return '<Dataset %r>' % self.title
 
@@ -147,9 +152,11 @@ class Topotype(db.Model):
     dest_column = db.Column(db.String(120)) # dest colum name
     citation_patterns = db.relationship('Regexp', backref='citation_patterns', lazy='dynamic',foreign_keys='Regexp.citation_patterns_id') # regexp ids
 
-    # def __init__(self, title, description):
-    #     self.title = title
-    #     self.description = description 
+
+    # backilnk
+    # datasets = db.relationship('Dataset', backref='topotype_id', lazy='dynamic')
+    datasets = db.relationship('Dataset', backref='topotype', lazy='dynamic', foreign_keys="Dataset.topotype_id")
+
 
     def __repr__(self):
         return '<Topotype (%r, %s)>' % (self.id, self.title)

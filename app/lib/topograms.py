@@ -18,15 +18,21 @@ def get_analyzer(topotype_id):
     else : languages = topotype['languages'].split(",")
     # print languages
 
-    print type(topotype['citation_patterns'])
+    # print type(topotype['citation_patterns'])
 
     for v in list(topotype['citation_patterns']):
         citation_regexp=v["regexp"]
 
-    print citation_regexp
+    # print citation_regexp
 
+    # if type(topotype['stopwords']) is unicode : stopwords = [topotype['stopwords']]
+    # else : stopwords = [str(w) for w in topotype['stopwords'].split(",")]
+    # for w in stopwords : print type(w.encode("utf-8"))
+
+    stopwords=[w.encode("utf-8") for w in topotype['stopwords'].split(",")]
+    
     # create topogram object
-    topo= Topogram(languages=languages, stopwords=topotype['stopwords'], citation_regexp=citation_regexp)
+    topo= Topogram(languages=languages, stopwords=stopwords, citation_regexp=citation_regexp)
 
     # TIMESTAMP
     topo.timestamp_column=topotype["timestamp_column"]    # timestamp column name

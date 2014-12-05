@@ -8,9 +8,19 @@ import uuid
 from time import time
 import json
 
-from topograms import get_analyzer
+from topograms import get_analyzer, get_topotype
 
-def build_es_index_from_csv(raw_data_path, es_index_name, data_type="message" ):
+def build_es_index_from_csv(raw_data_path, data_type, es_index_name ):
+
+    topotype=get_topotype(data_type)
+    print topotype
+
+    created_at=topotype["timestamp_column"] 
+    print created_at
+    
+    # topotype['time_pattern']
+    # datetime.datetime.strptime(created_at, topotype['time_pattern'])
+    # =df[created_at].str.replace(" ", "T")
 
     # size of CSV chunk to process
     chunksize=1000
@@ -24,33 +34,25 @@ def build_es_index_from_csv(raw_data_path, es_index_name, data_type="message" ):
     csv_filepath=os.path.join(app.config["UPLOAD_FOLDER"], raw_data_path)
     csvfile=pd.read_csv(csv_filepath, iterator=True, chunksize=chunksize) 
 
-    # flag file
-    # if filename[-10:] != "processing": 
-    #     os.rename(csv_file, csv_file+".processing")
-    #     csv_file=os.path.join(TOPOGRAM_UPLOADS_FOLDER, raw_data_path+".processing")
-
     # parse file
     for i,df in enumerate(csvfile):
-        
-        # fix the date formatting
-        df["created_at"]=df["created_at"].str.replace(" ", "T")
+
+        # df[created_at]=pd.to_datetime(df[created_at])
+        df[created_at]=df[created_at].str.replace(" ", "T")
 
         # get records
         records=df.where(pd.notnull(df), None).T.to_dict()
 
         # convert json object to a list of json objects
         list_records=[records[it] for it in records]
+
         # print list_records
-
+        
         # insert into elasticsearch
-        # elastic.indices.create(index='myindex', ignore=400)
+        # elastic.indices.create(index=es_index_name)
 
-        elastic.bulk_index(es_index_name,data_type,list_records)
-        try :
-            # elastic.indices.create(index='myindex', ignore=400)
-            raw_data_path
-        except :
-            print "error with elasticsearch"
+        res = elastic.bulk_index(es_index_name, "message", list_records)
+        if res["errors"] is "True": print res 
 
 def es2mongo(query, index_name, data_mongo_id):
     t0=time()
@@ -96,6 +98,7 @@ def es2mongo(query, index_name, data_mongo_id):
     return data_size
 
 def es2csv(meme_name, query, indexes_names, csv_file, log_file):
+
 
     # Open a csv file and write the stuff inside
     with open(csv_file, 'wb') as csvfile: 
@@ -157,12 +160,28 @@ def es2topogram(query, type_id, index_name, data_mongo_id):
     data_size=res['hits']['total']
     print "Total %d Hits from %s" % (data_size, index_name)
     print type(res['hits']["hits"])
+    # print "len res", len(res['hits']["hits"])
 
     topo=get_analyzer(type_id)
 
-    for message in res['hits']["hits"]:
-        # print message
-        topo.process(message["_source"])
+    chunksize=1000
+
+    for chunk in xrange(0, data_size, chunksize):
+
+        # display progress as percent
+        per=round(float(chunk)/data_size*100, 1)
+
+        # request data
+        res=elastic.search(query, index=index_name, size=chunksize, es_from=chunk)
+
+        print "%.01f %% %d Hits Retreived - fiability %.3f" % (per,chunk, res['hits']['hits'][0]["_score"])
+
+        if res['hits']['hits'][0]["_score"] < 0.2 : break
+
+        for message in res['hits']["hits"]:
+            # print message
+            topo.process(message["_source"])
+            
 
     topo.create_networks()
     topo.create_timeframes()

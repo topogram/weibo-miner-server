@@ -1,4 +1,4 @@
-"""empty message
+"""create user
 
 Revision ID: 3863b4c659e3
 Revises: None

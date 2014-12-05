@@ -1,4 +1,4 @@
-"""empty message
+"""create topogram_type
 
 Revision ID: 4c6db136d964
 Revises: 576b56952a32

@@ -172,18 +172,23 @@ class DatasetListView(restful.Resource):
         if not form.validate_on_submit():
             return form.errors, 422
 
+
         # add file 
         fileName = secure_filename(form.dataset.data.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], fileName)
         form.dataset.data.save(file_path)
 
         # index to elasticsearch
-        print fileName
-        es_index_name=fileName[0:-4] + "_"+ str(uuid.uuid4())
-        build_es_index_from_csv(file_path,es_index_name)
+        # print fileName
+        safename = "".join([c for c in fileName if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+        es_index_name=(safename + "_"+ str(uuid.uuid4())).lower()
+
+        build_es_index_from_csv(file_path, form.topotype_id.data, es_index_name)
+
+        # print "topotype_id", form.topotype_id.data
 
         # index file
-        dataset = Dataset(form.title.data, form.type.data, form.description.data, es_index_name, str(file_path))
+        dataset = Dataset(form.title.data, form.topotype_id.data, form.description.data, es_index_name, str(file_path))
 
         db.session.add(dataset)
         db.session.commit()
@@ -235,7 +240,7 @@ class MemeListView(restful.Resource):
                     "es_index" : str(form.es_index_name.data),
                     "messages" :[]})
 
-        records_count = es2topogram(form.es_query.data, form.type_id.data, str(form.es_index_name.data),  data_mongo_id)
+        records_count = es2topogram(form.es_query.data, form.topotype_id.data, str(form.es_index_name.data),  data_mongo_id)
 
         meme = Meme(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data, str(data_mongo_id), records_count)
 
@@ -412,5 +417,16 @@ class TopotypeView(restful.Resource):
 
 api.add_resource(TopotypeView, '/api/v1/topotypes/<int:id>')
 api.add_resource(TopotypeListView, '/api/v1/topotypes')
+
+class TestView(restful.Resource):
+    def get(self):
+        topotype = get_topotype(1)
+        print type(topotype['stopwords'])
+        # if type(topotype['stopwords'] is str) : stopwords = [topotype['stopwords']]
+        # else : stopwords = topotype['stopwords'].split(",")]
+        # retun
+
+
+api.add_resource(TestView, '/api/v1/test')
 
 # get_analyzer

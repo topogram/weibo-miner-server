@@ -101,7 +101,7 @@ function MemeCreateCtrl($scope, $routeParams, $location, Restangular, flash, sea
           "es_index_name" : $scope.index,
           "description" : $scope.description,
           "dataset_id" : $routeParams.datasetId,
-          "type_id" : $scope.dataset.type
+          "topotype_id" : $scope.dataset.topotype_id
         };
 
         Restangular.all('memes').post(meme).then(function(meme) {
