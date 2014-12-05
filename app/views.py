@@ -25,6 +25,7 @@ import sendgrid
 from flask.ext.principal import Permission, RoleNeed
 from flask.ext.principal import Principal, Identity, AnonymousIdentity, identity_changed, identity_loaded, RoleNeed, UserNeed
 
+
 # roles
 admin_role = RoleNeed('admin')
 user_role  = RoleNeed('user')
@@ -167,7 +168,6 @@ class DatasetListView(restful.Resource):
  
     @login_required
     def post(self):
-
         form = DatasetCreateForm()
         if not form.validate_on_submit():
             return form.errors, 422
@@ -235,7 +235,7 @@ class MemeListView(restful.Resource):
                     "es_index" : str(form.es_index_name.data),
                     "messages" :[]})
 
-        records_count = es2topogram(form.es_query.data, str(form.es_index_name.data),  data_mongo_id)
+        records_count = es2topogram(form.es_query.data, form.type_id.data, str(form.es_index_name.data),  data_mongo_id)
 
         meme = Meme(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data, str(data_mongo_id), records_count)
 
@@ -410,6 +410,7 @@ class TopotypeView(restful.Resource):
         topotype= TopotypeSerializer(topotype).data
         return topotype
 
-
 api.add_resource(TopotypeView, '/api/v1/topotypes/<int:id>')
 api.add_resource(TopotypeListView, '/api/v1/topotypes')
+
+# get_analyzer

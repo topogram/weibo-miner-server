@@ -1,5 +1,10 @@
 function DatasetCreateCtrl($scope, $timeout, $location, Restangular,FileUploader, flash) {
 
+    Restangular.all('topotypes').getList().then(function(topotypes){
+        $scope.topotypes=topotypes;
+        console.log(topotypes);
+    })
+
     $scope.dataset = {
         "type": "weibo"
     };

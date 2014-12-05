@@ -8,7 +8,7 @@ import uuid
 from time import time
 import json
 
-from topograms import create_topogram
+from topograms import get_analyzer
 
 def build_es_index_from_csv(raw_data_path, es_index_name, data_type="message" ):
 
@@ -151,15 +151,15 @@ def es2csv(meme_name, query, indexes_names, csv_file, log_file):
     print "Done. Data saved in %s"%csv_file
     print "Log is stored at %s"%log_file
 
-
-def es2topogram(query, index_name, data_mongo_id):
+def es2topogram(query, type_id, index_name, data_mongo_id):
 
     res = elastic.search(query,index=index_name)
     data_size=res['hits']['total']
     print "Total %d Hits from %s" % (data_size, index_name)
     print type(res['hits']["hits"])
 
-    topo=topoweibo()
+    topo=get_analyzer(type_id)
+
     for message in res['hits']["hits"]:
         # print message
         topo.process(message["_source"])

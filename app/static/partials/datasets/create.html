@@ -11,14 +11,15 @@
       </div>
 
       <div class="form-group" ng-class="{ 'has-error' : datasetForm.description.$invalid && !datasetForm.description.$pristine }">
-        <label for="inputDescription" class="control-label">Description (required)</label>
+        <label for="inputDescription" class="control-label">Description</label>
           <textarea id="inputDescription" placeholder="Your description..." rows="3" ng-model="dataset.description" class="form-control" ng-required='true', ng-minlength=3></textarea>
       </div>
 
       <div class="form-group">
         <label for="inputType" class="control-label">Type</label>
-          <select id="inputType" ng-model="dataset.type" class="form-control"  disabled>
-            <option value="weibo" selected>weibo</option>
+          
+          <select id="inputType" ng-model="dataset.type" class="form-control">
+            <option ng-repeat="type in topotypes" value="{{type.id}}">{{type.title}}</option>
           </select>
       </div>
     </div>
@@ -33,7 +34,7 @@
         </div> -->
         
         <label for="fileName" class="control-label">Dataset</label>
-        <input type="file" class="btn btn-default" nv-file-select uploader="uploader" id="fileName" />
+        <input type="file" class="btn btn-default" nv-file-select uploader="uploader" id="fileName" data="dataset" />
       </div>
       <div class="form-group">
         <label for="userData" class="control-label">Network data (optional)</label>

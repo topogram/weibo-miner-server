@@ -36,6 +36,7 @@ class MemeCreateForm(ModelForm):
     class Meta:
         model = Meme
     dataset_id=StringField('dataset_id', validators=[DataRequired()])
+    type_id=StringField('type_id', validators=[DataRequired()])
 
 class RegexpCreateForm(ModelForm):
     class Meta:
