@@ -3,11 +3,11 @@ from flask_wtf.file import FileField, FileAllowed, FileRequired
 from flask.ext.uploads import UploadSet, DATA
 
 from wtforms_alchemy import model_form_factory
-from wtforms import StringField
+from wtforms import StringField, PasswordField
 from wtforms.validators import DataRequired
  
 from app.server import db
-from models import User, Dataset, Meme
+from models import User, Dataset, Meme, Regexp
  
 BaseModelForm = model_form_factory(Form)
  
@@ -23,7 +23,7 @@ class UserCreateForm(ModelForm):
  
 class SessionCreateForm(Form):
     email = StringField('email', validators=[DataRequired()])
-    password = StringField('password', validators=[DataRequired()])
+    password = PasswordField('password', validators=[DataRequired()])
 
 datasets = UploadSet('data', DATA)
 
@@ -37,3 +37,6 @@ class MemeCreateForm(ModelForm):
         model = Meme
     dataset_id=StringField('dataset_id', validators=[DataRequired()])
 
+class RegexpCreateForm(ModelForm):
+    class Meta:
+        model = Regexp

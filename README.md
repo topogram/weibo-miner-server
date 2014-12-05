@@ -21,7 +21,7 @@ Currently supported :
 * Upload your own data sets (csv and txt)
  
  
-# Deploy
+## Deploy
 
 Run locally 
 
@@ -32,4 +32,10 @@ Run locally
     
     pip install -r dev_requirements.txt
     python dev_run.py db 
+
+## Test content creation
+
+Regexps 
+
+    curl -X POST http://localhost:5000/api/v1/regexps -d '{"regexp" : "ha", "title" : "ho" }' -H "Content-Type: application/json"
 

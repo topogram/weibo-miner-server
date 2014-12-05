@@ -16,9 +16,9 @@ from flask_login import login_required, logout_user, current_user, login_user
 from flask import session
 
 from server import app, api, db, flask_bcrypt, mongo, login_manager
-from models import User, Dataset, Meme
-from forms import UserCreateForm, SessionCreateForm, DatasetCreateForm, MemeCreateForm
-from serializers import UserSerializer, DatasetSerializer, MemeSerializer
+from models import User, Dataset, Meme, Regexp, Topotype
+from forms import UserCreateForm, SessionCreateForm, DatasetCreateForm, MemeCreateForm, RegexpCreateForm
+from serializers import UserSerializer, DatasetSerializer, MemeSerializer,RegexpSerializer, TopotypeSerializer
 from itsdangerous import URLSafeTimedSerializer
 import sendgrid
 
@@ -106,7 +106,7 @@ class SessionView(restful.Resource):
             return form.errors, 422
 
         user = User.query.filter_by(email=form.email.data).first()
-        # print user
+        
         if user and flask_bcrypt.check_password_hash(user.password, form.password.data):
             
             # User is auth with falsk-login
@@ -361,3 +361,55 @@ api.add_resource(MemeTimeFramesList, '/api/v1/datasets/<int:dataset_id>/memes/<i
 api.add_resource(MemeTimeFramesView, '/api/v1/datasets/<int:dataset_id>/memes/<int:meme_id>/timeframes/<int:start>/<int:end>')
 
 api.add_resource(MemeListView, '/api/v1/memes')
+
+class RegexpListView(restful.Resource):
+    def post(self):
+        form = RegexpCreateForm()
+
+        if not form.validate_on_submit():
+            return form.errors, 422
+
+        regexp = Regexp(title=form.title.data, regexp=form.regexp.data)
+        db.session.add(regexp)
+        db.session.commit()
+        return RegexpSerializer(regexp).data
+
+    def get(self):
+        try:
+            regexps = Regexp.query.all()
+            return RegexpSerializer(regexps, many=True).data
+            
+        except Exception as e:
+            print e
+            return '', 500
+
+class RegexpView(restful.Resource):
+    def get(self, id):
+        print id, type(id)
+        regexp = Regexp.query.filter_by(id=id).first()
+        regexp= RegexpSerializer(regexp).data
+        return regexp
+
+api.add_resource(RegexpListView, '/api/v1/regexps')
+api.add_resource(RegexpView, '/api/v1/regexps/<int:id>')
+
+class TopotypeListView(restful.Resource):
+    def get(self):
+        try:
+            topotypes = Topotype.query.all()
+            print topotypes
+            return TopotypeSerializer(topotypes, many=True).data
+            
+        except Exception as e:
+            print e
+            return '', 500
+
+class TopotypeView(restful.Resource):
+    def get(self, id):
+        topotype = Topotype.query.filter_by(id=id).first()
+        topotype= TopotypeSerializer(topotype).data
+        return topotype
+
+
+api.add_resource(TopotypeView, '/api/v1/topotypes/<int:id>')
+api.add_resource(TopotypeListView, '/api/v1/topotypes')

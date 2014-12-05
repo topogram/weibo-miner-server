@@ -61,6 +61,7 @@ mongo = PyMongo(app)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
+
 # create data dir if it doesn't exist
 try:
     os.mkdir(app.config['UPLOAD_FOLDER'])
@@ -120,3 +121,4 @@ def favicon():
                                'img/favicon.ico')
 
 import views
+import admin

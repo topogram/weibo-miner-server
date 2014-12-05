@@ -19,6 +19,7 @@
       <td data-title="'query'">{{post.es_query}}</td>
       <td data-title="'description'">{{post.description}}</td>
       <td data-title="'created_at'" sortable="'created_at'">{{post.created_at | date:'medium'}}</td>
+      <td data-title="'type'" sortable="'type'">{{post.type}}</td>
       <td data-title="'View'"><a href="#/datasets/{{dataset.id}}/memes/{{post.id}}" role="button" class="btn btn-default btn-sm">View</a></td>
       <td data-title="'Delete'"><a href="#" ng-click="delete(post)" role="button" class="btn btn-primary btn-sm">Delete</a></td>
     </tr>

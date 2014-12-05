@@ -35,15 +35,15 @@
                         </ul>
 
                         <ul class="nav navbar-nav navbar-right">
-                            <li><a href="#">Help</a></li>
-                            <li><a href="#">About</a></li>
+                            <!-- <li><a href="/api/v1/spec.html">Help</a></li> -->
+                            <!-- <li><a href="#">About</a></li> -->
                             <li class="divider-vertical"></li>
                             <li ng-if="isLogged()">
                                 <a href="#/sessions/destroy">Logout</a>
                             </li>
-                            <li ng-if="!isLogged()">
+                            <!-- <li ng-if="!isLogged()">
                                 <a href="#/users/create" title="Register">Register</a>
-                            </li>
+                            </li> -->
                             <li ng-if="!isLogged()"><a href="#/sessions/create" ng-class="{active: isActive('/sessions/create')}">Login</a></li>
                         </ul>
                     </div>
@@ -71,7 +71,7 @@
         </div><!-- /.container -->
  
         <div class="blog-footer">
-            <p>Application built by <a href="https://twitter.com/clemsos">@clemsos</a> using Flask and AngularJS.</p>
+            <!-- <p>Application built by <a href="https://twitter.com/clemsos">@clemsos</a> using Flask and AngularJS.</p> -->
             <p>
                 <a href="#">Back to top</a>
             </p>
