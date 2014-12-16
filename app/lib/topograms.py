@@ -36,9 +36,9 @@ def get_analyzer(topotype_id):
 
     # TIMESTAMP
     topo.timestamp_column=topotype["timestamp_column"]    # timestamp column name
-    topo.text_column=topotype["text_column"]
-    topo.source_column=topotype["source_column"]
-    topo.dest_column=topotype["dest_column"]
+    topo.text_column=topotype["text_column"].encode('utf-8')
+    topo.source_column=topotype["source_column"].encode('utf-8')
+    if topotype["dest_column"] is not None : topo.dest_column=topotype["dest_column"].encode('utf-8')
 
     if topotype['ignore_citations'] is not None :
         for ign in topotype['ignore_citations'] : #  cited to be ignored
@@ -48,7 +48,7 @@ def get_analyzer(topotype_id):
     for pattern in topotype["stop_patterns"]: 
         topo.set_stop_regexp(pattern["regexp"])
 
-    topo.time_pattern=topotype["time_pattern"] # timestamp pattern
+    topo.time_pattern=topotype["time_pattern"].encode('utf-8') # timestamp pattern
 
     return topo
 

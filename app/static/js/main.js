@@ -6,7 +6,8 @@ window.Topogram = angular.module('Blog', [
                                  'angular-flash.flash-alert-directive',
                                  'angularFileUpload',
                                  'elasticsearch',
-                                 "ui.bootstrap"
+                                 "ui.bootstrap",
+                                 "ui.bootstrap-slider"
                                  ])
 .run(function($location, Restangular, AuthService) {
     Restangular.setFullRequestInterceptor(function(element, operation, route, url, headers, params, httpConfig) {

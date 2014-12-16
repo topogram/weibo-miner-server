@@ -29,6 +29,7 @@
     "ng-table":"0.3.3",
     "angular-flash" :"0.1.8",
     "angular-file-upload":"1.1.5",
-    "ng-table":"0.3.3"
+    "ng-table":"0.3.3",
+    "angular-bootstrap-slider": "latest"
   }
 }

@@ -1,78 +1,92 @@
-<div class="page-header">
+  <div class="page-header">
   <h1>{{dataset.title}} <small>{{dataset.description}}</small></h1>
 </div>
+
 
 <!-- <h4>index data</h4> -->
 <!-- <p><strong>Index</strong> : {{dataset.index_name}}</p>
   <p><strong>type</strong> : {{dataset.type}}</p> -->
 
-<div class="row">
-  <form ng-submit="search()" role="form">
+  <div class="row">
+    <form ng-submit="search()" role="form">
 
-    <div class="col-md-6 searchField form-inline">
-      <input ng-model="searchTerm" type="search" name="title" class="form-control"/>
-      <button type="submit" class="btn btn-default">Get results</button>
-      <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p>
-    </div>
-    <div class="col-md-6 utils form-group" ng-hide="!messages.length">
-      <label for="inputDesc">Description</label>
-      <textarea id="inputDesc" ng-model="description" placeholder="What is this visualization about?" rows="3" class="form-control"></textarea>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default">Cancel</button>
-        <a type="submit" ng-click="createTopogram()" class="btn btn-primary">Visualize</a>
+      <div class="col-md-6 searchField form-inline">
+        <input ng-model="searchTerm" type="search" name="title" class="form-control"/>
+        <button type="submit" class="btn btn-default">Get results</button>
+        <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p>
       </div>
-    </div>
-  </form>
-</div>
-
-<div class="row"  ng-hide="!messages.length">
-  <div class="col-xs-9 col-sm-9">
-    <words start="start" end="end" class="words-container"></words>
-  </div>
-  <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
-    <p><small>Hit Shift+W to save</small></p>
-    <div class="wordpie-container"></div>
-  </div>
-</div>
-
-<div class="row"  ng-hide="!messages.length">
-  <div class="col-xs-9 col-sm-9">
-    <citations start="start" end="end" class="words-container"></citations>
+      <div class="col-md-6 utils form-group" ng-hide="!messages.length">
+        <label for="inputDesc">Description</label>
+        <textarea id="inputDesc" ng-model="description" placeholder="What is this visualization about?" rows="3" class="form-control"></textarea>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default">Cancel</button>
+          <a type="submit" ng-click="saveTopogram()" class="btn btn-primary">Save</a>
+        </div>
+      </div>
+    </form>
   </div>
 
+  <section class="results">
+    <h3 ng-hide="messages.length" class="no-recipes">No results</h3>
+      <!-- <input type="text" class="span2" value="" data-slider-min="-20" data-slider-max="20" data-slider-step="1" data-slider-value="-14"  data-slider-selection="after"data-slider-tooltip="hide"> -->
+      <!-- <slider id="time-slider" model="maxWords" type="text" data-slider-min="0" data-slider-step="1" data-slider-orientation="horizontal" data-slider-selection="after" data-slider-tooltip="show"></slider> -->
 
-  <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveCitations(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
-    <p><small>Hit Shift+C to save</small></p>
-    <!-- <div class="pie-container"></div> -->
-  </div>
-</div>
+      <label for="wordsLimit">Max Words : {{wordsLimit}}
+      <br>
+      <slider ng-model="wordsLimit" min="0" step="1" max="10" data-slider-orientation="horizontal" id="wordsLimit"></slider>
+      </label>
 
-<section class="results">
-  <h3 ng-hide="messages.length" class="no-recipes">No results</h3>
-  <article ng-hide="!messages.length" class="recipe">
-    <h3>Total : {{ totalResults }} results<small> in {{ index }}</small></h3>
+      <label for="citationsLimit">Max Citations : {{citationsLimit}}
+      <br>
+      <slider ng-model="citationsLimit" min="0" step="1" max="10" data-slider-orientation="horizontal" id="citationsLimit"></slider>
+      </label>
 
-    <timeserie timeserie="" time-data="timeData" start="start" end="end" meme-name="searchTerm"></timeserie>
+    <section ng-hide="!messages.length" class="recipe">
+      <h3>Total : {{ totalResults }} results<small> in {{ index }}</small></h3>
+      <timeserie timeserie="" time-data="timeData" start="start" end="end" meme-name="searchTerm"></timeserie>
+    </section>
 
-    <table ng-table show-filter="true" class="table table-condensed table-es-results">
-      <thead>
-        <tr>
-          <th ng-repeat="column in columns" class="text-center sortable" ng-class="{ 'sort-asc': tableParams.isSortBy(column.field, 'asc'), 'sort-desc': tableParams.isSortBy(column.field, 'desc') }" ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')"
-          >  {{column.field }}
+    <section id="words" class="row" ng-hide="!messages.length">
+      <div class="col-xs-9 col-sm-9">
+      <div class="loader" ng-hide="words.index.length"></div>
+        <words start="start" end="end" class="words-container"></words>
+      </div>
+      <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+        <p><small>Hit Shift+W to save</small></p>
+        <div class="wordpie-container"></div>
+      </div>
+    </section>
+
+    <section class="row"  ng-hide="!messages.length">
+
+      <div class="col-xs-9 col-sm-9">
+        <div class="loader" ng-hide="citations.index.length"></div>
+        <citations start="start" end="end" class="citations-container"></citations>
+      </div>
+
+      <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveCitations(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+        <p><small>Hit Shift+C to save</small></p>
+        <!-- <div class="pie-container"></div> -->
+      </div>
+    </section>
+
+    <section class="messages" ng-hide="!messages.length">
+      <table ng-table show-filter="true" class="table table-condensed table-es-results">
+        <thead>
+          <tr>
+            <th ng-repeat="column in columns" class="text-center sortable" ng-class="{ 'sort-asc': tableParams.isSortBy(column.field, 'asc'), 'sort-desc': tableParams.isSortBy(column.field, 'desc') }" ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')"
+            >  {{column.field }}
           </th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="row in messages">
-          <td ng-repeat="column in columns"
-          tooltip='{{row[column.field]}}'
-          tooltip-append-to-body="true"
-          >
+          <td ng-repeat="column in columns" tooltip='{{row[column.field]}}' tooltip-append-to-body="true">
             <a href="{{row[column.field]}}" class="disabled" disabled onclick="return false">{{row[column.field] | limitTo:10 }}</a>
           </td>
         </tr>
       </tbody>
     </table>
     <div ng-cloak="" ng-hide="allResults" class="load-more"><a ng-click="loadMore()" class="btn btn-default">View more results...</a></div>
-  </article>
+  </section>
 </section>

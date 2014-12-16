@@ -11,6 +11,15 @@ import csv
 
 from topograms import get_analyzer, get_topotype
 
+def get_index_info( es_index_name):
+        res = elastic.status(es_index_name)
+        # if res["errors"] is "True": print res
+        return res 
+
+def delete_index( es_index_name):
+    res = elastic.delete_index(es_index_name)
+    return res 
+
 def build_es_index_from_csv(raw_data_path, data_type, es_index_name ):
 
     topotype=get_topotype(data_type)

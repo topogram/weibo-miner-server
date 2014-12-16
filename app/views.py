@@ -13,7 +13,7 @@ import uuid
 from bson import ObjectId
 
 from flask_login import login_required, logout_user, current_user, login_user
-from flask import session
+from flask import session, request
 
 from server import app, api, db, flask_bcrypt, mongo, login_manager
 from models import User, Dataset, Meme, Regexp, Topotype
@@ -172,21 +172,16 @@ class DatasetListView(restful.Resource):
         if not form.validate_on_submit():
             return form.errors, 422
 
-
         # add file 
         fileName = secure_filename(form.dataset.data.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], fileName)
         form.dataset.data.save(file_path)
 
         # index to elasticsearch
-        # print fileName
         safename = "".join([c for c in fileName if c.isalpha() or c.isdigit() or c==' ']).rstrip()
         es_index_name=(safename + "_"+ str(uuid.uuid4())).lower()
 
-        # build_es_index_from_csv(file_path, form.topotype_id.data, es_index_name)
-        build_topo_index(file_path, form.topotype_id.data, es_index_name)
-
-        # print "topotype_id", form.topotype_id.data
+        # build_topo_index(file_path, form.topotype_id.data, es_index_name)
 
         # index file
         dataset = Dataset(form.title.data, form.topotype_id.data, form.description.data, es_index_name, str(file_path))
@@ -200,29 +195,74 @@ class DatasetView(restful.Resource):
 
     @login_required
     def get(self, id):
-        datasets = Dataset.query.filter_by(id=id).first()
-        desc= DatasetSerializer(datasets).data
-        
-        # get csv sample
-        csv_file = csv.reader(open(desc["filepath"]))
-        csv_sample=[]
-        fieldnames=csv_file.next() # get name
+        """
+        GET 
+        a Single dataset per ID
 
-        for line in range(0,10):
-            row={}
-            for i,rec in enumerate(csv_file.next()):
-                row[fieldnames[i]] = rec
-            csv_sample.append(row)
-        desc["csvSample"] = csv_sample
-        return desc
+        params:
+            to_index (true) : if to_index=true, the whole dataset will be indexed
+            sample (true) : if sample=true, a sample of the dataset will be returned
+        """
+
+        datasets = Dataset.query.filter_by(id=id).first()
+        dataset= DatasetSerializer(datasets).data
+
+        if request.values.get('to_index') == "true" :
+            print 'build topo index'
+            build_topo_index(dataset["filepath"], dataset["topotype_id"], dataset["index_name"])
+
+        if request.values.get('sample') == "true" :
+            # get csv sample
+            csv_file = csv.reader(open(dataset["filepath"]))
+            csv_sample=[]
+            fieldnames=csv_file.next() # get name
+
+            for line in range(0,10):
+                row={}
+                for i,rec in enumerate(csv_file.next()):
+                    row[fieldnames[i]] = rec
+                csv_sample.append(row)
+            dataset["csvSample"] = csv_sample
+
+        return dataset
 
     @login_required
     def delete(self, id):
         dataset = Dataset.query.filter_by(id=id).first()
+        
+        d= DatasetSerializer(dataset).data
+        delete_index(d["index_name"])
+
         db.session.delete(dataset)
         db.session.commit()
-        return '{"ok" : post deleted"}', 204
+        return '{"ok" : dataset deleted"}', 204
 
+class DatasetEsView(restful.Resource) :
+    @login_required
+    def get(self, id):
+        datasets = Dataset.query.filter_by(id=id).first()
+        dataset= DatasetSerializer(datasets).data
+
+        es_info= get_index_info(dataset["index_name"])
+
+        return {
+            "index_name" : dataset["index_name"],
+            "count" : es_info["indices"][dataset["index_name"]]["docs"]["num_docs"]
+            # "info" : es_info["indices"][dataset["index_name"]]
+            # "info" : es_info[""]
+            }
+
+api.add_resource(DatasetEsView, '/api/v1/datasets/<int:id>/index')
+
+class DatasetEsStart(restful.Resource):
+    @login_required
+    def get(self, id):
+        datasets = Dataset.query.filter_by(id=id).first()
+        dataset= DatasetSerializer(datasets).data
+        # build_topo_index(dataset["filepath"], dataset["topotype_id"], dataset["index_name"])
+        return {"status" : "started"}
+
+api.add_resource(DatasetEsStart, '/api/v1/datasets/<int:id>/index/start')
 
 class TopogramListView(restful.Resource):
     @login_required

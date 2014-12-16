@@ -89,6 +89,10 @@ def index():
 def basic_pages(**kwargs):
     return make_response(open(os.path.join(basedir, 'templates/index.html')).read())
 
+@app.route('/modal.html')
+def modal_page(**kwargs):
+    return make_response(open(os.path.join(basedir, 'templates/modal.html')).read())
+
 # STATIC
 @app.route('/js/<path:path>')
 def js_static_proxy(path):

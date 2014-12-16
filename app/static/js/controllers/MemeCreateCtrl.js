@@ -1,13 +1,13 @@
 function MemeCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService) {
 
-    Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
+  Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
         // console.log(dataset);
         $scope.dataset = dataset;
         // $scope.datasetId = dataset.id;
 
         $scope.index = dataset.index_name;
 
-    });
+      });
 
     // Initialize the scope defaults.
     // $scope.indices=[]       // list of elasticsearch indices
@@ -25,94 +25,136 @@ function MemeCreateCtrl($scope, $routeParams, $location, Restangular, flash, sea
     // console.log($scope.index);
 
     $scope.search = function(){
-        $scope.page = 0;
-        $scope.messages = [];
-        $scope.allResults = false;
-        $location.search({'q': $scope.searchTerm,
-                          "index":$scope.index}
-                          );
-        $scope.searchFirst();
+      $scope.page = 0;
+      $scope.messages = [];
+      $scope.allResults = false;
+      $location.search({'q': $scope.searchTerm,
+                       "index":$scope.index}
+                       );
+      $scope.searchFirst();
     };
 
     /**
      * Load the next page of results, incrementing the page counter.
      * When query is finished, push results onto $scope.recipes and decide
      * whether all results have been returned (i.e. were 10 results returned?)
-    */
+     */
 
-    $scope.loadMore = function(){
+     $scope.loadMore = function(){
       searchService
-        .loadMore($scope.index, $scope.searchTerm, $scope.page++).then(function(results){
-          if(results.messages.length !== 10){
-              $scope.allResults = true;
-          }
+      .loadMore($scope.index, $scope.searchTerm, $scope.page++).then(function(results){
+        if(results.messages.length !== 10){
+          $scope.allResults = true;
+        }
 
-          var ii = 0;
-          for(;ii < results.messages.length; ii++){
-              $scope.messages.push(results.messages[ii]);
-          }
-        })
+        var ii = 0;
+        for(;ii < results.messages.length; ii++){
+          $scope.messages.push(results.messages[ii]);
+        }
+      })
     };
+
+      $scope.maxWords = 10;
+      $scope.wordsLimit=5;
+
+      $scope.citationsLimit=5;
+      $scope.maxCitations = 10;
+
+      $scope.$watch("wordsLimit", function(value) {
+        console.log('new words limit : ' + value);
+      });
+
+      $scope.$watch("citationsLimit", function(value) {
+        console.log('new citations limit : ' + value);
+      });
 
     /**
      * A fresh search. Reset the scope variables to their defaults, set
      * the q query parameter.
      */
-    $scope.searchFirst= function(){
+     $scope.searchFirst= function(){
       searchService.search($scope.index,$scope.searchTerm).then(function(results){
+            
             // console.log("search success");
             console.log(results);
 
             // display all columns (except  exludedColumns)
             var exludedColumns =["words_cited_edges", "words_edges", "cited_edges", "cited_nodes", "words_nodes", "timestamp"];
 
+            // TITLE
+            $scope.title=$scope.searchTerm;
+
+            // TABLE : display some results
             for (colName in results.messages[0]) {
                 // console.log(colName);
                 if(exludedColumns.indexOf(colName) == -1) 
-                    $scope.columns.push({"title": colName, 'field': colName})
-            };
-
-            // $scope.columns=["uid","text","created_at"]
+                  $scope.columns.push({"title": colName, 'field': colName})
+              };
 
             $scope.totalResults=results.total;
-            
+
             if(results.messages.length !== 10){
-                $scope.allResults = true;
+              $scope.allResults = true;
             }
-            console.log($scope.allResults);
 
             var ii = 0;
             for(;ii < results.messages.length; ii++){
-                $scope.messages.push(results.messages[ii]);
+              $scope.messages.push(results.messages[ii]);
             }
 
-        
-            $scope.title=$scope.searchTerm;
-            
+            // HISTOGRAM
             if(results.histogram.length){
               $scope.start=results.histogram[0].time;
               $scope.end=results.histogram[results.histogram.length-1].time;
               $scope.timeData=results.histogram;
             }
 
-      });
+            // GRAPHS
+            var topoInfo = {
+              "es_query" : $scope.searchTerm,
+              "es_index_name" : $scope.index,
+              "description" : $scope.description,
+              "dataset_id" : $routeParams.datasetId,
+              "topotype_id" : $scope.dataset.topotype_id
+            };
 
-    };
+            Restangular.all('memes').post(topoInfo).then(function(topogram) {
+              // flash.success = "New topogram created !"
+              // console.log(topogram.words);
+              // $location.path("/datasets/"+$routeParams.datasetId+"/memes/"+meme.id);
 
-    $scope.createTopogram = function () {
-        console.log($scope);
+              // words
+              $scope.words=topogram.words;
+              if(data.words.index!=undefined) $scope.wordsLength=topogram.words.index.length;
+              $scope.wordForceStarted = true;
 
-        var topoInfo = {
-          "es_query" : $scope.searchTerm,
-          "es_index_name" : $scope.index,
-          "description" : $scope.description,
-          "dataset_id" : $routeParams.datasetId,
-          "topotype_id" : $scope.dataset.topotype_id
-        };
+              // citations
+              $scope.showCommunities=false; // show provinces clustering or communities
 
-        Restangular.all('memes').post(topoInfo).then(function(topogram) {
-            flash.success = "New topogram created !"
-            console.log(topogram.words);
+              $scope.citations=data.citations;
+              if(data.citations.index!=undefined) $scope.citationsLength=data.citations.index.length;
+              $scope.wordForceStarted = true;
+
+          });
+
+          });
+
+};
+
+$scope.createTopogram = function () {
+  console.log($scope);
+
+  var topoInfo = {
+    "es_query" : $scope.searchTerm,
+    "es_index_name" : $scope.index,
+    "description" : $scope.description,
+    "dataset_id" : $routeParams.datasetId,
+    "topotype_id" : $scope.dataset.topotype_id
+  };
+
+  Restangular.all('memes').post(topoInfo).then(function(topogram) {
+    flash.success = "New topogram created !"
+    console.log(topogram.words);
             // $location.path("/datasets/"+$routeParams.datasetId+"/memes/"+meme.id);
 
             // words
@@ -127,26 +169,26 @@ function MemeCreateCtrl($scope, $routeParams, $location, Restangular, flash, sea
             if(data.citations.index!=undefined) $scope.citationsLength=data.citations.index.length;
             $scope.wordForceStarted = true;
 
-        });
+          });
 
-    };
+};
 
-    $scope.createMeme = function () {
-        console.log($scope);
+$scope.createMeme = function () {
+  console.log($scope);
 
-        var meme = {
-          "es_query" : $scope.searchTerm,
-          "es_index_name" : $scope.index,
-          "description" : $scope.description,
-          "dataset_id" : $routeParams.datasetId,
-          "topotype_id" : $scope.dataset.topotype_id
-        };
+  var meme = {
+    "es_query" : $scope.searchTerm,
+    "es_index_name" : $scope.index,
+    "description" : $scope.description,
+    "dataset_id" : $routeParams.datasetId,
+    "topotype_id" : $scope.dataset.topotype_id
+  };
 
-        Restangular.all('memes').post(meme).then(function(meme) {
-            flash.success = "New meme created !"
-            $location.path("/datasets/"+$routeParams.datasetId+"/memes/"+meme.id);
-        });
-    }
+  Restangular.all('memes').post(meme).then(function(meme) {
+    flash.success = "New meme created !"
+    $location.path("/datasets/"+$routeParams.datasetId+"/memes/"+meme.id);
+  });
+}
 
 
 }
