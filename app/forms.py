@@ -7,7 +7,7 @@ from wtforms import StringField, PasswordField
 from wtforms.validators import DataRequired
  
 from app.server import db
-from models import User, Dataset, Meme, Regexp
+from models import User, Dataset, Topogram, Regexp
  
 BaseModelForm = model_form_factory(Form)
  
@@ -33,9 +33,9 @@ class DatasetCreateForm(ModelForm):
     dataset = FileField("dataset", validators=[DataRequired()])
     topotype_id=StringField('topotype_id', validators=[DataRequired()])
 
-class MemeCreateForm(ModelForm):
+class TopogramCreateForm(ModelForm):
     class Meta:
-        model = Meme
+        model = Topogram
     dataset_id=StringField('dataset_id', validators=[DataRequired()])
     topotype_id=StringField('topotype_id', validators=[DataRequired()])
 

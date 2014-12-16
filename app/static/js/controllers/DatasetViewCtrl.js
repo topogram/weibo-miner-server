@@ -1,22 +1,22 @@
 function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular, flash) {
 
     Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
-            // console.log(memes);
+            // console.log(topograms);
             $scope.dataset = dataset;
     });
 
-    Restangular.one('datasets',$routeParams.datasetId).getList('memes').then(function(memes) {
-            // console.log(memes);
-            $scope.memes = memes;
+    Restangular.one('datasets',$routeParams.datasetId).getList('topograms').then(function(topograms) {
+            // console.log(topograms);
+            $scope.topograms = topograms;
     });
 
-    $scope.delete = function(meme) {
+    $scope.delete = function(topogram) {
         
-        meme.remove().then(function() {
+        topogram.remove().then(function() {
             $timeout(function() {
                 $location.path("/datasets/"+ $scope.dataset.id);
             })
-            $scope.posts = _.without($scope.memes, meme);
+            $scope.posts = _.without($scope.topograms, topogram);
         });
     }
 }

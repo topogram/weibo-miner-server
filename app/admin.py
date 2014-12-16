@@ -12,7 +12,7 @@ from flask.ext.principal import Permission, Need
 from functools import partial
 
 from forms import SessionCreateForm
-from models import User, Dataset, Meme, Topotype, Regexp
+from models import User, Dataset, Topogram, Topotype, Regexp
 from views import admin_permission
 import os.path as op
 
@@ -91,7 +91,7 @@ class TopotypeView(ModelView):
 # Add administrative views here
 admin.add_view(ModelView(User, db.session))
 admin.add_view(ModelView(Dataset, db.session))
-admin.add_view(ModelView(Meme, db.session))
+admin.add_view(ModelView(Topogram, db.session))
 admin.add_view(TopotypeView(Topotype, db.session))
 admin.add_view(ModelView(Regexp, db.session))
 

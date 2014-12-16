@@ -232,12 +232,9 @@ def build_topo_index(raw_data_path, type_id, es_index_name ):
 
         reader = csv.DictReader(f)
         for message in reader:
-            # print message
             message[created_at.decode("utf-8")]=message[created_at].replace(" ", "T")
             topodata=topo.process(message)
-            # print topodata
             record=dict(message, **topodata)
-            # print repr(record)
 
             try :
                 res = elastic.index(es_index_name, "message", record)
@@ -252,15 +249,25 @@ def build_topo_index(raw_data_path, type_id, es_index_name ):
 
     print 
 
-def get_topo_networks_from_es(query, type_id, index_name):
+def get_topo_networks_from_es(query, type_id, index_name, words_limit, citations_limit):
+    """ 
+        Create networks in d3 format from ES query 
+        
+        type_id               : topotype id
+        index_name       : elasticsearch index name
+        words_limit         : max size of words networks
+        citations_limit     : max size of citations networks
+    
+    """
 
     res = elastic.search(query,index=index_name)
     data_size=res['hits']['total']
     print "Total %d Hits from %s" % (data_size, index_name)
     print type(res['hits']["hits"])
-    # print "len res", len(res['hits']["hits"])
 
     topo=get_analyzer(type_id)
+    topo.words_limit = words_limit
+    topo.citations_limit = citations_limit 
 
     chunksize=1000
 
@@ -278,11 +285,7 @@ def get_topo_networks_from_es(query, type_id, index_name):
 
         messages=[]
         for message in res['hits']["hits"]:
-            # print message["_source"].keys()
             topo.load_from_processed(message["_source"])
-
-    # timeframes_to_networks(messages)
-    # topo.create_timeframes()
 
     return topo.get_d3_networks()
 

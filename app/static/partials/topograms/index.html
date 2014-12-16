@@ -1,6 +1,6 @@
-<p>Datasets : {{ memes.length }} </p>
+<p>Datasets : {{ topograms.length }} </p>
 
-<a href="#/memes/create" class="btn btn-primary">Create New Meme</a>
+<a href="#/topograms/create" class="btn btn-primary">Create New Topogram</a>
 
 <table ng-table="" class="table table-striped">
   <thead>
@@ -10,7 +10,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr ng-repeat="post in memes">
+    <tr ng-repeat="post in topograms">
       <td data-title="'title'" sortable="'title'"> <a href="#/datasets/{{post.id}}" role="button">{{ post.dataset.title }}</a></td>
       <td data-title="'description'">{{post.description}}</td>
       <td data-title="'query'">{{post.es_query}}</td>

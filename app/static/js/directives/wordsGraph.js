@@ -30,7 +30,7 @@ Topogram.directive("words", function () {
                         .attr("class", "words-legend")
                         .attr("transform", "translate("+(100)+","+(h-200)+")");
                     
-            $scope.$watch('memeName', function(newVal, oldVal) {
+            $scope.$watch('topogramName', function(newVal, oldVal) {
                 // console.log(newVal);
                 if(newVal!=undefined) {                           
                     wordsLegend.append("text")

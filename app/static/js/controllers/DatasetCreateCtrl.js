@@ -49,7 +49,7 @@ function DatasetCreateCtrl($scope, $timeout, $location, Restangular,FileUploader
             flash.success = "Dataset created ! " + response.id;
 
             $timeout(function() {
-                $location.path("/datasets/"+response.id+"/memes/create");
+                $location.path("/datasets/"+response.id+"/topograms/create");
 
                 // index the file in elasticsearch
                 Restangular.one('datasets', response.id).get({"to_index": true}).then(function(dataset){

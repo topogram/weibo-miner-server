@@ -28,9 +28,7 @@
 
   <section class="results">
     <h3 ng-hide="messages.length" class="no-recipes">No results</h3>
-      <!-- <input type="text" class="span2" value="" data-slider-min="-20" data-slider-max="20" data-slider-step="1" data-slider-value="-14"  data-slider-selection="after"data-slider-tooltip="hide"> -->
-      <!-- <slider id="time-slider" model="maxWords" type="text" data-slider-min="0" data-slider-step="1" data-slider-orientation="horizontal" data-slider-selection="after" data-slider-tooltip="show"></slider> -->
-
+<!-- 
       <label for="wordsLimit">Max Words : {{wordsLimit}}
       <br>
       <slider ng-model="wordsLimit" min="0" step="1" max="10" data-slider-orientation="horizontal" id="wordsLimit"></slider>
@@ -39,17 +37,17 @@
       <label for="citationsLimit">Max Citations : {{citationsLimit}}
       <br>
       <slider ng-model="citationsLimit" min="0" step="1" max="10" data-slider-orientation="horizontal" id="citationsLimit"></slider>
-      </label>
+      </label> -->
 
     <section ng-hide="!messages.length" class="recipe">
       <h3>Total : {{ totalResults }} results<small> in {{ index }}</small></h3>
-      <timeserie timeserie="" time-data="timeData" start="start" end="end" meme-name="searchTerm"></timeserie>
+      <timeserie timeserie="" time-data="timeData" start="start" end="end" topogram-name="searchTerm"></timeserie>
     </section>
 
     <section id="words" class="row" ng-hide="!messages.length">
       <div class="col-xs-9 col-sm-9">
       <div class="loader" ng-hide="words.index.length"></div>
-        <words start="start" end="end" class="words-container"></words>
+        <words class="words-container"></words>
       </div>
       <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
         <p><small>Hit Shift+W to save</small></p>
@@ -61,7 +59,7 @@
 
       <div class="col-xs-9 col-sm-9">
         <div class="loader" ng-hide="citations.index.length"></div>
-        <citations start="start" end="end" class="citations-container"></citations>
+        <citations class="citations-container"></citations>
       </div>
 
       <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveCitations(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>

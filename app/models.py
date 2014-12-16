@@ -30,7 +30,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(80), nullable=False)
     role = db.Column(db.String(120))
     datasets = db.relationship('Dataset', backref='user', lazy='dynamic')
-    memes = db.relationship('Meme', backref='user', lazy='dynamic')
+    topograms = db.relationship('Topogram', backref='user', lazy='dynamic')
     active = db.Column(db.Boolean, unique=False, default=True)
     registered_on = db.Column(db.DateTime, default=db.func.now())
  
@@ -81,7 +81,7 @@ class Dataset(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     topotype_id = db.Column(db.Integer, db.ForeignKey('topotype.id'), nullable=False)
 
-    memes = db.relationship('Meme', backref='dataset', lazy='dynamic')
+    topograms = db.relationship('Topogram', backref='dataset', lazy='dynamic')
 
     # topotype = db.relationship('Topotype', backref='dataset', lazy='dynamic')
 
@@ -97,8 +97,8 @@ class Dataset(db.Model):
     def __repr__(self):
         return '<Dataset %r>' % self.title
 
-class Meme(db.Model):
-    "Memes are visualisation of selected ..."
+class Topogram(db.Model):
+    "Topograms are visualisation of selected ..."
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.Text)
     es_index_name = db.Column(db.String(200), nullable=False)
@@ -107,25 +107,32 @@ class Meme(db.Model):
     data_mongo_id = db.Column(db.String(150))
     records_count = db.Column(db.Integer)
 
+    words_limit = db.Column(db.Integer)
+    citations_limit = db.Column(db.Integer)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
     created_at = db.Column(db.DateTime, default=db.func.now())
 
-    def __init__(self, dataset_id, description, es_index_name, es_query, data_mongo_id,records_count):
+    def __init__(self, dataset_id, description, es_index_name, es_query, records_count,words_limit, citations_limit):
+        
         # print dataset_id, description, es_index_name, es_query
         # print g.user.id, g.dataset_id
         self.description = description
         self.es_query = es_query
         self.es_index_name = es_index_name
-        self.data_mongo_id = data_mongo_id
+        
+        # self.data_mongo_id = data_mongo_id
         self.records_count = records_count
         self.dataset_id = dataset_id
         self.user_id = g.user.id
 
+        self.words_limit=words_limit
+        self.citations_limit=citations_limit
  
     def __repr__(self):
-        return '<Meme %r>' % self.id
+        return '<Topogram %r>' % self.id
 
 class Topotype(db.Model):
     """Topotype are data mining profiles to extract topograms from data"""

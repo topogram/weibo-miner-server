@@ -16,9 +16,9 @@ from flask_login import login_required, logout_user, current_user, login_user
 from flask import session, request
 
 from server import app, api, db, flask_bcrypt, mongo, login_manager
-from models import User, Dataset, Meme, Regexp, Topotype
-from forms import UserCreateForm, SessionCreateForm, DatasetCreateForm, MemeCreateForm, RegexpCreateForm
-from serializers import UserSerializer, DatasetSerializer, MemeSerializer,RegexpSerializer, TopotypeSerializer
+from models import User, Dataset, Topogram, Regexp, Topotype
+from forms import UserCreateForm, SessionCreateForm, DatasetCreateForm, TopogramCreateForm, RegexpCreateForm
+from serializers import UserSerializer, DatasetSerializer, TopogramSerializer,RegexpSerializer, TopotypeSerializer
 from itsdangerous import URLSafeTimedSerializer
 import sendgrid
 
@@ -224,6 +224,9 @@ class DatasetView(restful.Resource):
                 csv_sample.append(row)
             dataset["csvSample"] = csv_sample
 
+        es_info= get_index_info(dataset["index_name"])
+        dataset["records_count"] = es_info["indices"][dataset["index_name"]]["docs"]["num_docs"]
+
         return dataset
 
     @login_required
@@ -266,107 +269,106 @@ api.add_resource(DatasetEsStart, '/api/v1/datasets/<int:id>/index/start')
 
 class TopogramListView(restful.Resource):
     @login_required
-    def post(self):
-        form = MemeCreateForm()
-
-        if not form.validate_on_submit():
-            return form.errors, 422
-         
-        topo =get_topo_networks_from_es(form.es_query.data, form.topotype_id.data, str(form.es_index_name.data))
-
-        return topo
-        # return TopogramSerializer(topo).data
-
-class MemeListView(restful.Resource):
-    @login_required
     def get(self):
-        memes = Meme.query.all()
-        return MemeSerializer(memes, many=True).data
+        topograms = Topogram.query.all()
+        return TopogramSerializer(topograms, many=True).data
 
     @login_required
     def post(self):
-        form = MemeCreateForm()
+        form = TopogramCreateForm()
 
         if not form.validate_on_submit():
             return form.errors, 422
 
-        # data_mongo_id=mongo.db.memes.insert({
-        #             "es_query" : form.es_query.data,
-        #             "es_index" : str(form.es_index_name.data),
-        #             "messages" :[]})
-        # print "haha"
+        topogram = Topogram(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data,  form.records_count.data)
 
-        topo =get_topo_networks_from_es(form.es_query.data, form.topotype_id.data, str(form.es_index_name.data))
-        
-        # print topo
+        db.session.add(topogram)
+        db.session.commit()
 
-        # records_count = es2topogram(form.es_query.data, form.topotype_id.data, str(form.es_index_name.data),  data_mongo_id)
+        return TopogramSerializer(topogram).data
 
-        # meme = Meme(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data, str(data_mongo_id), records_count)
-
-        # db.session.add(meme)
-        # db.session.commit()
-
-        # return MemeSerializer(topo).data
-        return topo
-
-class MemeView(restful.Resource):
+class TopogramView(restful.Resource):
 
     @login_required
-    def get(self, dataset_id, meme_id):
-        meme = Meme.query.filter_by(id=meme_id).first()
-        meme= MemeSerializer(meme).data
-        return meme
+    def get(self, dataset_id, Topogram_id):
+        topogram = Topogram.query.filter_by(id=topogram_id).first()
+        topogram= TopogramSerializer(topogram).data
+        return topogram
 
     @login_required
-    def delete(self, dataset_id, meme_id):
-        meme = Meme.query.filter_by(id=meme_id).first()
-        db.session.delete(meme)
+    def delete(self, dataset_id, Topogram_id):
+        topogram = topogram.query.filter_by(id=topogram_id).first()
+        db.session.delete(topogram)
         db.session.commit()
         return '{"ok" : post deleted"}', 204
 
-class MemesByDataset(restful.Resource):
+class TopogramsByDataset(restful.Resource):
 
     def get(self, id):
         print id, type(id)
-        memes = Meme.query.filter_by(dataset_id=id).all()
-        memes = MemeSerializer(memes, many=True).data
-        return memes
+        topograms = Topogram.query.filter_by(dataset_id=id).all()
+        topograms = TopogramSerializer(topograms, many=True).data
+        return topograms
+
+class TopogramNetworksView(restful.Resource):
+    @login_required
+    def post(self):
+        form = TopogramCreateForm()
+        if not form.validate_on_submit():
+            return form.errors, 422
+         
+        # TODO : fix nasty fallback
+        # print(form.words_limit, form.citations_limit) 
+        if form.words_limit is None : 
+            words_limit=100 
+        else :
+            words_limit=form.words_limit.data
+
+        if form.citations_limit is None : 
+            citations_limit=100
+        else :
+            citations_limit=form.citations_limit.data
+
+        topo =get_topo_networks_from_es(form.es_query.data, form.topotype_id.data, str(form.es_index_name.data), words_limit, citations_limit)
+
+        return topo
+
+api.add_resource(TopogramNetworksView, '/api/v1/topograms/networks')
 
 api.add_resource(UserView, '/api/v1/users')
 api.add_resource(SessionView, '/api/v1/sessions')
 
 api.add_resource(DatasetListView, '/api/v1/datasets')
 api.add_resource(DatasetView, '/api/v1/datasets/<int:id>')
-api.add_resource(MemesByDataset, '/api/v1/datasets/<int:id>/memes')
-api.add_resource(MemeView, '/api/v1/datasets/<int:dataset_id>/memes/<int:meme_id>')
+api.add_resource(TopogramsByDataset, '/api/v1/datasets/<int:id>/topograms')
+api.add_resource(TopogramView, '/api/v1/datasets/<int:dataset_id>/topograms/<int:topogram_id>')
 
 
-class MemeTimeFramesList(restful.Resource):
+class TopogramTimeFramesList(restful.Resource):
     
-    def get(self, dataset_id, meme_id):
-        meme = Meme.query.filter_by(id=meme_id).first()
-        meme= MemeSerializer(meme).data
-        meme_data=mongo.db.memes.find_one({ "_id" : ObjectId(meme["data_mongo_id"]) })
-        # print meme_data["timeframes"]
-        rep=[ {"count":0, "timestamp":d["time"]} for d in meme_data["timeframes"]]
+    def get(self, dataset_id, Topogram_id):
+        topogram = Topogram.query.filter_by(id=topogram_id).first()
+        topogram= TopogramSerializer(topogram).data
+        topogram_data=mongo.db.topograms.find_one({ "_id" : ObjectId(topogram["data_mongo_id"]) })
+        # print Topogram_data["timeframes"]
+        rep=[ {"count":0, "timestamp":d["time"]} for d in topogram_data["timeframes"]]
 
         return sorted(rep, key=lambda k: k['timestamp'])
 
-class MemeTimeFramesView(restful.Resource):
-    def get(self, dataset_id, meme_id, start, end):
+class TopogramTimeFramesView(restful.Resource):
+    def get(self, dataset_id, Topogram_id, start, end):
         print  start, end
-        meme = Meme.query.filter_by(id=meme_id).first()
-        meme= MemeSerializer(meme).data
-        meme_data=mongo.db.memes.find_one({ "_id" : ObjectId(meme["data_mongo_id"]) })
+        topogram = Topogram.query.filter_by(id=Topogram_id).first()
+        topogram= TopogramSerializer(topogram).data
+        topogram_data=mongo.db.topograms.find_one({ "_id" : ObjectId(topogram["data_mongo_id"]) })
 
-        return timeframes_to_networks(meme_data)
+        return timeframes_to_networks(Topogram_data)
 
-api.add_resource(MemeTimeFramesList, '/api/v1/datasets/<int:dataset_id>/memes/<int:meme_id>/timeframes')
+api.add_resource(TopogramTimeFramesList, '/api/v1/datasets/<int:dataset_id>/topograms/<int:topogram_id>/timeframes')
 
-api.add_resource(MemeTimeFramesView, '/api/v1/datasets/<int:dataset_id>/memes/<int:meme_id>/timeframes/<int:start>/<int:end>')
+api.add_resource(TopogramTimeFramesView, '/api/v1/datasets/<int:dataset_id>/topograms/<int:topogram_id>/timeframes/<int:start>/<int:end>')
 
-api.add_resource(MemeListView, '/api/v1/memes')
+api.add_resource(TopogramListView, '/api/v1/topograms')
 
 class RegexpListView(restful.Resource):
     def post(self):

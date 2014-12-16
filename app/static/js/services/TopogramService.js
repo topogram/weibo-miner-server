@@ -1,4 +1,4 @@
-Topogram.factory('MemeService', function() {
+Topogram.factory('TopogramService', function() {
     return {
 
       "citations" : { nodes:[],edges:[]},
