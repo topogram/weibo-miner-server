@@ -27,3 +27,13 @@
 #timeline .slider {
     width: 960px;
 }
+
+
+.table-es-results td {
+    word-wrap: break-word;
+}
+.table-es-results {
+font-size: 10pt;
+table-layout: fixed;
+width: 100%;
+}

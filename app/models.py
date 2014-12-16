@@ -1,6 +1,6 @@
 from flask import g
 from wtforms.validators import Email
-from server import db, flask_bcrypt, secret_key
+from server import db, flask_bcrypt, secret_key, mongo
 from flask_restful_swagger import swagger
 from flask.ext.login import UserMixin
 from datetime import datetime
@@ -176,3 +176,20 @@ class Regexp(db.Model):
 
     def __repr__(self):
         return '<Regexp (%r, %s)>' % (self.id, self.title)
+
+# class Topogram(mongo.Document):
+#     created_at = mongo.DateTimeField(default=datetime.datetime.now, required=True)
+#     title = mongo.StringField(max_length=255, required=True)
+#     # slug = mongo.StringField(max_length=255, required=True)
+#     # body = mongo.StringField(required=True)
+#     # comments = db.ListField(db.EmbeddedDocumentField('Comment'))
+
+#     def __unicode__(self):
+#         return self.title
+
+#     meta = {
+#         'allow_inheritance': True,
+#         'indexes': ['-created_at', 'slug'],
+#         'ordering': ['-created_at']
+#     }
+

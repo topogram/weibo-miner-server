@@ -19,10 +19,32 @@
       <textarea id="inputDesc" ng-model="description" placeholder="What is this visualization about?" rows="3" class="form-control"></textarea>
       <div class="modal-footer">
         <button type="button" class="btn btn-default">Cancel</button>
-        <a type="submit" ng-click="createMeme()" class="btn btn-primary">Visualize</a>
+        <a type="submit" ng-click="createTopogram()" class="btn btn-primary">Visualize</a>
       </div>
     </div>
   </form>
+</div>
+
+<div class="row"  ng-hide="!messages.length">
+  <div class="col-xs-9 col-sm-9">
+    <words start="start" end="end" class="words-container"></words>
+  </div>
+  <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+    <p><small>Hit Shift+W to save</small></p>
+    <div class="wordpie-container"></div>
+  </div>
+</div>
+
+<div class="row"  ng-hide="!messages.length">
+  <div class="col-xs-9 col-sm-9">
+    <citations start="start" end="end" class="words-container"></citations>
+  </div>
+
+
+  <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveCitations(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+    <p><small>Hit Shift+C to save</small></p>
+    <!-- <div class="pie-container"></div> -->
+  </div>
 </div>
 
 <section class="results">
@@ -32,17 +54,21 @@
 
     <timeserie timeserie="" time-data="timeData" start="start" end="end" meme-name="searchTerm"></timeserie>
 
-    <table ng-table show-filter="true" class="table table-condensed">
+    <table ng-table show-filter="true" class="table table-condensed table-es-results">
       <thead>
         <tr>
-          <th ng-repeat="column in columns" class="text-center sortable" ng-class="{ 'sort-asc': tableParams.isSortBy(column.field, 'asc'), 'sort-desc': tableParams.isSortBy(column.field, 'desc') }" ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">  {{column.field}}
+          <th ng-repeat="column in columns" class="text-center sortable" ng-class="{ 'sort-asc': tableParams.isSortBy(column.field, 'asc'), 'sort-desc': tableParams.isSortBy(column.field, 'desc') }" ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')"
+          >  {{column.field }}
           </th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="row in messages">
-          <td ng-repeat="column in columns">
-            {{row[column.field]}}
+          <td ng-repeat="column in columns"
+          tooltip='{{row[column.field]}}'
+          tooltip-append-to-body="true"
+          >
+            <a href="{{row[column.field]}}" class="disabled" disabled onclick="return false">{{row[column.field] | limitTo:10 }}</a>
           </td>
         </tr>
       </tbody>

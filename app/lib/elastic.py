@@ -7,6 +7,7 @@ import pandas as pd
 import uuid
 from time import time
 import json
+import csv
 
 from topograms import get_analyzer, get_topotype
 
@@ -70,6 +71,8 @@ def es2mongo(query, index_name, data_mongo_id):
 
     for chunk in xrange(0, data_size, chunksize):
         
+        print chunk
+        if chunk > 5000 : break
         # display progress as percent
         per=round(float(chunk)/data_size*100, 1)
 
@@ -181,7 +184,6 @@ def es2topogram(query, type_id, index_name, data_mongo_id):
         for message in res['hits']["hits"]:
             # print message
             topo.process(message["_source"])
-            
 
     topo.create_networks()
     topo.create_timeframes()
@@ -199,3 +201,142 @@ def es2topogram(query, type_id, index_name, data_mongo_id):
 
 
     return data_size
+
+def build_topo_index(raw_data_path, type_id, es_index_name ):
+    """ extract knowledge and index topograms elements in elasticsearch"""
+
+    topotype=get_topotype(type_id)
+    # print topotype
+
+    created_at=str(topotype["timestamp_column"])
+    print type(created_at)
+
+    topo=get_analyzer(type_id)
+    print topo.source_column
+
+    csv_filepath=os.path.join(app.config["UPLOAD_FOLDER"], raw_data_path)
+    # chunksize=100
+
+    records=[]
+    errors = 0
+    with open(csv_filepath, "r") as f:
+
+        reader = csv.DictReader(f)
+        for message in reader:
+            # print message
+            message[created_at.decode("utf-8")]=message[created_at].replace(" ", "T")
+            topodata=topo.process(message)
+            # print topodata
+            record=dict(message, **topodata)
+            # print repr(record)
+
+            try :
+                res = elastic.index(es_index_name, "message", record)
+            except UnicodeDecodeError:
+                print "error unicode"
+                errors+=1
+                # if res["errors"] is "True": print res 
+            records.append(record)
+    
+    print "%d records on %s"%(len(records ), es_index_name)
+    print "%d errors"%errors 
+
+    print 
+
+def get_topo_networks_from_es(query, type_id, index_name):
+
+    res = elastic.search(query,index=index_name)
+    data_size=res['hits']['total']
+    print "Total %d Hits from %s" % (data_size, index_name)
+    print type(res['hits']["hits"])
+    # print "len res", len(res['hits']["hits"])
+
+    topo=get_analyzer(type_id)
+
+    chunksize=1000
+
+    for chunk in xrange(0, data_size, chunksize):
+
+        # display progress as percent
+        per=round(float(chunk)/data_size*100, 1)
+
+        # request data
+        res=elastic.search(query, index=index_name, size=chunksize, es_from=chunk)
+
+        print "%.01f %% %d Hits Retreived - fiability %.3f" % (per,chunk, res['hits']['hits'][0]["_score"])
+
+        if res['hits']['hits'][0]["_score"] < 0.2 : break
+
+        messages=[]
+        for message in res['hits']["hits"]:
+            # print message["_source"].keys()
+            topo.load_from_processed(message["_source"])
+
+    # timeframes_to_networks(messages)
+    # topo.create_timeframes()
+
+    return topo.get_d3_networks()
+
+def timeframes_to_networks(timeframes):
+        # init
+        dataService={}
+        dataService["citations"]={}
+        dataService["words"]={}
+
+        dataService["citations"]["nodes"]=[]
+        dataService["citations"]["edges"]=[]
+        dataService["citations"]["index"]=[]
+
+        dataService["words"]["nodes"]=[]
+        dataService["words"]["edges"]=[]
+        dataService["words"]["index"]=[]
+
+        # dataService["wordsProvince"]={}
+        # dataService["geo"]=[]
+
+        # gather relevant timeframes
+        for tf in timeframes:
+
+            d=tf["data"]
+
+            current=datetime.fromtimestamp(int(tf["time"]))
+            ts_start=datetime.fromtimestamp(start)
+            ts_end=datetime.fromtimestamp(end)
+
+            if current > ts_start and current < ts_end: 
+
+                for cited in d["cited_nodes"]:
+                    if cited["name"] not in dataService["citations"]["index"]:
+                        dataService["citations"]["nodes"].append(cited);
+                        dataService["citations"]["index"].append(cited["name"]);
+
+                for edge in d["cited_edges"]:
+
+                    if edge["source"] in dataService["citations"]["index"] and edge["target"] in dataService["citations"]["index"]:
+
+                        existing_edge=next((item for item in dataService["citations"]["edges"] if item["source"] == edge["source"] and item["target"] == edge["target"]), None)
+
+                        if existing_edge:
+                            existing_edge["weight"]=existing_edge["weight"]+1
+                        else :
+                            dataService["citations"]["edges"].append(edge)
+
+
+                for cited in d["words_nodes"]:
+                    if cited["name"] not in dataService["words"]["index"]:
+                        dataService["words"]["nodes"].append(cited);
+                        dataService["words"]["index"].append(cited["name"]);
+
+                for edge in d["words_edges"]:
+
+                    if edge["source"] in dataService["words"]["index"] and edge["target"] in dataService["words"]["index"]:
+
+                        existing_edge=next((item for item in dataService["words"]["edges"] if item["source"] == edge["source"] and item["target"] == edge["target"]), None)
+
+                        if existing_edge:
+                            existing_edge["weight"]=existing_edge["weight"]+1
+                        else :
+                            dataService["words"]["edges"].append(edge)
+
+
+        return [dataService]

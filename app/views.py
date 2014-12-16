@@ -183,7 +183,8 @@ class DatasetListView(restful.Resource):
         safename = "".join([c for c in fileName if c.isalpha() or c.isdigit() or c==' ']).rstrip()
         es_index_name=(safename + "_"+ str(uuid.uuid4())).lower()
 
-        build_es_index_from_csv(file_path, form.topotype_id.data, es_index_name)
+        # build_es_index_from_csv(file_path, form.topotype_id.data, es_index_name)
+        build_topo_index(file_path, form.topotype_id.data, es_index_name)
 
         # print "topotype_id", form.topotype_id.data
 
@@ -222,6 +223,20 @@ class DatasetView(restful.Resource):
         db.session.commit()
         return '{"ok" : post deleted"}', 204
 
+
+class TopogramListView(restful.Resource):
+    @login_required
+    def post(self):
+        form = MemeCreateForm()
+
+        if not form.validate_on_submit():
+            return form.errors, 422
+         
+        topo =get_topo_networks_from_es(form.es_query.data, form.topotype_id.data, str(form.es_index_name.data))
+
+        return topo
+        # return TopogramSerializer(topo).data
+
 class MemeListView(restful.Resource):
     @login_required
     def get(self):
@@ -235,18 +250,25 @@ class MemeListView(restful.Resource):
         if not form.validate_on_submit():
             return form.errors, 422
 
-        data_mongo_id=mongo.db.memes.insert({
-                    "es_query" : form.es_query.data,
-                    "es_index" : str(form.es_index_name.data),
-                    "messages" :[]})
+        # data_mongo_id=mongo.db.memes.insert({
+        #             "es_query" : form.es_query.data,
+        #             "es_index" : str(form.es_index_name.data),
+        #             "messages" :[]})
+        # print "haha"
 
-        records_count = es2topogram(form.es_query.data, form.topotype_id.data, str(form.es_index_name.data),  data_mongo_id)
+        topo =get_topo_networks_from_es(form.es_query.data, form.topotype_id.data, str(form.es_index_name.data))
+        
+        # print topo
 
-        meme = Meme(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data, str(data_mongo_id), records_count)
+        # records_count = es2topogram(form.es_query.data, form.topotype_id.data, str(form.es_index_name.data),  data_mongo_id)
 
-        db.session.add(meme)
-        db.session.commit()
-        return MemeSerializer(meme).data
+        # meme = Meme(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data, str(data_mongo_id), records_count)
+
+        # db.session.add(meme)
+        # db.session.commit()
+
+        # return MemeSerializer(topo).data
+        return topo
 
 class MemeView(restful.Resource):
 
@@ -298,68 +320,7 @@ class MemeTimeFramesView(restful.Resource):
         meme= MemeSerializer(meme).data
         meme_data=mongo.db.memes.find_one({ "_id" : ObjectId(meme["data_mongo_id"]) })
 
-        # init
-        dataService={}
-        dataService["citations"]={}
-        dataService["words"]={}
-
-        dataService["citations"]["nodes"]=[]
-        dataService["citations"]["edges"]=[]
-        dataService["citations"]["index"]=[]
-
-        dataService["words"]["nodes"]=[]
-        dataService["words"]["edges"]=[]
-        dataService["words"]["index"]=[]
-
-        # dataService["wordsProvince"]={}
-        # dataService["geo"]=[]
-
-        # gather relevant timeframes
-        for tf in meme_data["timeframes"]:
-
-            d=tf["data"]
-
-            current=datetime.fromtimestamp(int(tf["time"]))
-            ts_start=datetime.fromtimestamp(start)
-            ts_end=datetime.fromtimestamp(end)
-
-            if current > ts_start and current < ts_end: 
-
-                for cited in d["cited_nodes"]:
-                    if cited["name"] not in dataService["citations"]["index"]:
-                        dataService["citations"]["nodes"].append(cited);
-                        dataService["citations"]["index"].append(cited["name"]);
-
-                for edge in d["cited_edges"]:
-
-                    if edge["source"] in dataService["citations"]["index"] and edge["target"] in dataService["citations"]["index"]:
-
-                        existing_edge=next((item for item in dataService["citations"]["edges"] if item["source"] == edge["source"] and item["target"] == edge["target"]), None)
-
-                        if existing_edge:
-                            existing_edge["weight"]=existing_edge["weight"]+1
-                        else :
-                            dataService["citations"]["edges"].append(edge)
-
-
-                for cited in d["words_nodes"]:
-                    if cited["name"] not in dataService["words"]["index"]:
-                        dataService["words"]["nodes"].append(cited);
-                        dataService["words"]["index"].append(cited["name"]);
-
-                for edge in d["words_edges"]:
-
-                    if edge["source"] in dataService["words"]["index"] and edge["target"] in dataService["words"]["index"]:
-
-                        existing_edge=next((item for item in dataService["words"]["edges"] if item["source"] == edge["source"] and item["target"] == edge["target"]), None)
-
-                        if existing_edge:
-                            existing_edge["weight"]=existing_edge["weight"]+1
-                        else :
-                            dataService["words"]["edges"].append(edge)
-
-
-        return [dataService]
+        return timeframes_to_networks(meme_data)
 
 api.add_resource(MemeTimeFramesList, '/api/v1/datasets/<int:dataset_id>/memes/<int:meme_id>/timeframes')
 

@@ -63,10 +63,16 @@ function MemeCreateCtrl($scope, $routeParams, $location, Restangular, flash, sea
             // console.log("search success");
             console.log(results);
 
+            // display all columns (except  exludedColumns)
+            var exludedColumns =["words_cited_edges", "words_edges", "cited_edges", "cited_nodes", "words_nodes", "timestamp"];
+
             for (colName in results.messages[0]) {
-                // console.log(colHeader);
-                $scope.columns.push({"title": colName, 'field': colName})
+                // console.log(colName);
+                if(exludedColumns.indexOf(colName) == -1) 
+                    $scope.columns.push({"title": colName, 'field': colName})
             };
+
+            // $scope.columns=["uid","text","created_at"]
 
             $scope.totalResults=results.total;
             
@@ -90,6 +96,38 @@ function MemeCreateCtrl($scope, $routeParams, $location, Restangular, flash, sea
             }
 
       });
+
+    };
+
+    $scope.createTopogram = function () {
+        console.log($scope);
+
+        var topoInfo = {
+          "es_query" : $scope.searchTerm,
+          "es_index_name" : $scope.index,
+          "description" : $scope.description,
+          "dataset_id" : $routeParams.datasetId,
+          "topotype_id" : $scope.dataset.topotype_id
+        };
+
+        Restangular.all('memes').post(topoInfo).then(function(topogram) {
+            flash.success = "New topogram created !"
+            console.log(topogram.words);
+            // $location.path("/datasets/"+$routeParams.datasetId+"/memes/"+meme.id);
+
+            // words
+            $scope.words=topogram.words;
+            if(data.words.index!=undefined) $scope.wordsLength=topogram.words.index.length;
+            $scope.wordForceStarted = true;
+
+            // citations
+            $scope.showCommunities=false; // show provinces clustering or communities
+
+            $scope.citations=data.citations;
+            if(data.citations.index!=undefined) $scope.citationsLength=data.citations.index.length;
+            $scope.wordForceStarted = true;
+
+        });
 
     };
 

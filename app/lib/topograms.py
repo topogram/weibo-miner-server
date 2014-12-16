@@ -57,4 +57,3 @@ def get_topotype(_id):
     topotype = Topotype.query.filter_by(id=_id).first()
     topotype = TopotypeSerializer(topotype).data
     return topotype
-
