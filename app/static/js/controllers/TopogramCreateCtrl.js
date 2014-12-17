@@ -1,7 +1,7 @@
 function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService) {
 
   Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
-        $scope.dataset = dataset;
+    $scope.dataset = dataset;
         // $scope.datasetId = dataset.id;
 
         $scope.index = dataset.index_name;
@@ -12,16 +12,15 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
         }
 
         console.log($scope.stopwords);
-
       });
 
-    $scope.addWord =function() {
-        if($scope.addedStopWord){
-            console.log($scope.addedStopWord);
-            $scope.stopwords.push({"word" :this.addedStopWord});
-            $scope.addedStopWord= '';
-        }
+  $scope.addWord =function() {
+    if($scope.addedStopWord){
+      console.log($scope.addedStopWord);
+      $scope.stopwords.push({"word" :this.addedStopWord});
+      $scope.addedStopWord= '';
     }
+  }
 
     // Initialize the scope defaults.
     // $scope.indices=[]       // list of elasticsearch indices
@@ -87,7 +86,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
      * the q query parameter.
      */
      $scope.searchFirst= function(){ 
-            searchService.search($scope.index,$scope.searchTerm).then(function(results){
+      searchService.search($scope.index,$scope.searchTerm).then(function(results){
 
             // console.log("search success");
             console.log(results);
@@ -149,7 +148,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
             });
 
-      });
+          });
 
 };
 
@@ -200,4 +199,49 @@ $scope.saveTopogram = function () {
   });
 }
 
+
+$('body').keydown(function (e) {
+      if(e.which==87 && e.shiftKey==true) $scope.saveWords() // W
+      else if (e.which==71 && e.shiftKey==true) $scope.saveMap() // G
+      else if (e.which==67 && e.shiftKey==true) $scope.saveUsers() //C
+      else if (e.which==84 && e.shiftKey==true) $scope.saveTime()
+      else if (e.which==65 && e.shiftKey==true) $scope.saveAll()
+});
+
+$scope.saveAll = function () {
+  $scope.saveTime();
+  $scope.saveWords();
+  // $scope.saveMap();
+  $scope.saveUsers();
 }
+
+$scope.saveTime = function(){
+  var sv=new Simg($(".time-container svg")[0]);
+  var fn="time_"+$scope.dataset.title +"_"+$scope.query
+  sv.download(fn);
+}
+
+$scope.saveWords = function(){
+  var name ="words_"+$scope.dataset.title +"_"+$scope.query;
+  $scope.downloadPNG($(".words-container svg")[0], name);
+}
+
+$scope.saveUsers = function(){
+  var name ="users_"+$scope.dataset.title +"_"+$scope.query;
+  $scope.downloadPNG($(".user-container svg")[0], name);
+}
+
+$scope.downloadPNG=function(container, name) {
+     var sv=new Simg(container);
+     sv.download(name),
+
+    // rewrite download function
+     // sv.toImg(function(img){
+     //   var a = document.createElement("a");
+     //   a.download = name+".png";
+     //   a.href = img.getAttribute('src');
+     //   a.click();
+     // });
+}
+
+} // end controller
