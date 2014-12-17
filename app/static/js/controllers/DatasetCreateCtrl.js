@@ -9,7 +9,7 @@ function DatasetCreateCtrl($scope, $timeout, $location, Restangular,FileUploader
     
     // FILE UPLOAD
     var uploader = $scope.uploader = new FileUploader({
-        url: '//localhost:5000/api/v1/datasets',
+        url: '/api/v1/datasets',
         alias : "dataset",
         formData : [ $scope.dataset ]
     });
