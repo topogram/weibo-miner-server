@@ -1,12 +1,12 @@
-function MemeViewCtrl($scope, $routeParams, $timeout, $location, Restangular, MemeService, ConfigService) {
+function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular, TopogramService, ConfigService) {
 
-    Restangular.one('datasets',$routeParams.datasetId).one("memes", $routeParams.memeId).get().then(function(meme) {
-        console.log(meme);
-        $scope.meme = meme;
-        $scope.memeName= meme.dataset.title;
+    Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
+        console.log(topogram);
+        $scope.topogram = topogram;
+        $scope.topogramName= topogram.dataset.title;
     });
 
-    Restangular.one('datasets',$routeParams.datasetId).one("memes", $routeParams.memeId).getList("timeframes").then(function(timeframes) {
+    Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).getList("timeframes").then(function(timeframes) {
             $scope.timeframes = timeframes;
 
             // x1000 for JS ts
@@ -77,16 +77,16 @@ function MemeViewCtrl($scope, $routeParams, $timeout, $location, Restangular, Me
 
         if($scope.start!=undefined && $scope.end!=undefined && ($scope.prevStart!=$scope.start || $scope.prevEnd!=$scope.end)) {
 
-            Restangular.one('datasets',$routeParams.datasetId).one("memes", $routeParams.memeId).one("timeframes", $scope.start/1000).getList($scope.end/1000).then(function(data) {
+            Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).one("timeframes", $scope.start/1000).getList($scope.end/1000).then(function(data) {
 
                 data=data[0];
 
-                // MemeService.citations.nodes=data.citations.nodes;
-                // MemeService.citations.edges=data.citations.edges;
-                // MemeService.citations.index=data.citations.index;
-                // MemeService.words.nodes=data.words.nodes;
-                // MemeService.words.edges=data.words.edges;
-                // MemeService.words.index=data.words.index;
+                // TopogramService.citations.nodes=data.citations.nodes;
+                // TopogramService.citations.edges=data.citations.edges;
+                // TopogramService.citations.index=data.citations.index;
+                // TopogramService.words.nodes=data.words.nodes;
+                // TopogramService.words.edges=data.words.edges;
+                // TopogramService.words.index=data.words.index;
 
                 // words
                 $scope.words=data.words;

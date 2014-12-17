@@ -35,15 +35,15 @@
                         </ul>
 
                         <ul class="nav navbar-nav navbar-right">
-                            <li><a href="#">Help</a></li>
-                            <li><a href="#">About</a></li>
+                            <!-- <li><a href="/api/v1/spec.html">Help</a></li> -->
+                            <!-- <li><a href="#">About</a></li> -->
                             <li class="divider-vertical"></li>
                             <li ng-if="isLogged()">
                                 <a href="#/sessions/destroy">Logout</a>
                             </li>
-                            <li ng-if="!isLogged()">
+                            <!-- <li ng-if="!isLogged()">
                                 <a href="#/users/create" title="Register">Register</a>
-                            </li>
+                            </li> -->
                             <li ng-if="!isLogged()"><a href="#/sessions/create" ng-class="{active: isActive('/sessions/create')}">Login</a></li>
                         </ul>
                     </div>
@@ -71,7 +71,7 @@
         </div><!-- /.container -->
  
         <div class="blog-footer">
-            <p>Application built by <a href="https://twitter.com/clemsos">@clemsos</a> using Flask and AngularJS.</p>
+            <!-- <p>Application built by <a href="https://twitter.com/clemsos">@clemsos</a> using Flask and AngularJS.</p> -->
             <p>
                 <a href="#">Back to top</a>
             </p>
@@ -99,6 +99,14 @@
         <script type="text/javascript" src="./bower_components/bootstrap-slider/bootstrap-slider.js"></script>
         <script type="text/javascript" src="./bower_components/colorbrewer/colorbrewer.js"></script>
 
+        <script type="text/javascript" src="./bower_components/angular-bootstrap/ui-bootstrap.js"></script>
+        <script type="text/javascript" src="./bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+
+        <script type="text/javascript" src="./bower_components/angular-bootstrap-slider/slider.js"></script>
+
+        <!-- <script type="text/javascript" src="./bower_components/simg/dist/simg.min.js"></script> -->
+        <script type="text/javascript" src="./bower_components/simg/src/simg.js"></script>
+
         <script type="text/javascript" src="./js/main.js"></script>
         <script type="text/javascript" src="./js/routes.js"></script>
         <script type="text/javascript" src="./js/controllers/HomeDetailCtrl.js"></script>
@@ -109,9 +117,9 @@
         <script type="text/javascript" src="./js/controllers/DatasetCreateCtrl.js"></script>
         <script type="text/javascript" src="./js/controllers/DatasetViewCtrl.js"></script>
         <script type="text/javascript" src="./js/controllers/DatasetIndexCtrl.js"></script>
-        <script type="text/javascript" src="./js/controllers/MemeCreateCtrl.js"></script>
-        <script type="text/javascript" src="./js/controllers/MemeViewCtrl.js"></script>
-        <script type="text/javascript" src="./js/controllers/MemeIndexCtrl.js"></script>
+        <script type="text/javascript" src="./js/controllers/TopogramCreateCtrl.js"></script>
+        <script type="text/javascript" src="./js/controllers/TopogramViewCtrl.js"></script>
+        <script type="text/javascript" src="./js/controllers/TopogramIndexCtrl.js"></script>
 
         <script type="text/javascript" src="./js/factories/Session.js"></script>
         <script type="text/javascript" src="./js/factories/User.js"></script>
@@ -119,14 +127,17 @@
 
         <script type="text/javascript" src="./js/services/AuthService.js"></script>
         <script type="text/javascript" src="./js/services/SearchService.js"></script>
-        <script type="text/javascript" src="./js/services/MemeService.js"></script>
+        <script type="text/javascript" src="./js/services/TopogramService.js"></script>
         <script type="text/javascript" src="./js/services/ConfigService.js"></script>
+        <script type="text/javascript" src="./js/services/ModalService.js"></script>
 
         <script type="text/javascript" src="./js/directives/match.js"></script>
         <script type="text/javascript" src="./js/directives/timeSeries.js"></script>
         <script type="text/javascript" src="./js/directives/timeSlider.js"></script>
         <script type="text/javascript" src="./js/directives/wordsGraph.js"></script>
         <script type="text/javascript" src="./js/directives/citationsGraph.js"></script>
+
+        <!-- <script type="text/javascript" src="./js/others.js"></script> -->
 
     </body>
 </html>

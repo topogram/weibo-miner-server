@@ -1,28 +1,28 @@
-<h1>{{meme.dataset.title}} <small>{{meme.dataset.description}}</small></h1>
+<h1>{{topogram.dataset.title}} <small>{{topogram.dataset.description}}</small></h1>
 
 <section class="row">
   <div class="col-md-4">
     <dl class="dl-horizontal">
       <dt>Data source</dt>
-      <dd><a href="#/dataset/{{ meme.dataset.id }}">{{ meme.dataset.title}}</a></dd>
+      <dd><a href="#/dataset/{{ topogram.dataset.id }}">{{ topogram.dataset.title}}</a></dd>
       <dt>Data type</dt>
-      <dd>{{meme.dataset.type}}</dd>
+      <dd>{{topogram.dataset.type}}</dd>
       <dt>Creation date</dt>
-      <dd>{{meme.created_at | date:medium}}</dd>
+      <dd>{{topogram.created_at | date:medium}}</dd>
       <dt>Search query</dt>
-      <dd>{{meme.es_query}} in {{meme.es_index_name}}</dd>
+      <dd>{{topogram.es_query}} in {{topogram.es_index_name}}</dd>
       <dt>Messages Count</dt>
-      <dd>{{meme.records_count}} messages</dd>
+      <dd>{{topogram.records_count}} messages</dd>
       <dt>Timeframe Count</dt>
       <dd>{{timeframes.length}} timeframes</dd>
     </dl>
   </div>
   <div class="col-md-4">
-    <div ng-if="meme.records_count == 0">
+    <div ng-if="topogram.records_count == 0">
       <button ng-click="getData(&quot;mongo&quot;)" class="btn btn-primary">Extract data</button>
     </div>
-    <div ng-if="meme.messages != 0">
-      <p></p><a target="_blank" href="/api/meme/{{post._id}}/download.csv" download="{{post.name}}.csv" class="btn btn-default" disabled> Download search as CSV</a>
+    <div ng-if="topogram.messages != 0">
+      <p></p><a target="_blank" href="/api/topogram/{{post._id}}/download.csv" download="{{post.name}}.csv" class="btn btn-default" disabled> Download search as CSV</a>
     </div>
   </div>
 
@@ -53,7 +53,7 @@
 
 <div id="timeline" u="" class="row well">
   <timeslider id="time-slider" model="timeframe" type="text" data-slider-min="0" data-slider-step="1" data-slider-orientation="horizontal" data-slider-selection="after" data-slider-tooltip="show"></timeslider>
-  <div timeserie="" time-data="timeSeriesData" start="start" end="end" meme-name="memeName" class="time-container"></div>
+  <div timeserie="" time-data="timeSeriesData" start="start" end="end" topogram-name="topogramName" class="time-container"></div>
   <p><a href="#" ng-click="playAll(); $event.preventDefault()" class="btn btn-default"><span class="glyphicon glyphicon-play"></span>Play</a><a href="#" ng-click="stop(); $event.preventDefault()" class="btn btn-default"><span class="glyphicon glyphicon-stop"></span>Stop</a><b>Start: {{start | date:'medium'}}</b><b>End: {{end | date:'medium'}}</b></p>
 </div>
 

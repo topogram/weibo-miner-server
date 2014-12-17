@@ -35,7 +35,7 @@ Topogram.directive("citations", function () {
                         .attr("class", "citations-legend")
                         .attr("transform", "translate("+(20)+","+(h-50)+")");
                     
-            $scope.$watch('memeName', function(newVal, oldVal) {
+            $scope.$watch('topogramName', function(newVal, oldVal) {
                 console.log(newVal);
                 if(newVal!=undefined) {                           
                     citationsLegend.append("text")
@@ -87,7 +87,7 @@ Topogram.directive("citations", function () {
 
             $scope.$watch("citationsLength", function(newVal,oldVal){
                 if(newVal==undefined) return
-                // console.log(newVal);
+                console.log(newVal);
                 var citationData=$scope.citations;
 
                 // parse data properly                     

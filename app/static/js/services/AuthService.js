@@ -7,20 +7,28 @@ Topogram.service('AuthService', AuthService = function($q, localStorageService, 
             me.setToken(credentials);
             return deferred.resolve(user);
         }, function(response) {
-            if (response.status == 401) {
-                return deferred.reject(false);
+            switch (response.status) {
+                case 401:
+                    return deferred.reject(false);
+                case 422:
+                    return deferred.reject({status: 422, statusText:"Wrong password or email"});
+                default:
+                    // throw new Error('No handler for status code ' + response.status);
+                    return deferred.reject(response)
             }
-            throw new Error('No handler for status code ' + response.status);
+            return deferred.reject(response)
         });
         return deferred.promise
     };
  
     this.logout = function() {
+        Session.destroy();
         localStorageService.clearAll();
     };
  
     this.isAuthenticated = function() {
         var token = this.getToken();
+
         if (token) {
             return true
         }
@@ -32,6 +40,7 @@ Topogram.service('AuthService', AuthService = function($q, localStorageService, 
     };
  
     this.getToken = function() {
+        // console.log(localStorageService.get('token'));
         return localStorageService.get('token');
     };
  

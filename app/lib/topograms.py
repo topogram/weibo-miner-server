@@ -2,36 +2,58 @@
 # -*- coding: utf-8 -*-
 
 from topogram import Topogram
+from ..models import Topotype
+from ..serializers import TopotypeSerializer
 
-def topoweibo():
+def get_analyzer(topotype_id):
 
-    print "start weibo"
+    topotype = get_topotype(topotype_id)
 
-    # specific stopwords for weibo
-    stopwords=["转发","微博","说 ","一个","【 ","年 ","转 ","请","＂ ","问题","知道","中 ","已经","现在","说","【",'＂',"年","中","今天","应该","真的","月","希望","想","日","这是","太","转","支持", "@", "。", "/", "！","？",".",",","?","、","。","“","”","《","》","！","，","：","；","？",":","；","[","]","；",".", ".","."]
+    print "create topogram"
 
-    MentionPattern =r"@([^:：,，\)\(（）|\\\s]+)"
+    # for t in topotype :
+    #     print t, "  :  ", topotype[t]
 
+    if type(topotype['languages'] is str) : languages = [topotype['languages']]
+    else : languages = topotype['languages'].split(",")
+    # print languages
+
+    # print type(topotype['citation_patterns'])
+
+    for v in list(topotype['citation_patterns']):
+        citation_regexp=v["regexp"]
+
+    # print citation_regexp
+
+    # if type(topotype['stopwords']) is unicode : stopwords = [topotype['stopwords']]
+    # else : stopwords = [str(w) for w in topotype['stopwords'].split(",")]
+    # for w in stopwords : print type(w.encode("utf-8"))
+
+    stopwords=[w.encode("utf-8") for w in topotype['stopwords'].split(",")]
+    
     # create topogram object
-    weibo= Topogram(languages=["zh"], stopwords=stopwords, citation_regexp=MentionPattern)
+    topo= Topogram(languages=languages, stopwords=stopwords, citation_regexp=citation_regexp)
 
     # TIMESTAMP
-    weibo.timestamp_column="created_at"    # timestamp column name
-    weibo.text_column="text"
-    weibo.source_column="uid"
-    weibo.additional_citations_column="retweeted_uid"
+    topo.timestamp_column=topotype["timestamp_column"]    # timestamp column name
+    topo.text_column=topotype["text_column"].encode('utf-8')
+    topo.source_column=topotype["source_column"].encode('utf-8')
+    if topotype["dest_column"] is not None : topo.dest_column=topotype["dest_column"].encode('utf-8')
 
-    # add citations to be ignored
-    ignore=["ukn", "ukn：","ukn："]
-    for ign in ignore :
-        weibo.add_citation_exception(ign)
+    if topotype['ignore_citations'] is not None :
+        for ign in topotype['ignore_citations'] : #  cited to be ignored
+            topo.add_citation_exception(ign)
 
     # add regexp to ignore
-    urlPattern=r"\b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^\p{P}\s]|/)))"
-    hashtagPattern=r"#([^#\s]+)#"
-    weibo.set_stop_regexp(urlPattern)
-    weibo.set_stop_regexp(hashtagPattern)
+    for pattern in topotype["stop_patterns"]: 
+        topo.set_stop_regexp(pattern["regexp"])
 
-    # weibo.time_pattern="%Y-%m-%d %H:%M:%S" # timestamp pattern
+    topo.time_pattern=topotype["time_pattern"].encode('utf-8') # timestamp pattern
 
-    return weibo
+    return topo
+
+def get_topotype(_id):
+    """get the topotype data"""
+    topotype = Topotype.query.filter_by(id=_id).first()
+    topotype = TopotypeSerializer(topotype).data
+    return topotype

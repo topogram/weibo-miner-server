@@ -78,23 +78,23 @@ Topogram.config(function($routeProvider, RestangularProvider) {
                 redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
             }
         })
-        .when('/datasets/:datasetId/memes/create', {
-            controller: 'MemeCreateCtrl',
-            templateUrl: partialsDir + '/memes/create.html',
+        .when('/datasets/:datasetId/topograms/create', {
+            controller: 'TopogramCreateCtrl',
+            templateUrl: partialsDir + '/topograms/create.html',
             resolve: {
                 redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
             }
         })
-        // .when('/memes', {
-        //     controller: 'MemeIndexCtrl',
-        //     templateUrl: partialsDir + '/memes/index.html',
+        // .when('/topograms', {
+        //     controller: 'TopogramIndexCtrl',
+        //     templateUrl: partialsDir + '/topograms/index.html',
         //     resolve: {
         //         redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
         //     }
         // })
-        .when('/datasets/:datasetId/memes/:memeId', {
-            controller: 'MemeViewCtrl',
-            templateUrl: partialsDir + '/memes/view.html',
+        .when('/datasets/:datasetId/topograms/:topogramId', {
+            controller: 'TopogramViewCtrl',
+            templateUrl: partialsDir + '/topograms/view.html',
             resolve: {
                 redirectIfNotAuthenticated: redirectIfNotAuthenticated('/sessions/create')
             }

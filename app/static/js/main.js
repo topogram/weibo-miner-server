@@ -5,7 +5,9 @@ window.Topogram = angular.module('Blog', [
                                  'angular-flash.service',
                                  'angular-flash.flash-alert-directive',
                                  'angularFileUpload',
-                                 'elasticsearch'
+                                 'elasticsearch',
+                                 "ui.bootstrap",
+                                 "ui.bootstrap-slider"
                                  ])
 .run(function($location, Restangular, AuthService) {
     Restangular.setFullRequestInterceptor(function(element, operation, route, url, headers, params, httpConfig) {
@@ -25,7 +27,8 @@ window.Topogram = angular.module('Blog', [
                     $location.path('/sessions/create');
                     break;
                 default:
-                    throw new Error('No handler for status code ' + response.status);
+                    // throw new Error('No handler for status code ' + response.status);
+                    return response
             }
             return false;
         }

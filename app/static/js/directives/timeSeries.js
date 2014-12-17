@@ -6,7 +6,7 @@ Topogram.directive('timeserie', function () {
             timeData: '=timeData',
             start: '=start',
             end: '=end',
-            memeName: "=memeName"
+            topogramName: "=topogramName"
          },
         link: function ($scope, element, attrs) {
 
@@ -83,7 +83,7 @@ Topogram.directive('timeserie', function () {
                         .append("text")
                         .style("font-size",9)
                         .style("color", "#404040")
-                        .text("Volume of tweets in meme "+$scope.memeName +" (year 2012)")
+                        .text("Volume of tweets in topogram "+$scope.topogramName +" (year 2012)")
 
                     bars.transition()
                         .duration(duration)
