@@ -38,3 +38,6 @@ Flask-Principal
 Flask-Admin
 pymysql
 MySQL-python
+
+Flask-SocketIO==0.3.8
+redis

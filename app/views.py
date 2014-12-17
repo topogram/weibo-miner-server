@@ -15,7 +15,7 @@ from bson import ObjectId
 from flask_login import login_required, logout_user, current_user, login_user
 from flask import session, request
 
-from server import app, api, db, flask_bcrypt, mongo, login_manager
+from server import app, api, db, flask_bcrypt, mongo, login_manager, socket
 from models import User, Dataset, Topogram, Regexp, Topotype
 from forms import UserCreateForm, SessionCreateForm, DatasetCreateForm, TopogramCreateForm, RegexpCreateForm
 from serializers import UserSerializer, DatasetSerializer, TopogramSerializer,RegexpSerializer, TopotypeSerializer
@@ -25,6 +25,8 @@ import sendgrid
 from flask.ext.principal import Permission, RoleNeed
 from flask.ext.principal import Principal, Identity, AnonymousIdentity, identity_changed, identity_loaded, RoleNeed, UserNeed
 
+from flask.ext.socketio import send, emit
+from lib.queue import RedisQueue
 
 # roles
 admin_role = RoleNeed('admin')
@@ -207,6 +209,11 @@ class DatasetView(restful.Resource):
         datasets = Dataset.query.filter_by(id=id).first()
         dataset= DatasetSerializer(datasets).data
 
+        # reset tasks queue
+        q = RedisQueue('topogram:'+ dataset["index_name"])
+        q.clean()
+
+
         if request.values.get('to_index') == "true" :
             print 'build topo index'
             build_topo_index(dataset["filepath"], dataset["topotype_id"], dataset["index_name"])
@@ -280,7 +287,7 @@ class TopogramListView(restful.Resource):
         if not form.validate_on_submit():
             return form.errors, 422
 
-        topogram = Topogram(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data,  form.records_count.data)
+        topogram = Topogram(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data,  form.records_count.data, form.words_limit.data, form.citations_limit.data,form.words.data, form.citations.data)
 
         db.session.add(topogram)
         db.session.commit()
@@ -290,13 +297,13 @@ class TopogramListView(restful.Resource):
 class TopogramView(restful.Resource):
 
     @login_required
-    def get(self, dataset_id, Topogram_id):
+    def get(self, dataset_id, topogram_id):
         topogram = Topogram.query.filter_by(id=topogram_id).first()
         topogram= TopogramSerializer(topogram).data
         return topogram
 
     @login_required
-    def delete(self, dataset_id, Topogram_id):
+    def delete(self, dataset_id, topogram_id):
         topogram = topogram.query.filter_by(id=topogram_id).first()
         db.session.delete(topogram)
         db.session.commit()
@@ -310,13 +317,17 @@ class TopogramsByDataset(restful.Resource):
         topograms = TopogramSerializer(topograms, many=True).data
         return topograms
 
+
+from threading import Thread
+
 class TopogramNetworksView(restful.Resource):
     @login_required
     def post(self):
+
         form = TopogramCreateForm()
         if not form.validate_on_submit():
             return form.errors, 422
-         
+
         # TODO : fix nasty fallback
         # print(form.words_limit, form.citations_limit) 
         if form.words_limit is None : 

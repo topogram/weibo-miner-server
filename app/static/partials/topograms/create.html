@@ -11,11 +11,18 @@
     <form ng-submit="search()" role="form">
 
       <div class="col-md-6 searchField form-inline">
-        <input ng-model="searchTerm" type="search" name="title" class="form-control"/>
+        <input ng-model="searchTerm" type="search" name="title" class="form-control" ng-required='true'/>
         <button type="submit" class="btn btn-default">Get results</button>
         <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p>
       </div>
-      <div class="col-md-6 utils form-group" ng-hide="!messages.length">
+    </form>
+
+      <div ng-hide="loadingNetworks.percent==0 || loadingNetworks.percent==100">
+        <p>Now processing...</p>
+        <progressbar class="progress-striped active" max="100" value=" loadingNetworks.percent" type="danger"><i>{{ loadingNetworks.current}} / {{ totalResults}}</i></progressbar>
+      </div>
+
+      <div class="col-md-6 utils form-group" ng-hide="!readyToSave">
         <label for="inputDesc">Description</label>
         <textarea id="inputDesc" ng-model="description" placeholder="What is this visualization about?" rows="3" class="form-control"></textarea>
         <div class="modal-footer">
@@ -23,7 +30,7 @@
           <a type="submit" ng-click="saveTopogram()" class="btn btn-primary">Save</a>
         </div>
       </div>
-    </form>
+
   </div>
  <!--  <h3>Stopwords
    <small>({{stopwords.length}})</small>

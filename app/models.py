@@ -110,12 +110,15 @@ class Topogram(db.Model):
     words_limit = db.Column(db.Integer)
     citations_limit = db.Column(db.Integer)
 
+    words = db.Column(db.Text)
+    citations = db.Column(db.Text)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
     created_at = db.Column(db.DateTime, default=db.func.now())
 
-    def __init__(self, dataset_id, description, es_index_name, es_query, records_count,words_limit, citations_limit):
+    def __init__(self, dataset_id, description, es_index_name, es_query, records_count,words_limit, citations_limit, words, citations):
         
         # print dataset_id, description, es_index_name, es_query
         # print g.user.id, g.dataset_id

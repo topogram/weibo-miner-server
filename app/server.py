@@ -21,6 +21,14 @@ from flask.ext.login import (LoginManager, login_required, login_user,
 from flask.ext.principal import Principal
 from flask import render_template, jsonify, send_from_directory, request, make_response
 
+from lib.queue import RedisQueue
+import json
+
+from gevent import monkey
+monkey.patch_all()
+from flask.ext.socketio import SocketIO, emit
+
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 ASSETS_DIR=os.path.join(basedir, 'static')
 
@@ -60,6 +68,22 @@ mongo = PyMongo(app)
 # manager
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
+
+# socket.io
+socket = SocketIO(app)
+
+@socket.on('connect')
+def test_connect(message):
+    print  "socket io connected"
+
+@socket.on('progress')
+def state_progress(message):
+        # print 'point'
+        q = RedisQueue('topogram:'+message["index_name"])
+        point = json.loads(q.get())
+        # point=q.get()
+        print point, type(point)
+        socket.emit("progress", json.dumps(point))
 
 
 # create data dir if it doesn't exist

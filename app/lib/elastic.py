@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
  
 import os
-from ..server import app, elastic, mongo
+from ..server import app, elastic, mongo, socket
+from ..lib.queue import RedisQueue
 import pandas as pd
+from flask.ext.socketio import send, emit
 import uuid
 from time import time
 import json
@@ -66,7 +68,7 @@ def build_es_index_from_csv(raw_data_path, data_type, es_index_name ):
 
 def es2mongo(query, index_name, data_mongo_id):
     t0=time()
-    chunksize=1000
+    chunksize=200
 
     print query, index_name, data_mongo_id
 
@@ -82,6 +84,7 @@ def es2mongo(query, index_name, data_mongo_id):
         
         print chunk
         if chunk > 5000 : break
+
         # display progress as percent
         per=round(float(chunk)/data_size*100, 1)
 
@@ -265,27 +268,41 @@ def get_topo_networks_from_es(query, type_id, index_name, words_limit, citations
     print "Total %d Hits from %s" % (data_size, index_name)
     print type(res['hits']["hits"])
 
+
+    # redis queue for push notifications 
+    q = RedisQueue('topogram:'+index_name)
+    q.clean()
+
+    # setup topotype analyzer
     topo=get_analyzer(type_id)
     topo.words_limit = words_limit
     topo.citations_limit = citations_limit 
 
-    chunksize=1000
+    # process by chunk to free more memory
+    chunksize=200
 
     for chunk in xrange(0, data_size, chunksize):
-
+        i=0
         # display progress as percent
         per=round(float(chunk)/data_size*100, 1)
 
         # request data
         res=elastic.search(query, index=index_name, size=chunksize, es_from=chunk)
-
+        # some log
         print "%.01f %% %d Hits Retreived - fiability %.3f" % (per,chunk, res['hits']['hits'][0]["_score"])
 
+        # minimum fiability request
         if res['hits']['hits'][0]["_score"] < 0.2 : break
+
 
         messages=[]
         for message in res['hits']["hits"]:
+            i=i+1
             topo.load_from_processed(message["_source"])
+            
+            if i%50 ==0:
+                per_ok=round(float(chunk+i )/ data_size*100, 1)
+                q.put(json.dumps({"percent" : per_ok, "current" : chunk+i, "total" : data_size }))
 
     return topo.get_d3_networks()
 
