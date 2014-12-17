@@ -217,31 +217,37 @@ $scope.saveAll = function () {
 
 $scope.saveTime = function(){
   var sv=new Simg($(".time-container svg")[0]);
-  var fn="time_"+$scope.dataset.title +"_"+$scope.query
+  var fn="time_"+$scope.dataset.title +"_"+$scope.searchTerm
   sv.download(fn);
 }
 
 $scope.saveWords = function(){
-  var name ="words_"+$scope.dataset.title +"_"+$scope.query;
-  $scope.downloadPNG($(".words-container svg")[0], name);
+  var name ="words_"+$scope.dataset.title +"_"+$scope.searchTerm;
+  // $scope.downloadPNG($(".words-container svg")[0], name);
+     var sv=new Simg($(".words-container svg")[0]);
+     console.log(sv);
+     sv.download();
 }
 
 $scope.saveUsers = function(){
-  var name ="users_"+$scope.dataset.title +"_"+$scope.query;
+  var name ="users_"+$scope.dataset.title +"_"+$scope.searchTerm;
   $scope.downloadPNG($(".user-container svg")[0], name);
 }
 
 $scope.downloadPNG=function(container, name) {
+     console.log(name);
      var sv=new Simg(container);
-     sv.download(name),
+     // console.log(sv);
+     // sv.download();
+     // sv.downloadWithName(name);
 
     // rewrite download function
-     // sv.toImg(function(img){
-     //   var a = document.createElement("a");
-     //   a.download = name+".png";
-     //   a.href = img.getAttribute('src');
-     //   a.click();
-     // });
+     sv.toImg(function(img){
+       var a = document.createElement("a");
+       a.download = name+".png";
+       a.href = img.getAttribute('src');
+       a.click();
+     });
 }
 
 } // end controller
