@@ -1,4 +1,8 @@
-function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService) {
+function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService, socket, $interval) {
+
+      socket.on('connect', function () {
+            console.log('connect');
+      });
 
   Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
     $scope.dataset = dataset;
@@ -11,7 +15,9 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           $scope.stopwords.push({"word" : stops[i]})
         }
 
-        console.log($scope.stopwords);
+        socket.emit('progress', {"index_name": $scope.index});
+
+        // console.log($scope.stopwords);
       });
 
   $scope.addWord =function() {
@@ -41,9 +47,9 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       $scope.page = 0;
       $scope.messages = [];
       $scope.allResults = false;
-      $location.search({'q': $scope.searchTerm,
-                       "index":$scope.index}
-                       );
+      // $location.search({'q': $scope.searchTerm,
+      //                  "index":$scope.index}
+      //                  );
       $scope.searchFirst();
     };
 
@@ -81,12 +87,47 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       console.log('new citations limit : ' + value);
     });
 
+     var stopLoader;
+     $scope.readyToSave = false;
+     $scope.loadingNetworks = {};
+     $scope.loadingNetworks.percent= 0;
+
+      socket.on('progress', function (data) {
+          // console.log("progress", );
+          console.log(data);
+          var d=JSON.parse(data)
+          console.log(typeof(data), typeof(d));
+          $scope.loadingNetworks=JSON.parse(data);
+      });
+
+     $scope.$watch("loadingNetworks", function(newVal, oldVal){
+
+          console.log("loadingNetworks", newVal);
+
+          if(newVal !=oldVal && newVal==1) {
+              stopLoader=$interval( function  () {
+                console.log("loadingNetworks started");
+                socket.emit('progress', {"index_name": $scope.index});
+              }, 200)
+
+          } else if(newVal !=oldVal && newVal==100){
+              $interval.cancel(stopLoader);
+              stopLoader = undefined;
+              console.log("done");
+
+          }
+     });
+
     /**
      * A fresh search. Reset the scope variables to their defaults, set
      * the q query parameter.
      */
+
+
      $scope.searchFirst= function(){ 
-      searchService.search($scope.index,$scope.searchTerm).then(function(results){
+
+        $scope.readyToSave = false;
+        searchService.search($scope.index,$scope.searchTerm).then(function(results){
 
             // console.log("search success");
             console.log(results);
@@ -132,21 +173,38 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
               "words_limit" : 50
             };
 
-            Restangular.all('topograms').all('networks').post(topoInfo).then(function(topogram) {
+            // process data if any results
+            if (results.total !=0) { 
+                $scope.loadingNetworks.percent = 1;
+                
+                Restangular.all('topograms').all('networks').post(topoInfo).then(function(topogram) {
 
-              // words
-              $scope.words=topogram.words;
-              if(data.words.index!=undefined) $scope.wordsLength=topogram.words.index.length;
-              $scope.wordForceStarted = true;
+                  $scope.loadingNetworks.current = results.total;
+                  $scope.loadingNetworks.percent = 100;
 
-              // citations
-              $scope.showCommunities=false; // show provinces clustering or communities
+                  $scope.readyToSave = true;
 
-              $scope.citations=data.citations;
-              if(data.citations.index!=undefined) $scope.citationsLength=data.citations.index.length;
-              $scope.wordForceStarted = true;
+                  console.log("all data is ok ! ");
+                  
+                  // words
+                  if (topogram.words.index.length !=0) {
+                    $scope.words=topogram.words;
+                    if(data.words.index!=undefined) $scope.wordsLength=topogram.words.index.length;
+                    $scope.wordForceStarted = true;
+                  }
+                  
+                  // citations
+                  console.log(topogram);
+                  if (topogram.citations.index.length !=0) {
 
-            });
+                    $scope.showCommunities=false; // show provinces clustering or communities
+
+                    $scope.citations=topogram.citations;
+                    if(topogram.citations.index!=undefined) $scope.citationsLength=topogram.citations.index.length;
+                    $scope.wordForceStarted = true;
+                  }
+                });
+            }
 
           });
 
@@ -190,13 +248,17 @@ $scope.saveTopogram = function () {
     "es_index_name" : $scope.index,
     "description" : $scope.description,
     "dataset_id" : $routeParams.datasetId,
-    "topotype_id" : $scope.dataset.topotype_id
+    "topotype_id" : $scope.dataset.topotype_id,
+    "words"     : JSON.stringify($scope.words),
+    "citations" : JSON.stringify($scope.citations) 
   };
+  console.log($scope.words, $scope.citations);
 
   Restangular.all('topograms').post(topogram).then(function(topogram) {
     flash.success = "New topogram created !"
     $location.path("/datasets/"+$routeParams.datasetId+"/topograms/"+topogram.id);
   });
+
 }
 
 

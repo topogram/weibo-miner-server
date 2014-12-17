@@ -1,6 +1,35 @@
 function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular, TopogramService, ConfigService) {
 
     Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
+
+         // GRAPHS
+            var topoInfo = {
+              "es_query" : topogram.es_query,
+              "es_index_name" : topogram.es_index_name,
+              "dataset_id" : topogram.dataset_id,
+              "topotype_id" : topogram.dataset.topotype_id,
+              "citations_limit" : 50,
+              "words_limit" : 50
+            };
+
+            Restangular.all('topograms').all('networks').post(topoInfo).then(function(topogram) {
+
+              // words
+              $scope.words=topogram.words;
+              if(data.words.index!=undefined) $scope.wordsLength=topogram.words.index.length;
+              $scope.wordForceStarted = true;
+
+              // citations
+              $scope.showCommunities=false; // show provinces clustering or communities
+
+              $scope.citations=data.citations;
+              if(data.citations.index!=undefined) $scope.citationsLength=data.citations.index.length;
+              $scope.wordForceStarted = true;
+
+            });
+        });
+
+    /*Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
         console.log(topogram);
         $scope.topogram = topogram;
         $scope.topogramName= topogram.dataset.title;
@@ -112,5 +141,5 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
         var sv=new Simg($(".words-container svg")[0]);
         sv.download(fn);
     }
-
+*/
 }
