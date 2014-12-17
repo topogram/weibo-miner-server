@@ -1,13 +1,27 @@
 function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService) {
 
   Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
-        // console.log(dataset);
         $scope.dataset = dataset;
         // $scope.datasetId = dataset.id;
 
         $scope.index = dataset.index_name;
+        $scope.stopwords = [];
+        var stops = dataset.topotype.stopwords.split(",");
+        for (var i = 0; i < stops.length; i++) {
+          $scope.stopwords.push({"word" : stops[i]})
+        }
+
+        console.log($scope.stopwords);
 
       });
+
+    $scope.addWord =function() {
+        if($scope.addedStopWord){
+            console.log($scope.addedStopWord);
+            $scope.stopwords.push({"word" :this.addedStopWord});
+            $scope.addedStopWord= '';
+        }
+    }
 
     // Initialize the scope defaults.
     // $scope.indices=[]       // list of elasticsearch indices

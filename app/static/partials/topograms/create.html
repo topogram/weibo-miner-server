@@ -25,10 +25,22 @@
       </div>
     </form>
   </div>
+ <!--  <h3>Stopwords
+   <small>({{stopwords.length}})</small>
 
-  <section class="results">
-    <h3 ng-hide="messages.length" class="no-recipes">No results</h3>
-<!-- 
+  </h3>
+
+  <div class="active">
+    <span class="badge"ng-repeat="stopword in stopwords">{{stopword.word}}</span>
+    <form role="form" class="form-inline" ng-submit="addWord()">
+      <div class="input-group input-group-sm">
+      <input type="text" class="form-control" ng-model="addedStopWord" placeholder="Add stopword">
+    </div>
+
+      <button  type="submit" class="btn btn-default">Add</button>
+    </form>
+
+  </div>
       <label for="wordsLimit">Max Words : {{wordsLimit}}
       <br>
       <slider ng-model="wordsLimit" min="0" step="1" max="10" data-slider-orientation="horizontal" id="wordsLimit"></slider>
@@ -38,6 +50,9 @@
       <br>
       <slider ng-model="citationsLimit" min="0" step="1" max="10" data-slider-orientation="horizontal" id="citationsLimit"></slider>
       </label> -->
+
+  <section class="results">
+    <h3 ng-hide="messages.length" class="no-recipes">No results</h3>
 
     <section ng-hide="!messages.length" class="recipe">
       <h3>Total : {{ totalResults }} results<small> in {{ index }}</small></h3>
