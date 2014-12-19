@@ -248,9 +248,10 @@ $scope.saveTopogram = function () {
     "es_index_name" : $scope.index,
     "description" : $scope.description,
     "dataset_id" : $routeParams.datasetId,
-    "topotype_id" : $scope.dataset.topotype_id,
-    "words"     : JSON.stringify($scope.words),
-    "citations" : JSON.stringify($scope.citations) 
+    "topotype_id" : $scope.dataset.topotype_id
+    // ,
+    // "words"     : JSON.stringify($scope.words),
+    // "citations" : JSON.stringify($scope.citations) 
   };
   console.log($scope.words, $scope.citations);
 
