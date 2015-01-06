@@ -39,5 +39,5 @@ Flask-Admin
 pymysql
 MySQL-python
 
-Flask-SocketIO==0.3.8
+Flask-SocketIO
 redis

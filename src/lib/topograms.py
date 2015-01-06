@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from topogram import Topogram
-from ..models import Topotype
-from ..serializers import TopotypeSerializer
+from src.models.topotype import Topotype
+from src.serializers.topotype import TopotypeSerializer
 
 def get_analyzer(topotype_id):
 

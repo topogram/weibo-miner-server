@@ -2,16 +2,18 @@
 # -*- coding: utf-8 -*-
  
 import os
-from ..server import app, elastic, mongo, socket
-from ..lib.queue import RedisQueue
-import pandas as pd
-from flask.ext.socketio import send, emit
-import uuid
-from time import time
-import json
 import csv
+import json
+import uuid
+import pandas as pd
+from time import time
+from flask.ext.socketio import send, emit
 
-from topograms import get_analyzer, get_topotype
+from src.resources import app
+from src.resources.elastic import elastic
+from src.resources.socket import socket
+from src.lib.queue import RedisQueue
+from src.lib.topograms import get_analyzer, get_topotype
 
 def get_index_info( es_index_name):
         res = elastic.status(es_index_name)

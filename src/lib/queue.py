@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import redis
 
 # from http://peter-hoffmann.com/2012/python-simple-queue-redis-queue.html

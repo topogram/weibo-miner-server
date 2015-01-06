@@ -1,20 +1,29 @@
-from server import app, db, flask_bcrypt
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
 
 from flask import redirect, url_for, request
 
 from flask.ext.admin.contrib.sqla import ModelView
 from flask.ext.admin import Admin, AdminIndexView, helpers, expose
 from flask.ext.admin.contrib.fileadmin import FileAdmin
-
 from flask.ext.login import login_user, current_user, logout_user
 
 from flask.ext.principal import Permission, Need
 from functools import partial
 
-from forms import SessionCreateForm
-from models import User, Dataset, Topogram, Topotype, Regexp
-from views import admin_permission
-import os.path as op
+from src.forms.session import SessionCreateForm
+from src.models.user import User
+from src.models.dataset import Dataset
+from src.models.topogram import Topogram
+from src.models.topotype import Topotype
+from src.models.regexp import Regexp
+
+from src.resources import app, db, flask_bcrypt
+
+# from views import admin_permission
+
 
 # admin_role
 AdminAccessNeed = partial(Need, 'admin')
@@ -95,5 +104,5 @@ admin.add_view(ModelView(Topogram, db.session))
 admin.add_view(TopotypeView(Topotype, db.session))
 admin.add_view(ModelView(Regexp, db.session))
 
-path = op.join(op.dirname(__file__), 'static')
+path = os.path.join(os.path.join(os.getcwd(), 'src'), "static")
 admin.add_view(FileAdmin(path, '/static/', name='Static Files'))
