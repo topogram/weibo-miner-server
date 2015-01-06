@@ -30,14 +30,14 @@ pandas
 -e git://github.com/jcrafford/flask-elasticsearch.git#egg=Flask-ElasticSearch-dev
 Flask-PyMongo==0.3.0
 -e git://github.com/topogram/topogram.git#egg=topogram
-
 Flask-Migrate
 Flask-Script
 Flask-Login
 Flask-Principal
 Flask-Admin
+Flask-rq
 pymysql
 MySQL-python
-
 Flask-SocketIO
 redis
+rq

@@ -8,9 +8,8 @@ from flask import Flask
 from flask.ext import restful
 
 basedir = os.path.join(os.path.abspath(os.getcwd()), "src")
-
 ASSETS_DIR=os.path.join(basedir, 'static')
-# from flask.ext.uploads import UploadSet, configure_uploads, DATA, UploadNotAllowed
+
 
 app = Flask(__name__)
 
@@ -28,11 +27,13 @@ except OSError, e:
         raise e
     pass
 
-from src.resources.db import db
+# from src.resources.db import db
 from src.resources.login import flask_bcrypt
 import src.resources.admin
 
 import src.resources.routes
 import src.resources.api
+import src.resources.rqueue
+
 # import views
 

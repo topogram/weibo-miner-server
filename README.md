@@ -21,6 +21,11 @@ Currently supported :
 * Upload your own data sets (csv and txt)
  
  
+## Tests
+    
+    python manage.py tests
+
+
 ## Deploy
 
 Run locally 

@@ -4,7 +4,7 @@
 from wtforms import StringField
 from wtforms.validators import DataRequired
 
-from src.forms import ModelForm
+from src.forms.model import ModelForm
 from src.models.user import User
 
 class UserCreateForm(ModelForm):

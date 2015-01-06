@@ -60,3 +60,15 @@ def img_static_proxy(path):
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'img/favicon.ico')
+
+@app.errorhandler(404)
+def not_found(error=None):
+    message = {
+            'status': 404,
+            'message': 'Not Found: ' + request.url,
+    }
+    resp = jsonify(message)
+    resp.status_code = 404
+
+    return resp
+    

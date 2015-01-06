@@ -3,7 +3,8 @@
 
 from flask_login import login_required
 
-from src.resources import app, db, restful
+from src.resources import app, restful
+from src.resources.db import db
 from src.models.regexp import Regexp
 from src.serializers.topotype import TopotypeSerializer
 

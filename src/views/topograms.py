@@ -3,8 +3,9 @@
 
 from flask_login import login_required
 
-from src.resources import app, db, restful
+from src.resources import app, restful
 from src.models.topogram import Topogram 
+from src.resources.db import db
 from src.forms.topogram import TopogramCreateForm
 from src.serializers.topogram import TopogramSerializer
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from src.resources import db
+from src.resources.db import db
 
 class Regexp(db.Model):
     """ Regular expression for different uses """

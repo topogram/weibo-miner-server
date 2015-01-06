@@ -20,7 +20,8 @@ from src.models.topogram import Topogram
 from src.models.topotype import Topotype
 from src.models.regexp import Regexp
 
-from src.resources import app, db, flask_bcrypt
+from src.resources import app, flask_bcrypt
+from src.resources.db import db
 
 # from views import admin_permission
 

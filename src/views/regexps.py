@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from flask_login import login_required
-
-from src.resources import app, db, restful
+from src.resources import app, restful
+from src.resources.db import db
 from src.models.regexp import Regexp
 from src.forms.regexp import RegexpCreateForm
 from src.serializers.regexp import RegexpSerializer

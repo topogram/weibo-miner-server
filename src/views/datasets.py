@@ -4,12 +4,13 @@
 from flask import request
 from flask_login import login_required
 
-from src.resources import app, db, restful
+from src.resources import app, restful
+from src.resources.db import db
 from src.models.dataset import Dataset 
 from src.forms.dataset import DatasetCreateForm
 from src.serializers.dataset import DatasetSerializer
 from src.lib.queue import RedisQueue
-from src.lib.elastic import get_index_info
+from src.lib.elastic import get_index_info, delete_index
 
 class DatasetListView(restful.Resource):
 

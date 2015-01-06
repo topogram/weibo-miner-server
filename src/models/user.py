@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from src.resources import db, flask_bcrypt, secret_key
+from src.resources import flask_bcrypt, secret_key
+from src.resources.db import db
+
 from wtforms.validators import Email
 from itsdangerous import URLSafeTimedSerializer
 from flask.ext.login import UserMixin
@@ -56,13 +58,11 @@ class User(db.Model, UserMixin):
         data = [str(self.id), self.password]
         return login_serializer.dumps(data)
 
-    #############################################################
-    # method required by flask-login
-    #############################################################
-    
+    # methods required by flask-login
+
     def is_authenticated(self):
         return True
-    
+
     def is_anonymous(self):
         return False
     

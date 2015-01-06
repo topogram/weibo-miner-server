@@ -21,8 +21,12 @@ def get_index_info( es_index_name):
         return res 
 
 def delete_index( es_index_name):
-    res = elastic.delete_index(es_index_name)
-    return res 
+    try :
+        res = elastic.delete_index(es_index_name)
+        return res
+    except IndexMissingException:
+        print "index missing"
+        return {} 
 
 def build_es_index_from_csv(raw_data_path, data_type, es_index_name ):
 

@@ -1,4 +1,8 @@
-tests
+coverage
+
+tests/oldies
+
+
 venv
 bower_components
 uploads

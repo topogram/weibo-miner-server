@@ -7,7 +7,7 @@ from flask.ext.uploads import UploadSet, DATA
 from wtforms import StringField
 from wtforms.validators import DataRequired
 
-from src.forms import ModelForm
+from src.forms.model import ModelForm
 from src.models.dataset import Dataset
 
 datasets = UploadSet('data', DATA)
