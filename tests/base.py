@@ -6,13 +6,14 @@ import unittest
 from flask.ext.testing import TestCase
 from flask.ext.migrate import upgrade, downgrade
 
-from src.resources import app
-from src.resources.db import db
-
+from src.resources import app, db
 from src.models.user import User
 
 import logging
-logger = logging.getLogger('topogram-server.tests.app')
+logger = logging.getLogger('topogram-server.tests')
+
+SQLALCHEMY_DATABASE_URI = "mysql+pymysql://topogram:topo2014@localhost/test_topogram"
+TESTING=True
 
 class BaseTestCase(TestCase):
     """A base test case."""
@@ -20,25 +21,16 @@ class BaseTestCase(TestCase):
     def setUp(self):
 
         logger.info("setting up database : %s"%app.config["SQLALCHEMY_DATABASE_URI"])
-
         # upgrade(revision="head")
         db.create_all()
-        db.session.commit()
-
-        data = {"password" : "admin", "invite" : "invite", "email" : "ad@min.com"}
-        resp = self.client.post("/api/v1/users", data=data)
+        with self.client:
+            data = {"password" : "admin", "invite" : "invite", "email" : "ad@min.com"}
+            resp = self.client.post("/api/v1/users", data=data)
 
     def create_app(self):
-        app.config.from_object('test_config')
-        secret_key="a_random_secret_key_$%#!@"
-        app.secret_key = secret_key
+        app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
+        app.config["TESTING"] = TESTING
         return app
-
-    # def test_write_user_in_db(self):
-        # self.assertRaises(ValueError, lambda : User())
-        # user = User(password="password")
-        # self.db.session.add(user)
-        # self.db.session.commit()
 
     def tearDown(self):
         logger.info("downgrading database")

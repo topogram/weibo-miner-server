@@ -7,12 +7,13 @@ import unittest
 from base import BaseTestCase
 from flask.ext.login import current_user
 from src.models.user import User
-from src.resources import flask_bcrypt
+from src.resources import bcrypt
 
 class TestUser(BaseTestCase):
 
     # Ensure user can register
     def test_user_registeration(self):
+        """ Ensure user can register """
         data = {"password" : "password", "invite" : "invite", "email" : "test@test.com"}
         with self.client:
             resp = self.client.post("/api/v1/users", data=data)
@@ -24,6 +25,7 @@ class TestUser(BaseTestCase):
 
     # Ensure errors are thrown during an incorrect user registration
     def test_incorrect_user_registeration(self):
+        """ Ensure errors are thrown during an incorrect user registration """
         data = {"password" : "", "invite" : "invite", "email" : "test"}
         with self.client:
             resp = self.client.post("/api/v1/users", data=data)
@@ -33,6 +35,7 @@ class TestUser(BaseTestCase):
     
     # Ensure an invite cide is required for registering
     def test_require_invite(self):
+        """ Ensure an invite cide is required for registering """
         data = {"password" : "djqsld", "email" : "test@test.com"}
         resp = self.client.post("/api/v1/users", data=data, follow_redirects=True)
         self.assertEqual(resp.json["status"],  "error")
@@ -42,9 +45,9 @@ class TestUser(BaseTestCase):
         resp = self.client.post("/api/v1/users", data=data, follow_redirects=True)
         self.assertIn(b'Wrong invitation code.', resp.data)
 
-
     # Ensure id is correct for the current/logged in user
     def test_login(self):
+        """ Ensure id is correct for the current/logged in user """
         data = {"password" : "admin", "email" : "ad@min.com"}
         with self.client:
             resp = self.client.post("/api/v1/sessions", data=data)
@@ -53,16 +56,18 @@ class TestUser(BaseTestCase):
 
      # Ensure given password is correct after unhashing
     def test_check_password(self):
+        """ Ensure given password is correct after unhashing """
         data = {"password" : "admin", "email" : "ad@min.com"}
         with self.client:
             user = User.query.filter_by(email='ad@min.com').first()
-            # self.assertTrue(flask_bcrypt.check_password_hash(user.password, "admin"))
-            self.assertFalse(flask_bcrypt.check_password_hash(user.password, 'foobar'))
+            self.assertTrue(bcrypt.check_password_hash(user.password, "admin"))
+            self.assertFalse(bcrypt.check_password_hash(user.password, 'foobar'))
 
 class UserViewsTests(BaseTestCase):
 
     # Ensure login behaves correctly with correct credentials
     def test_correct_login(self):
+        """ Ensure login behaves correctly with correct credentials """
         data = {"password" : "admin", "email" : "ad@min.com"}
         with self.client:
             resp = self.client.post(
@@ -75,6 +80,7 @@ class UserViewsTests(BaseTestCase):
 
     # Ensure login behaves correctly with incorrect credentials
     def test_incorrect_login(self):
+        """ Ensure login behaves correctly with incorrect credentials """
         data = {"password" : "wrong", "email" : "other@min.com"}
         resp = self.client.post(
             '/api/v1/sessions',
@@ -92,6 +98,7 @@ class UserViewsTests(BaseTestCase):
 
     # Ensure logout behaves correctly
     def test_logout(self):
+        """ Ensure logout behaves correctly """
         data = {"password" : "admin", "email" : "ad@min.com"}
         with self.client:
             self.client.post('/api/v1/sessions',data=data)

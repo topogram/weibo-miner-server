@@ -1,0 +1,132 @@
+<h3>{{dataset.title}}</h3>
+<p>{{dataset.description}}</p>
+
+<section class="row">
+  <div class="col-sm-6">
+    <h4>Index Description</h4>
+
+    <p><b>Creation Date : </b>{{dataset.created_at | date:'medium' }}</p>
+    <p><b>Index name :</b> {{ dataset.index_name }}</p>
+    <form class="form-inline" ng-hide="dataset.index_state != 'raw'">
+      <div class="form-group">
+         <div class="input-group">
+            <div class="input-group-addon">Citations</div>
+            <input id="inputTimeColumn" type="text" placeholder="Citation format..." ng-model="topogram.format" class="form-control" ng-required='true', ng-minlength=3/>
+
+        </div>
+        <select ng-model="topogram.language"id="inputLanguage" class="form-control">
+              <option>Chinese</option>
+            </select>
+        <p class="help-block">Format of the citation in the text .</p>
+        <!-- <label for="inputTimeColumn" class="control-label">Time Column</label> -->
+        <div class="form-group">
+        <!-- <label for="inputLanguage" class="control-label">Language Column</label> -->
+          
+        </div>
+        <button type="submit" class="btn btn-sm btn-primary">Process data</button>
+
+    </div>
+    </form>
+    <!-- 
+    <div ng-show="dataset.index_state != 'raw'">Processing...</div>
+        <b>Records count : </b>{{ dataset.records_count }}
+    </div> 
+    -->
+</div>
+
+<div class="col-sm-6">
+    <h4>Dataset Description</h4>
+    <form class="form-inline">
+      <div class="form-group">
+        <!-- <label for="inputTimeColumn" class="control-label">Time Column</label> -->
+        <div class="input-group">
+            <div class="input-group-addon">Time Column</div>
+            <input id="inputTimeColumn" type="text" placeholder="Time column name..." ng-model="dataset.time_column" class="form-control" ng-required='true', ng-minlength=3/>
+        </div>
+        <button type="submit" class="btn btn-sm">Update</button>
+        <p class="help-block">Name of the column with timestamps.</p>
+    </div>
+</form>
+<form class="form-inline">
+  <div class="form-group">
+
+   <!-- <label for="inputTimePattern" class="control-label">Time Pattern</label> -->
+   <div class="input-group">
+    <div class="input-group-addon">Time Pattern</div>
+
+    <input id="inputTimePattern" type="text" placeholder="Time format..." ng-model="dataset.time_pattern" class="form-control" ng-required='true', ng-minlength=3/>
+</div>
+<button type="submit" class="btn btn-sm">Update</button>
+<p class="help-block">Time pattern (using <a href="https://docs.python.org/2/library/time.html#time.strftime">strftime</a> format) ex. <em>"%a, %d %b %Y %H:%M:%S.</em></p>
+</div>
+<form class="form-inline">
+
+  <div class="form-group">
+    <!-- <label for="inputTextColumn" class="control-label">Text Column</label> -->
+    <div class="input-group">
+        <div class="input-group-addon">Text Column</div>
+        <input id="inputTextColumn" type="text" placeholder="Text column name..." ng-model="dataset.text_column" class="form-control" ng-minlength=3/>
+    </div>
+    <button type="submit" class="btn btn-sm">Update</button>
+    <p class="help-block">Name of the column with text to process.</p>
+</div>
+</form>
+<form class="form-inline">
+  <div class="form-group">
+    <!-- <label for="inputSourceColumn" class="control-label">Author Column</label> -->
+    <div class="input-group">
+        <div class="input-group-addon">Author Column</div>
+        <input id="inputSourceColumn" type="text" placeholder="Author column name..." ng-model="dataset.source_column" class="form-control" ng-minlength=3/>
+    </div>
+    <button type="submit" class="btn btn-sm">Update</button>
+    <p class="help-block">Name of the column with the author(s).</p>
+</div>
+</form>
+</div>
+</section>
+
+<section class="sample row" ng-hide="!dataset.sample.length">
+  <h3>Dataset sample</h3>
+  <table ng-table show-filter="true" class="table table-condensed table-es-results">
+    <thead>
+      <tr>
+
+        <th ng-repeat="column in dataset.columns" class="text-center sortable" ng-class="{ 'sort-asc': tableParams.isSortBy(column, 'asc'), 'sort-desc': tableParams.isSortBy(column, 'desc') }" ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column, 'asc') ? 'desc' : 'asc')"
+        >  {{column }}
+    </th>
+</tr>
+</thead>
+<tbody>
+    <tr ng-repeat="row in dataset.sample">
+      <td ng-repeat="column in dataset.columns" tooltip='{{row[column.field]}}' tooltip-append-to-body="true">
+        <a href="{{row[column]}}" class="disabled" disabled onclick="return false">{{row[column] }}</a>
+    </td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+
+<a href="#/datasets/{{ dataset.id }}/topograms/create" class="btn btn-primary">Create New Topogram</a>
+<br>
+
+<table ng-table="" class="table table-striped">
+  <thead>
+    <tr>
+      <th>Query</th>
+      <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+    <tr ng-repeat="post in topograms">
+      <!-- <td data-title="'title'" sortable="'title'"> <a href="#/datasets/{{post.id}}" role="button">{{ post.dataset.title }}</a></td> -->
+      <td data-title="'query'">{{post.es_query}}</td>
+      <td data-title="'description'">{{post.description}}</td>
+      <td data-title="'created_at'" sortable="'created_at'">{{post.created_at | date:'medium'}}</td>
+      <td data-title="'type'" sortable="'type'">{{post.type}}</td>
+      <td data-title="'View'"><a href="#/datasets/{{dataset.id}}/topograms/{{post.id}}" role="button" class="btn btn-default btn-sm">View</a></td>
+      <td data-title="'Delete'"><a href="#" ng-click="delete(post)" role="button" class="btn btn-primary btn-sm">Delete</a></td>
+  </tr>
+</tbody>
+</table>
