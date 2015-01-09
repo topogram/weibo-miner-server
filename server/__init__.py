@@ -15,9 +15,9 @@ from flask.ext.sqlalchemy import SQLAlchemy
 basedir = os.path.dirname(os.path.realpath(__file__))
 ASSETS_DIR = os.path.join(os.path.dirname(basedir), "client")
 
-app = Flask(__name__)
-
 print ASSETS_DIR
+
+app = Flask(__name__)
 
 # config
 app.config.from_object('config')
