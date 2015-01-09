@@ -41,3 +41,4 @@ MySQL-python
 Flask-SocketIO
 redis
 coverage
+colour-runner
