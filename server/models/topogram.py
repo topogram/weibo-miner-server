@@ -35,8 +35,11 @@ class Topogram(db.Model):
                             lazy = 'dynamic')
 
     status = db.Column(db.String(150))
+
     words = db.Column(db.Text)
     citations = db.Column(db.Text)
+
+    networks = db.Column(db.Text)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))

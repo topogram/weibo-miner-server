@@ -29,9 +29,10 @@ Topogram.directive("words", function () {
             var wordsLegend=divWords.append("g")
                         .attr("class", "words-legend")
                         .attr("transform", "translate("+(100)+","+(h-200)+")");
-                    
-            $scope.$watch('topogramName', function(newVal, oldVal) {
-                // console.log(newVal);
+            
+            // draw legend
+            $scope.$watch('topogram.es_query', function(newVal, oldVal) {
+
                 if(newVal!=undefined) {                           
                     wordsLegend.append("text")
                         .attr("dx",1)
@@ -79,10 +80,13 @@ Topogram.directive("words", function () {
             }
             
             // data 
-            $scope.$watch("wordsLength", function(newVal,oldVal){
+            $scope.$watch("words.words", function(newVal,oldVal){
+
+                // console.log(newVal);
 
                 if(newVal==undefined) return
-                var wordsData=$scope.words;
+                var wordsData=$scope.words.words;
+                // console.log(wordsData);
 
                 d3.selectAll(".word-link").remove();
                 d3.selectAll(".word").remove();
@@ -91,7 +95,6 @@ Topogram.directive("words", function () {
                     wordsY={};
 
                 updateWordXY= function updateWordXY() {
-
                     var margin=30,
                         rgx=d3.scale.linear().domain([0,wordNodes.length]).range([margin,w-margin-200]),
                         s=d3.shuffle(wordNodes),
@@ -99,8 +102,8 @@ Topogram.directive("words", function () {
 
                     for (var i = 0; i < wordNodes.length; i++) {
                         var d=s[i];
-                        wordsX[d.name]=rgx(i);
-                        wordsY[d.name]=rgy(wordScaleFont(d.count));
+                        wordsX[d.id]=rgx(i);
+                        wordsY[d.id]=rgy(wordScaleFont(d.weight));
                     };
                 }
 
@@ -108,27 +111,27 @@ Topogram.directive("words", function () {
                 var myWordNodes={},
                     myWordEdges={};
 
+                // init data with a children array 
                 for (var i = 0; i < wordsData.nodes.length; i++) {
-                    myWordNodes[wordsData.nodes[i]["name"]]=wordsData.nodes[i];
                     wordsData.nodes[i].children=[];
                     wordsData.nodes[i].selected=false;
                 };
 
-                wordsData.edges.forEach(function(link) {
-                    // console.log(link.weight);
-                     myWordNodes[link.source].children.push(myWordNodes[link.target]);
-                     myWordNodes[link.target].children.push(myWordNodes[link.source]);
-
-                    link.source = myWordNodes[link.source] || 
-                        (myWordNodes[link.source] = {name: link.source});
-                    link.target = myWordNodes[link.target] || 
-                        (myWordNodes[link.target] = {name: link.target});
+                // add childrens to nodes
+               for (var i = 0; i < wordsData.links.length; i++) {
+                    var link =  wordsData.links[i];
+                     wordsData.nodes[link.source].children.push(wordsData.nodes[link.target]);
+                     wordsData.nodes[link.target].children.push(wordsData.nodes[link.source]);
+                    link.source = wordsData.nodes[link.source] || 
+                        (wordsData.nodes[link.source] = {name: link.source});
+                    link.target = wordsData.nodes[link.target] || 
+                        (wordsData.nodes[link.target] = {name: link.target});
                     link.value = link.weight;
-                });
+                }
 
                 var wordForce=d3.layout.force()
                         .nodes(wordsData.nodes)
-                        .links(wordsData.edges)
+                        .links(wordsData.links)
                         .size([w,h])
                         .linkDistance(150)
                         .charge(-1000)
@@ -149,7 +152,7 @@ Topogram.directive("words", function () {
                     .append("g")
                     .attr("class", "word")
                     
-                if($scope.wordForceStarted) {
+                if($scope.wordsForceStarted) {
                     wordForce.start();
                     wordNodes.call(wordForce.drag);
                 }
@@ -158,7 +161,7 @@ Topogram.directive("words", function () {
 
                 // scales
                 var fontScale=[15,60],
-                    wordScale=wordsData.nodes.map(function(d){return d.count}),
+                    wordScale=wordsData.nodes.map(function(d){return d.weight}),
                     maxMinWordScale=[Math.min.apply(Math,wordScale), Math.max.apply(Math,wordScale)],
                     wordScaleFont=d3.scale.linear().domain(maxMinWordScale).range(fontScale),
                     userPathColor=d3.scale.category20b(),
@@ -195,15 +198,15 @@ Topogram.directive("words", function () {
                                 return c(d.community)
                             })
                             // .style("fill-opacity", function(d) {  return "#006d2c" })
-                            // .style("fill-opacity", function(d) {  return wordScaleOpacity(d.count) })
+                            // .style("fill-opacity", function(d) {  return wordScaleOpacity(d.weight) })
                             .attr("text-anchor", "middle") // text-align: right
-                            .text(function(d) { return d.name });
+                            .text(function(d) { return d.id });
 
                         var x=i*20;
                         var y=80;
 
-                        wordsX[d.name]=x;
-                        wordsY[d.name]=y;
+                        wordsX[d.id]=x;
+                        wordsY[d.id]=y;
                     }).on("mouseover",function(d,i,event){
                         // console.log(d3.mouse());Z
                         
@@ -214,8 +217,8 @@ Topogram.directive("words", function () {
                         })
                         
                         // drawWordPie(divWords.append("g").attr("transform",'translate(100,50)'),
-                        //     // $scope.wordProvinces[d.name],
-                        //     d.name
+                        //     // $scope.wordProvinces[d.id],
+                        //     d.id
                         //     )
 
                     }).on("mouseout",function(d,i){
@@ -311,7 +314,7 @@ Topogram.directive("words", function () {
 
                 function drawWordPath() {
 
-                    var wordPathExt=wordsData.edges.map(function(d){ return d.weight }),
+                    var wordPathExt=wordsData.links.map(function(d){ return d.weight }),
                         wordPathWeight=d3.scale.linear().domain(d3.extent(wordPathExt)).range([1, 4]),
                         wordPathOpacity=d3.scale.linear().domain(d3.extent(wordPathExt)).range([.1, 1]);
                     
@@ -330,16 +333,16 @@ Topogram.directive("words", function () {
                 function tickWord() {
 
                     // remove transition for force
-                    var ww = ($scope.wordForceStarted)? wordNodes : wordNodes.transition();
+                    var ww = ($scope.wordsForceStarted)? wordNodes : wordNodes.transition();
 
                     ww.attr("transform", function(d) { 
                     
                         var r=wordScaleFont(d.children.length),
-                            x=(d.x==undefined || !$scope.wordForceStarted)? wordsX[d.name] : Math.max(r, Math.min(w - r, d.x)),
-                            y=(d.y==undefined || !$scope.wordForceStarted)? wordsY[d.name] : Math.max(r, Math.min(h - r, d.y));
+                            x=(d.x==undefined || !$scope.wordsForceStarted)? wordsX[d.id] : Math.max(r, Math.min(w - r, d.x)),
+                            y=(d.y==undefined || !$scope.wordsForceStarted)? wordsY[d.id] : Math.max(r, Math.min(h - r, d.y));
 
-                        wordsX[d.name]=x;
-                        wordsY[d.name]=y;
+                        wordsX[d.id]=x;
+                        wordsY[d.id]=y;
 
                         return "translate(" + x + "," + y + ")"; 
 
@@ -355,7 +358,7 @@ Topogram.directive("words", function () {
                 }
 
                 function tickWordPath() {
-                    var wordPathExt=wordsData.edges.map(function(d){ return d.weight }),
+                    var wordPathExt=wordsData.links.map(function(d){ return d.weight }),
                         wordPathWeight=d3.scale.linear().domain(d3.extent(wordPathExt)).range([1, 4]),
                         wordPathOpacity=d3.scale.linear().domain(d3.extent(wordPathExt)).range([.1, 1]);
 
@@ -372,10 +375,10 @@ Topogram.directive("words", function () {
                         
                         var w=wordForce.size()[0],
                             h=wordForce.size()[1],
-                            r1=wordScaleFont(d.source.count),
+                            r1=wordScaleFont(d.source.weight),
                             x1=Math.max(r1, Math.min(w, d.source.x));
                             y1=Math.max(r1, Math.min(h, d.source.y)),
-                            r2=wordScaleFont(d.target.count),
+                            r2=wordScaleFont(d.target.weight),
                             x2=Math.max(r2, Math.min(w, d.target.x)),
                             y2=Math.max(r2, Math.min(h, d.target.y));
 

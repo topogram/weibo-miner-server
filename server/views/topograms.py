@@ -11,6 +11,7 @@ from server.forms.topogram import TopogramCreateForm
 from server.serializers.topogram import TopogramSerializer
 
 from server.lib.indexer import get_topogram
+import pickle
 
 class TopogramListView(restful.Resource):
     @login_required
@@ -51,19 +52,13 @@ class TopogramView(restful.Resource):
         t = Topogram.query.filter_by(id=topogram_id).first()
         topogram= TopogramSerializer(t).data
 
-        for key in topogram : print key, topogram[key]
         if topogram["citations_patterns"] is None : return "missing citation pattern", 422
 
-        if topogram["status"] == "raw":
+        if t.networks is None:
+
             # process data
             get_topogram(topogram)
             return { "status": "started"}, 201
-
-        elif topogram["status"] == "processing" :
-            return { "status": "processing"}, 201
-
-        elif topogram["status"] == "done" :
-            return { "status": "done"}, 201
 
         return topogram
 
@@ -82,29 +77,37 @@ class TopogramsByDataset(restful.Resource):
         topograms = TopogramSerializer(topograms, many=True).data
         return topograms
 
-class TopogramNetworksView(restful.Resource):
+class TopogramWordsView(restful.Resource):
     @login_required
-    def post(self):
+    def get(self, topogram_id, words_limit):
 
-        form = TopogramCreateForm()
-        if not form.validate_on_submit():
-            return form.errors, 422
+        t = Topogram.query.filter_by(id=topogram_id).first()
+        topogram= TopogramSerializer(t).data
 
-        # TODO : fix nasty fallback
-        # print(form.words_limit, form.citations_limit) 
-        if form.words_limit is None : 
-            words_limit=100 
-        else :
-            words_limit=form.words_limit.data
+        topo = pickle.loads(topogram["networks"])
 
-        if form.citations_limit is None : 
-            citations_limit=100
-        else :
-            citations_limit=form.citations_limit.data
+        data = {}
+        data["words"] = topo.export_words_to_d3_js()
+        data["density"] = topo.get_words_density()
+        data["top_words"] = topo.get_top_words(words_limit)
 
-        # topo =get_topo_networks_from_es(form.es_query.data, form.topotype_id.data, str(form.es_index_name.data), words_limit, citations_limit)
+        return data
 
-        return topo
+class TopogramCitationsView(restful.Resource):
+    @login_required
+    def get(self, topogram_id, citations_limit):
+
+        t = Topogram.query.filter_by(id=topogram_id).first()
+        topogram= TopogramSerializer(t).data
+
+        topo = pickle.loads(topogram["networks"])
+
+        data ={}
+        data["citations"] = topo.export_citations_to_d3_js()
+        data["citations"]["density"] = topo.get_citations_density()
+        data["top_citations"] = topo.get_top_citations(citations_limit)
+
+        return data
 
 class TopogramTimeFramesList(restful.Resource):
     

@@ -4,6 +4,7 @@
 from server import db
 from server.resources.elastic import elastic
 from server.models.dataset import Dataset
+from server.models.topogram import Topogram
 from flask.ext.rq import job
 
 from topogram.topograms.basic import BasicTopogram
@@ -12,6 +13,7 @@ from topogram.corpora.csv_file import CSVCorpus
 from topogram.corpora.elastic import ElasticCorpus
 
 import logging
+import pickle
 
 logger = logging.getLogger("topogram-server.lib.indexer")
 
@@ -56,9 +58,19 @@ def delete_index( es_index_name):
         return {}
 
 # @job('taf')
-def get_topogram(topogram):
-    nlp = ChineseNLP()
+def get_topogram(_topogram):
 
-    # nlp.add_stopword("ukn")
-    ElasticCorpus(elastic, topogram["index_name"], topogram["es_query"])
-    
+    nlp = ChineseNLP()
+    es = ElasticCorpus(elastic, _topogram["es_index_name"], _topogram["es_query"])
+
+    # process the data
+    topogram = BasicTopogram(corpus=es, nlp=nlp)
+    topogram.process()
+
+    # get the topgram from the db
+    t = Topogram.query.filter_by(id=_topogram["id"]).first()
+    data = pickle.dumps(topogram)
+    t.networks = data
+
+    db.session.commit()
+

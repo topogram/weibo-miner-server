@@ -1,14 +1,31 @@
 function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular, TopogramService, ConfigService) {
 
-    $scope.dataset ={};
+    // load topogram
     Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
+          console.log(topogram);
+          $scope.topogram = topogram;
+      });
+    
+    $scope.wordsLimit = 10;
+    $scope.citationsLimit = 10;
 
-        console.log(topogram);
 
-         // GRAPHS
+    // WORDS 
+    Restangular.one('topograms',$routeParams.topogramId).one('words', $scope.wordsLimit).get().then(function(words) {
+        console.log(words);
+        $scope.words=words;
+        $scope.wordsForceStarted = true;
+
+    });
+
+    // CITATIONS 
+    Restangular.one('topograms',$routeParams.topogramId).one('citations', $scope.citationsLimit).get().then(function(citations) {
+        console.log(citations);
+        $scope.citations=citations;
+        $scope.citationsForceStarted = true;
+    });
+
            /*
-            Restangular.all('topograms').all('networks').post(topoInfo).then(function(topogram) {
-
               // words
               $scope.words=topogram.words;
               if(data.words.index!=undefined) $scope.wordsLength=topogram.words.index.length;
@@ -21,9 +38,8 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
               if(data.citations.index!=undefined) $scope.citationsLength=data.citations.index.length;
               $scope.wordForceStarted = true;
 
-            });
             */
-        });
+
 
 
 $('body').keydown(function (e) {

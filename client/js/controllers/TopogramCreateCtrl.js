@@ -188,23 +188,23 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
         $scope.loadingNetworks=JSON.parse(data);
     });
 
-     $scope.$watch("loadingNetworks", function(newVal, oldVal){
+     // $scope.$watch("loadingNetworks", function(newVal, oldVal){
 
-          console.log("loadingNetworks", newVal);
+     //      console.log("loadingNetworks", newVal);
 
-          if(newVal !=oldVal && newVal==1) {
-              stopLoader=$interval( function  () {
-                console.log("loadingNetworks started");
-                socket.emit('progress', {"index_name": $scope.index});
-              }, 200)
+     //      if(newVal !=oldVal && newVal==1) {
+     //          stopLoader=$interval( function  () {
+     //            console.log("loadingNetworks started");
+     //            socket.emit('progress', {"index_name": $scope.index});
+     //          }, 200)
 
-          } else if(newVal !=oldVal && newVal==100){
-              $interval.cancel(stopLoader);
-              stopLoader = undefined;
-              console.log("done");
+     //      } else if(newVal !=oldVal && newVal==100){
+     //          $interval.cancel(stopLoader);
+     //          stopLoader = undefined;
+     //          console.log("done");
 
-          }
-     });
+     //      }
+     // });
 
 
     // stopwords
