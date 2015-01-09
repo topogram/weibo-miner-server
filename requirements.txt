@@ -42,4 +42,4 @@ Flask-SocketIO
 redis
 coverage
 colour-runner
-
+chardet
