@@ -12,8 +12,8 @@ from flask.ext.login import LoginManager
 from flask.ext.principal import Principal
 from flask.ext.sqlalchemy import SQLAlchemy
 
-basedir = os.path.join(os.path.abspath(os.getcwd()), "server")
-ASSETS_DIR = os.path.join(os.getcwd(), "client")
+basedir = os.path.dirname(os.path.realpath(__file__))
+ASSETS_DIR = os.path.join(os.path.dirname(basedir), "client")
 
 app = Flask(__name__)
 
