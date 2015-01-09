@@ -1,0 +1,129 @@
+<h1>{{topogram.dataset.title}} <small>{{topogram.dataset.description}}</small></h1>
+
+<section class="row">
+  <div class="col-md-4">
+    <dl class="dl-horizontal">
+      <dt>Data source</dt>
+      <dd><a href="#/dataset/{{ topogram.dataset.id }}">{{ topogram.dataset.title}}</a></dd>
+      <dt>Data type</dt>
+      <dd>{{topogram.dataset.type}}</dd>
+      <dt>Creation date</dt>
+      <dd>{{topogram.created_at | date:medium}}</dd>
+      <dt>Search query</dt>
+      <dd>{{topogram.es_query}} in {{topogram.es_index_name}}</dd>
+      <dt>Messages Count</dt>
+      <dd>{{topogram.records_count}} messages</dd>
+      <dt>Timeframe Count</dt>
+      <dd>{{timeframes.length}} timeframes</dd>
+    </dl>
+  </div>
+  <div class="col-md-4">
+    <div ng-if="topogram.records_count == 0">
+      <button ng-click="getData(&quot;mongo&quot;)" class="btn btn-primary">Extract data</button>
+    </div>
+    <div ng-if="topogram.messages != 0">
+      <p></p><a target="_blank" href="/api/topogram/{{post._id}}/download.csv" download="{{post.name}}.csv" class="btn btn-default" disabled> Download search as CSV</a>
+    </div>
+  </div>
+</section>
+
+<section id="timeseries">
+  <h3>Total : {{ totalResults }} results<small> in {{ index }}</small></h3>
+  <timeserie timeserie="" time-data="timeData" start="start" end="end" topogram-name="searchTerm"></timeserie>
+</section>
+
+<section id="words" class="row">
+    
+    <div class="col-xs-9 col-sm-9">
+          <words start="start" end="end" class="words-container"></words>
+    </div>
+
+    <div class="col-xs-3 col-sm-3">
+
+        <div class="well">
+              <h4>Semantic graph</h4>
+              <p class="help-block">This graph represents the co-occurence of words quoted in the corpus.</p>
+              <p><a href="#" type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-primary btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>   or hit <small> Shift+W</small></p>
+        
+        <h5>10 most connected words</h5>
+        <table ng-table show-filter="true" class="table table-condensed">
+        <thead>
+          <tr>
+            <th>Word</th>
+            <th>Degree</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="row in words.top_words.slice(0,10)">
+          <td>{{row.node }}</td>
+          <td>{{row.degree }}</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+      </div>
+
+</section>
+
+<section class="messages">
+      <table ng-table show-filter="true" class="table table-condensed">
+        <thead>
+          <tr>
+            <th ng-repeat="column in columns" class="text-center sortable"
+            >  {{column.field }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="row in messages">
+          <td ng-repeat="column in columns" tooltip-append-to-body="true">
+            {{row[column.field] }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div ng-cloak="" ng-hide="allResults" class="load-more"><a ng-click="loadMore()" class="btn btn-default">View more results...</a></div>
+  </section>
+
+
+<!-- <div class="row">
+  <div class="col-xs-9 col-sm-9">
+    <citations start="start" end="end" class="words-container"></citations>
+  </div>
+
+  <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveCitations(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+    <p><small>Hit Shift+C to save</small></p>
+  </div>
+</div> -->
+
+
+<!-- <div id="timeline" u="" class="row well">
+  <timeslider id="time-slider" model="timeframe" type="text" data-slider-min="0" data-slider-step="1" data-slider-orientation="horizontal" data-slider-selection="after" data-slider-tooltip="show"></timeslider>
+  <div timeserie="" time-data="timeSeriesData" start="start" end="end" topogram-name="topogramName" class="time-container"></div>
+  <p><a href="#" ng-click="playAll(); $event.preventDefault()" class="btn btn-default"><span class="glyphicon glyphicon-play"></span>Play</a><a href="#" ng-click="stop(); $event.preventDefault()" class="btn btn-default"><span class="glyphicon glyphicon-stop"></span>Stop</a><b>Start: {{start | date:'medium'}}</b><b>End: {{end | date:'medium'}}</b></p>
+</div>
+ -->
+
+<!--     <section id="words" class="row" ng-hide="!messages.length">
+      <div class="col-xs-9 col-sm-9">
+      <div class="loader" ng-hide="words.index.length"></div>
+        <words class="words-container"></words>
+      </div>
+      <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+        <p><small>Hit Shift+W to save</small></p>
+        <div class="wordpie-container"></div>
+      </div>
+    </section> -->
+
+<!--     <section class="row"  ng-hide="!messages.length">
+
+      <div class="col-xs-9 col-sm-9">
+        <div class="loader" ng-hide="citations.index.length"></div>
+        <citations class="citations-container"></citations>
+      </div>
+
+      <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveCitations(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+        <p><small>Hit Shift+C to save</small></p>
+      </div>
+    </section>
+     -->

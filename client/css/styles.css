@@ -1,0 +1,51 @@
+.main-view {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+#timeline .slider {
+    width: 960px;
+}
+
+
+.table-es-results td {
+    word-wrap: break-word;
+}
+.table-es-results {
+font-size: 10pt;
+table-layout: fixed;
+width: 100%;
+}
+
+.loader {
+    position : relative;
+    margin:auto;
+    display: block;
+    height:50px;
+    background: url("../img/circle-loader.gif") no-repeat center center;
+}
+
+mark {
+    background: #FFFF00
+}

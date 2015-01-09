@@ -1,0 +1,165 @@
+<h3>{{dataset.title}} <small>Dataset</small></h3>
+<p>{{dataset.description}}</p>
+<!-- <p><b>Creation Date : </b>{{dataset.created_at | date:'medium' }}</p>
+
+ -->
+<section class="row">
+
+<div class="col-sm-6" ng-hide="dataset.index_state != 'raw'">
+    <h4>Describe this dataset</h4>
+    <form class="form" ng-submit="postDatasetDescription()">
+            <div class="form-group">
+                <!-- <label for="inputTextColumn" class="control-label">Text Column</label> -->
+                <div class="input-group">
+                    <div class="input-group-addon">Text Column</div>
+
+                    <select class="form-control" id="inputTextColumn" ng-model="dataset.text_column">
+                        <option ng-selected="{{operator == dataset.text_column}}"
+                        ng-repeat="operator in dataset.csv.headers"
+                        value="{{operator}}">
+                        {{operator}}
+                    </option>
+                </select>
+
+            </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-group">
+              <div class="input-group-addon">Language</div>
+              <select ng-model="dataset.language"id="inputLanguage" class="form-control">
+                  <option ng-selected="{{operator == dataset.language}}"
+                  ng-repeat="operator in languages"
+                  value="{{operator}}">
+                  {{operator}}
+              </option>
+
+              </select>
+              </div>
+            <p class="help-block">Name of the column with text and language of the text</p>
+        </div>
+
+
+        <div class="form-group">
+            <!-- <label for="inputSourceColumn" class="control-label">Author Column</label> -->
+            <div class="input-group">
+                <div class="input-group-addon">Author Column</div>
+
+                <select class="form-control" id="inputSourceColumn" ng-model="dataset.source_column">
+                    <option ng-selected="{{operator == dataset.source_column}}"
+                    ng-repeat="operator in dataset.csv.headers"
+                    value="{{operator}}">
+                    {{operator}}
+                </option>
+            </select>
+
+        </div>
+        <p class="help-block">Name of the column with the author(s).</p>
+    </div>
+
+
+    <div class="form-group">
+        <!-- <label for="inputTimeColumn" class="control-label">Time Column</label> -->
+        <div class="input-group">
+            <div class="input-group-addon">Time Column</div>
+            <select class="form-control" id="inputTimeColumn" ng-model="dataset.time_column">
+                <option ng-selected="{{operator == dataset.time_column}}"
+                ng-repeat="operator in dataset.csv.headers"
+                value="{{operator}}">
+                {{operator}}
+            </option>
+        </select>
+
+    </div>
+    <p class="help-block">Name of the column with timestamps.</p>
+</div>
+
+<div class="form-group">
+
+ <!-- <label for="inputTimePattern" class="control-label">Time Pattern</label> -->
+ <div class="input-group">
+    <div class="input-group-addon">Time Pattern</div>
+
+    <input id="inputTimePattern" type="text" placeholder="Time format..." ng-model="dataset.time_pattern" class="form-control" ng-required='true', ng-minlength=3/>
+</div>
+
+<p class="help-block"> Parse date column using <a href="https://docs.python.org/2/library/time.html#time.strftime">strftime</a> format</p>
+<p class="well">{{ stfrDate(dataset.time_pattern) }} | <b>{{ regDate }}</b></p>
+
+</div>
+
+<div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-default">Update Description</button>
+    </div>
+</div>
+
+</form>
+</div>
+<div class="col-sm-6" ng-hide=" dataset.index_state != 'raw' || !isDescribed">
+    <div class="form-group">
+            <p class="help-block">Click on this button to enable  full-text search and start exploring your data.</p>
+            <a ng-click="indexDataset()" class="btn btn-primary">Create Index</a>
+    </div>
+</div>
+
+<div class="col-sm-6" ng-hide="dataset.index_state != 'processing'">
+  <h4>Indexing..</h4>
+  <div class="progress">
+  <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+    Processing records...
+  </div>
+        </div>
+    <p><b>Index name :</b> {{ dataset.index_name }}</p>
+</div>
+
+<div class="col-sm-6" ng-hide="dataset.index_state != 'done'">
+    <h2>Topograms</h2>
+    <a href="#/datasets/{{ dataset.id }}/topograms/create" class="btn btn-primary">Create New Topogram</a>
+    <br>
+    <table ng-table="" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Query</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="post in topograms">
+                    <!-- <td data-title="'title'" sortable="'title'"> <a href="#/datasets/{{post.id}}" role="button">{{ post.dataset.title }}</a></td> -->
+                    <td data-title="'query'">{{post.es_query}}</td>
+                    <td data-title="'description'">{{post.description}}</td>
+                    <td data-title="'created_at'" sortable="'created_at'">{{post.created_at | date:'medium'}}</td>
+                    <td data-title="'type'" sortable="'type'">{{post.type}}</td>
+                    <td data-title="'View'"><a href="#/datasets/{{dataset.id}}/topograms/{{post.id}}" role="button" class="btn btn-default btn-sm">View</a></td>
+                    <td data-title="'Delete'"><a href="#" ng-click="delete(post)" role="button" class="btn btn-primary btn-sm">Delete</a></td>
+                </tr>
+            </tbody>
+    </table>
+</div>
+</section>
+
+<section class="sample row" ng-hide="!dataset.csv.sample">
+    <h3>Dataset sample</h3>
+    <a href="" ng-click="loadMoreSamples()">Load more...</a>
+    <table ng-table show-filter="true" class="table table-condensed table-es-results">
+        <thead>
+            <tr>
+
+                <th ng-repeat="column in dataset.csv.headers" class="text-center sortable" ng-class="{ 'sort-asc': tableParams.isSortBy(column, 'asc'), 'sort-desc': tableParams.isSortBy(column, 'desc') }" ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column, 'asc') ? 'desc' : 'asc')"
+                >    {{column }}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in dataset.csv.sample">
+            <td ng-repeat="column in dataset.csv.headers" tooltip='{{row[column.field]}}' tooltip-append-to-body="true">
+                <a href="{{row[column]}}" class="disabled" disabled onclick="return false">{{row[column] }}</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</section>
+
+
+

@@ -1,41 +1,41 @@
-    
-**Under Development** : see [topogram miner](https://github.com/topogram/topogram-miner) for the core tech
-
 # Topogram
 
-Data Visualization engine for content spread on social networks
+Web-based dashboard for visualization of data as networks (words, users, geo maps). 
+
+* Social Media analysis (support for Twitter,  Sina Weibo, Tencent Weibo, etc.)
+* Scientific Papers citations
+* Mailing list mining
+
+Website : [http://topogram.io](http://topogram.io)
 
 
 ## Features
 
-See the [feature list](http://topogram.io)
+This dashboard provides a complete interface to create data visualizations by uploading CSV files, search keywords and create geographical and networks maps. It is based on the [topogram](https://github.com/topogram/topogram) lib. 
 
 Currently supported :
 
-* Support Chinese Social Media (Sina Weibo, Tencent Weibo, etc.)
-* Display keywords Frequency (Chinese and English language) 
+* Upload of data sets (csv, txt)
 * Show relationships between keywords, users and places
 * Analyze the structure of discussions (interactions; number of comments, forwards)
+* Indexation for full-text search
+* Keywords extraction (Chinese and English language) 
 * See the emergence of dynamics around words and users over time
 * Geo-location and tweets mapping
-* Upload your own data sets (csv and txt)
  
- 
-## Deploy
 
-Run locally 
 
-    git clone
-    virtualenv venv
-    . venv/bin/activate
+## Run you own instance
+
+You can easily run ```Topogram``` on your own machine at [http://localhost:5000]( http://localhost:5000)
+
+    git clone http://github.com/topogram/topogram-server
+    cd topogram-server
     pip install -r requirements.txt
-    
+    python run.py
+
+
+###  Tests
+
     pip install -r dev_requirements.txt
-    python dev_run.py db 
-
-## Test content creation
-
-Regexps 
-
-    curl -X POST http://localhost:5000/api/v1/regexps -d '{"regexp" : "ha", "title" : "ho" }' -H "Content-Type: application/json"
-
+    python manage.py tests

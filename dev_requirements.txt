@@ -1,2 +1,7 @@
 Flask-Migrate
 Flask-Script
+nose
+rednose
+Flask-Testing
+colour-runner
+coverage
