@@ -4,11 +4,11 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
     Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
           console.log(topogram);
           $scope.topogram = topogram;
+          $scope.dataset = topogram.dataset;
       });
-    
+
     $scope.wordsLimit = 10;
     $scope.citationsLimit = 10;
-
 
     // WORDS 
     Restangular.one('topograms',$routeParams.topogramId).one('words', $scope.wordsLimit).get().then(function(words) {
