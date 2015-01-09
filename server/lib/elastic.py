@@ -120,7 +120,6 @@ def es2mongo(query, index_name, data_mongo_id):
 
 def es2csv(meme_name, query, indexes_names, csv_file, log_file):
 
-
     # Open a csv file and write the stuff inside
     with open(csv_file, 'wb') as csvfile: 
 

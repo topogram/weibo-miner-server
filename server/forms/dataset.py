@@ -16,3 +16,7 @@ class DatasetCreateForm(ModelForm):
     class Meta:
         model = Dataset
     dataset = FileField("dataset", validators=[DataRequired()])
+
+class DatasetUpdateForm(ModelForm):
+    class Meta:
+        model = Dataset

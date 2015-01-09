@@ -1,69 +1,10 @@
-function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular, flash) {
-
-    // set a default value 
-    $scope.dataset = {};
-    $scope.languages = [{ "name" : "Chinese", "slug" : "zh"}]
-    $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
-
-
-    // load dataset description from db
-    Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
-            console.log(dataset);
-            $scope.dataset = dataset;
-            $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
-    });
-
-    $scope.loadMoreSamples = function() {
-            Restangular.one('datasets',$routeParams.datasetId).getList("sample").then(function(sample) {
-                console.log(sample);
-                $scope.dataset.csv.sample = sample;
-            });
+Topogram.factory('StrfrtimeService', function() {
+    return {
+        "start" : function convertToDate(dateFormat){
+            return strftime(dateFormat);
+        }
     }
-
-
-   // dataset description
-    $scope.postDatasetDescription = function() {
-        $scope.dataset.put().then(function(dataset) {
-            flash.success = "Your dataset description has been updated"
-        }, function errorCallback(response) {
-                console.log(response);
-                flash.error = response.data
-            });
-    }
-
-    $scope.stfrDate = function(pattern) {
-        return strftime(pattern)
-    }
-
-    // indexing
-    $scope.indexDataset =function() {
-            Restangular.one('datasets',$routeParams.datasetId).one("index").get().then(function(index) {
-                // console.log(index.status);
-                $timeout(function() {
-                  $location.path("/datasets/"+ $scope.dataset.id);
-                })
-                flash.success = "Index processing is " + index.status;
-                $scope.dataset.index_state = "processing";
-            });
-    }
-
-
-    // Topograms
-    $scope.topogram = [];
-    Restangular.one('datasets',$routeParams.datasetId).getList('topograms').then(function(topograms) {
-            // console.log(topograms);
-            $scope.topograms = topograms;
-    });
-
-    $scope.deleteTopogram = function(topogram) {
-        topogram.remove().then(function() {
-            $timeout(function() {
-                $location.path("/datasets/"+ $scope.dataset.id);
-            })
-            $scope.posts = _.without($scope.topograms, topogram);
-        });
-    }
-}
+});
 
 
 //

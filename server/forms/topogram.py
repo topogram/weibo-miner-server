@@ -11,3 +11,4 @@ class TopogramCreateForm(ModelForm):
     class Meta:
         model = Topogram
     dataset_id=StringField('dataset_id', validators=[DataRequired()])
+    citation_patterns=StringField('citation_patterns', validators=[DataRequired()])

@@ -1,17 +1,12 @@
 function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular, TopogramService, ConfigService) {
 
+    $scope.dataset ={};
     Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
 
-         // GRAPHS
-            var topoInfo = {
-              "es_query" : topogram.es_query,
-              "es_index_name" : topogram.es_index_name,
-              "dataset_id" : topogram.dataset_id,
-              "topotype_id" : topogram.dataset.topotype_id,
-              "citations_limit" : 50,
-              "words_limit" : 50
-            };
+        console.log(topogram);
 
+         // GRAPHS
+           /*
             Restangular.all('topograms').all('networks').post(topoInfo).then(function(topogram) {
 
               // words
@@ -27,7 +22,59 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
               $scope.wordForceStarted = true;
 
             });
+            */
         });
+
+
+$('body').keydown(function (e) {
+      if(e.which==87 && e.shiftKey==true) $scope.saveWords() // W
+      else if (e.which==71 && e.shiftKey==true) $scope.saveMap() // G
+      else if (e.which==67 && e.shiftKey==true) $scope.saveUsers() //C
+      else if (e.which==84 && e.shiftKey==true) $scope.saveTime()
+      else if (e.which==65 && e.shiftKey==true) $scope.saveAll()
+});
+
+$scope.saveAll = function () {
+  $scope.saveTime();
+  $scope.saveWords();
+  // $scope.saveMap();
+  $scope.saveUsers();
+}
+
+$scope.saveTime = function(){
+  var sv=new Simg($(".time-container svg")[0]);
+  var fn="time_"+$scope.dataset.title +"_"+$scope.searchTerm
+  sv.download(fn);
+}
+
+$scope.saveWords = function(){
+  var name ="words_"+$scope.dataset.title +"_"+$scope.searchTerm;
+  // $scope.downloadPNG($(".words-container svg")[0], name);
+     var sv=new Simg($(".words-container svg")[0]);
+     console.log(sv);
+     sv.download();
+}
+
+$scope.saveUsers = function(){
+  var name ="users_"+$scope.dataset.title +"_"+$scope.searchTerm;
+  $scope.downloadPNG($(".user-container svg")[0], name);
+}
+
+$scope.downloadPNG=function(container, name) {
+
+    var sv=new Simg(container);
+    // console.log(sv);
+    // sv.download();
+    // sv.downloadWithName(name);
+
+    // rewrite download function
+     sv.toImg(function(img){
+       var a = document.createElement("a");
+       a.download = name+".png";
+       a.href = img.getAttribute('src');
+       a.click();
+     });
+}
 
     /*Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
         console.log(topogram);

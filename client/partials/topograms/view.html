@@ -25,7 +25,6 @@
       <p></p><a target="_blank" href="/api/topogram/{{post._id}}/download.csv" download="{{post.name}}.csv" class="btn btn-default" disabled> Download search as CSV</a>
     </div>
   </div>
-
 </section>
 
 
@@ -57,3 +56,29 @@
   <p><a href="#" ng-click="playAll(); $event.preventDefault()" class="btn btn-default"><span class="glyphicon glyphicon-play"></span>Play</a><a href="#" ng-click="stop(); $event.preventDefault()" class="btn btn-default"><span class="glyphicon glyphicon-stop"></span>Stop</a><b>Start: {{start | date:'medium'}}</b><b>End: {{end | date:'medium'}}</b></p>
 </div>
 
+
+    <section id="words" class="row" ng-hide="!messages.length">
+    <!--  -->
+      <div class="col-xs-9 col-sm-9">
+      <div class="loader" ng-hide="words.index.length"></div>
+        <words class="words-container"></words>
+      </div>
+      <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+        <p><small>Hit Shift+W to save</small></p>
+        <div class="wordpie-container"></div>
+      </div>
+    </section>
+
+    <section class="row"  ng-hide="!messages.length">
+
+      <div class="col-xs-9 col-sm-9">
+        <div class="loader" ng-hide="citations.index.length"></div>
+        <citations class="citations-container"></citations>
+      </div>
+
+      <div class="col-xs-3 col-sm-3"><a type="button" ng-click="saveCitations(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>
+        <p><small>Hit Shift+C to save</small></p>
+        <!-- <div class="pie-container"></div> -->
+      </div>
+    </section>
+    

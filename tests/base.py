@@ -6,8 +6,8 @@ import unittest
 from flask.ext.testing import TestCase
 from flask.ext.migrate import upgrade, downgrade
 
-from src.resources import app, db
-from src.models.user import User
+from server import app, db
+from server.models.user import User
 
 import logging
 logger = logging.getLogger('topogram-server.tests')

@@ -6,8 +6,9 @@ import unittest
 
 from base import BaseTestCase
 from flask.ext.login import current_user
-from src.models.user import User
-from src.resources import bcrypt
+
+from server import bcrypt
+from server.models.user import User
 
 class TestUser(BaseTestCase):
 

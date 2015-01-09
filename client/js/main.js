@@ -28,13 +28,18 @@ window.Topogram = angular.module('Blog', [
                     break;
                 default:
                     // throw new Error('No handler for status code ' + response.status);
+                    // console.log(response);
                     return response
+
             }
             return false;
         }
     });
 })
+
 // fix for bootstrap 3
 Topogram.config(['flashProvider', function(flashProvider) {
   flashProvider.errorClassnames.push('alert-danger');
 }])
+
+Topogram.filter('unsafe', function($sce) { return $sce.trustAsHtml; });

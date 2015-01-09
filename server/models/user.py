@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from flask import g
 from server import bcrypt, secret_key, db
 
 from wtforms.validators import Email

@@ -6,4 +6,3 @@ from flask.ext.elasticsearch import ElasticSearch
 
 # elastic search
 elastic = ElasticSearch(app)
-

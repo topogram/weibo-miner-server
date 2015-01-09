@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import redis
-from rq import Queue
+from server.resources.rqueue import rq
 
 class JobQueue(object):
     """Job Queue using RQ to process data async"""
     def __init__(self, name, namespace='queue', **redis_kwargs):
         redis_conn = redis.Redis()
         self.key = '%s:%s' %(namespace, name)
-        self.q = Queue(name, connection=redis_conn)
+        self.q = rq.Queue(name, connection=redis_conn)
         
-    def queue(self, func, args):
+    def enqueue(self, func, args):
         self.q.enqueue(func, args)
 
     def jobs(self): 

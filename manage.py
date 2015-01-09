@@ -6,8 +6,7 @@ from colour_runner.runner import ColourTextTestRunner
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 
-from src.resources import app 
-from src.resources import db
+from server import app, db
 
 migrate = Migrate(app, db)
 manager = Manager(app)
@@ -19,6 +18,14 @@ def tests():
     """Runs the unit tests without coverage."""
     tests = unittest.TestLoader().discover('tests')
     ColourTextTestRunner(verbosity=2).run(tests)
+
+@manager.command
+def test():
+    """Runs a single test."""
+    module="tests.test_datasets.TestDatasetProcessing"
+    test = unittest.TestLoader().loadTestsFromName(module)
+    print test
+    ColourTextTestRunner(verbosity=2).run(test)
 
 @manager.command
 def cov():

@@ -1,9 +1,9 @@
 function DatasetCreateCtrl($scope, $timeout, $location, Restangular,FileUploader, modalService, flash) {
 
-    Restangular.all('topotypes').getList().then(function(topotypes){
-        $scope.topotypes=topotypes;
-        console.log(topotypes);
-    })
+    // Restangular.all('topotypes').getList().then(function(topotypes){
+    //     $scope.topotypes=topotypes;
+    //     console.log(topotypes);
+    // })
 
     $scope.dataset = {};
     

@@ -40,4 +40,3 @@ pymysql
 MySQL-python
 Flask-SocketIO
 redis
-rq

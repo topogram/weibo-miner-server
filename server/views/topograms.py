@@ -5,8 +5,12 @@ from flask_login import login_required
 
 from server import app, restful, db
 from server.models.topogram import Topogram 
+from server.models.regexp import Regexp
+
 from server.forms.topogram import TopogramCreateForm
 from server.serializers.topogram import TopogramSerializer
+
+from server.lib.indexer import get_topogram
 
 class TopogramListView(restful.Resource):
     @login_required
@@ -21,9 +25,20 @@ class TopogramListView(restful.Resource):
         if not form.validate_on_submit():
             return form.errors, 422
 
-        topogram = Topogram(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data,  form.records_count.data, form.words_limit.data, form.citations_limit.data,form.words.data, form.citations.data)
+        reg = Regexp.query.filter_by(id=form.citation_patterns.data).first()
+        if reg is None : return "Citations patterns doesn't exist", 404
+
+
+        print form.citation_patterns.data
+        print reg
+
+        topogram = Topogram(form.dataset_id.data,form.description.data, str(form.es_index_name.data), form.es_query.data,  form.records_count.data, form.words_limit.data, form.citations_limit.data,form.words.data, form.citations.data, form.stopwords.data, reg)
 
         db.session.add(topogram)
+        db.session.commit()
+
+        # add regexp backref
+        topogram.citations_patterns.append(reg)
         db.session.commit()
 
         return TopogramSerializer(topogram).data
@@ -32,8 +47,24 @@ class TopogramView(restful.Resource):
 
     @login_required
     def get(self, dataset_id, topogram_id):
-        topogram = Topogram.query.filter_by(id=topogram_id).first()
-        topogram= TopogramSerializer(topogram).data
+
+        t = Topogram.query.filter_by(id=topogram_id).first()
+        topogram= TopogramSerializer(t).data
+
+        for key in topogram : print key, topogram[key]
+        if topogram["citations_patterns"] is None : return "missing citation pattern", 422
+
+        if topogram["status"] == "raw":
+            # process data
+            get_topogram(topogram)
+            return { "status": "started"}, 201
+
+        elif topogram["status"] == "processing" :
+            return { "status": "processing"}, 201
+
+        elif topogram["status"] == "done" :
+            return { "status": "done"}, 201
+
         return topogram
 
     @login_required
