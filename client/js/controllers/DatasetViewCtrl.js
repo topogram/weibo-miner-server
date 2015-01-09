@@ -2,15 +2,20 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
 
     // set a default value 
     $scope.dataset = {};
-    $scope.languages = [{ "name" : "Chinese", "slug" : "zh"}]
+    $scope.languages = ["zh"];
     $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
-
 
     // load dataset description from db
     Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
             console.log(dataset);
             $scope.dataset = dataset;
             $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
+
+                if ($scope.dataset.text_column == ""  && $scope.dataset.time_column == "" && $scope.dataset.source_column == "" ) {
+                   $scope.isDescribed = false;
+                }
+                  else
+                    $scope.isDescribed = true;
     });
 
     $scope.loadMoreSamples = function() {
@@ -23,8 +28,10 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
 
    // dataset description
     $scope.postDatasetDescription = function() {
+        console.log($scope.dataset);
         $scope.dataset.put().then(function(dataset) {
-            flash.success = "Your dataset description has been updated"
+            flash.success = "Your dataset description has been updated";
+            $scope.isDescribed = true;
         }, function errorCallback(response) {
                 console.log(response);
                 flash.error = response.data
@@ -37,13 +44,12 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
 
     // indexing
     $scope.indexDataset =function() {
+            console.log('index dataset');
+            $scope.dataset.index_state = "processing";
+
             Restangular.one('datasets',$routeParams.datasetId).one("index").get().then(function(index) {
+              flash.success = "Index processing is " + index.status;
                 // console.log(index.status);
-                $timeout(function() {
-                  $location.path("/datasets/"+ $scope.dataset.id);
-                })
-                flash.success = "Index processing is " + index.status;
-                $scope.dataset.index_state = "processing";
             });
     }
 

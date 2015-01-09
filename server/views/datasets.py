@@ -95,20 +95,23 @@ class DatasetView(restful.Resource):
 
         # validate values
         csv_corpus = CSVCorpus(form.filepath.data,
-            source_column=form.source_column.data,
-            text_column=form.text_column.data,
-            timestamp_column=form.time_column.data,
-            time_pattern=form.time_pattern.data)
+                                source_column=form.source_column.data,
+                                text_column=form.text_column.data,
+                                timestamp_column=form.time_column.data,
+                                time_pattern=form.time_pattern.data)
         try :
             csv_corpus.validate()
         except ValueError, e:
             return e.message, 422
 
+        print form.language.data
+        
         # add new values 
         dataset.source_column = form.source_column.data
         dataset.text_column = form.text_column.data
         dataset.time_column = form.time_column.data
         dataset.time_pattern = form.time_pattern.data
+        dataset.language = form.language.data
         db.session.commit() #save changes
 
         # get the modified version

@@ -11,7 +11,6 @@ from topogram.languages.zh import ChineseNLP
 from topogram.corpora.csv_file import CSVCorpus
 from topogram.corpora.elastic import ElasticCorpus
 
-
 import logging
 
 logger = logging.getLogger("topogram-server.lib.indexer")

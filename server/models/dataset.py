@@ -28,12 +28,13 @@ class Dataset(db.Model):
     text_column = db.Column(db.String(120), default="text")
     time_column = db.Column(db.String(120), default="created_at") 
     time_pattern = db.Column(db.String(120), default="%Y-%m-%d %H:%M:%S") 
+    language = db.Column(db.String(120), default="en")
 
     # foreign keys
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     topograms = db.relationship('Topogram', backref='dataset', lazy='dynamic')
 
-    def __init__(self, title, description, filepath, index_name, index_state, source_column="source", text_column="text", time_column="created_at", time_pattern="%Y-%m-%d %H:%M:%S"):
+    def __init__(self, title, description, filepath, index_name, index_state, source_column="source", text_column="text", time_column="created_at", time_pattern="%Y-%m-%d %H:%M:%S", language="en"):
         self.title = title
         self.description = description
         self.index_name = index_name
@@ -41,6 +42,7 @@ class Dataset(db.Model):
         self.filepath = filepath
         self.source_column = source_column
         self.text_column = text_column
+        self.language = language
         self.time_column = time_column
         self.time_pattern = time_pattern
         self.user_id = g.user.id

@@ -27,11 +27,11 @@
         <div class="form-group">
           <div class="input-group">
               <div class="input-group-addon">Language</div>
-              <select ng-model="topogram.language"id="inputLanguage" class="form-control">
-                  <option ng-selected="{{operator.slug == dataset.language}}"
+              <select ng-model="dataset.language"id="inputLanguage" class="form-control">
+                  <option ng-selected="{{operator == dataset.language}}"
                   ng-repeat="operator in languages"
-                  value="{{operator.slug}}">
-                  {{operator.name}}
+                  value="{{operator}}">
+                  {{operator}}
               </option>
 
               </select>
@@ -90,13 +90,17 @@
 
 <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-
-            <button type="submit" class="btn btn-primary">Update Description</button>
-            <a ng-click="indexDataset()" class="btn btn-default">Create Index</a>
+            <button type="submit" class="btn btn-default">Update Description</button>
     </div>
 </div>
 
 </form>
+</div>
+<div class="col-sm-6" ng-hide=" dataset.index_state != 'raw' || !isDescribed">
+    <div class="form-group">
+            <p class="help-block">Click on this button to enable  full-text search and start exploring your data.</p>
+            <a ng-click="indexDataset()" class="btn btn-primary">Create Index</a>
+    </div>
 </div>
 
 <div class="col-sm-6" ng-hide="dataset.index_state != 'processing'">
