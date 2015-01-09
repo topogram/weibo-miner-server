@@ -1,4 +1,4 @@
-function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular, flash) {
+function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular, socket, flash) {
 
     // set a default value 
     $scope.dataset = {};
@@ -25,6 +25,17 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             });
     }
 
+    // init socket.io
+    socket.on('connect', function () {
+          console.log('connect');
+    });
+
+    socket.on('progress', function (data) {
+        console.log(data);
+        // var d=JSON.parse(data)
+        // console.log(typeof(data), typeof(d));
+        // $scope.loadingNetworks=JSON.parse(data);
+    });
 
    // dataset description
     $scope.postDatasetDescription = function() {

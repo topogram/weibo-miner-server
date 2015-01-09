@@ -5,17 +5,22 @@ from server import db
 from server.resources.elastic import elastic
 from server.models.dataset import Dataset
 from server.models.topogram import Topogram
+
 from flask.ext.rq import job
+from server.resources.socketio import socket
 
 from topogram.topograms.basic import BasicTopogram
 from topogram.languages.zh import ChineseNLP
 from topogram.corpora.csv_file import CSVCorpus
 from topogram.corpora.elastic import ElasticCorpus
 
-import logging
-import pickle
 
+import logging
 logger = logging.getLogger("topogram-server.lib.indexer")
+
+import pickle
+import json
+
 
 @job('taf')
 def csv2elastic(dataset):
@@ -34,7 +39,11 @@ def csv2elastic(dataset):
     d.index_state = "processing"
     db.session.commit()
 
-    for row in csv_corpus :
+    for i, row in enumerate(csv_corpus) :
+        if i%10 == 0: 
+            # print "emit socket"
+            socket.emit("progress", json.dumps({"count" : i}))
+
         record = { "text" : row[0], "created_at" : row[1],"source" : row[2]}
         res = elastic.index(dataset["index_name"], "message", record)
 
@@ -60,8 +69,16 @@ def delete_index( es_index_name):
 # @job('taf')
 def get_topogram(_topogram):
 
+    print _topogram
     nlp = ChineseNLP()
+    for word in _topogram["stopwords"].split(","): 
+        nlp.stopwords.append(word)
+        print word
+
+
     es = ElasticCorpus(elastic, _topogram["es_index_name"], _topogram["es_query"])
+
+    socket.emit('progress', {"state":"processing"});
 
     # process the data
     topogram = BasicTopogram(corpus=es, nlp=nlp)

@@ -181,11 +181,10 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     });
 
     socket.on('progress', function (data) {
-        // console.log("progress", );
         console.log(data);
-        var d=JSON.parse(data)
-        console.log(typeof(data), typeof(d));
-        $scope.loadingNetworks=JSON.parse(data);
+        // var d=JSON.parse(data)
+        // console.log(typeof(data), typeof(d));
+        // $scope.loadingNetworks=JSON.parse(data);
     });
 
      // $scope.$watch("loadingNetworks", function(newVal, oldVal){
@@ -227,6 +226,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       $scope.topogram.dataset_id = $routeParams.datasetId;
       $scope.topogram.es_query = $scope.searchTerm;
       $scope.topogram.es_index_name = $scope.index;
+      $scope.topogram.stopwords = $scope.topogram.stopwords.toString();
 
       console.log($scope.topogram);
 
@@ -235,17 +235,6 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
                 $location.path("/datasets/"+ $routeParams.datasetId + "/topograms/" + topogram.id);
             })
             flash.success = "New topogram created !"
-
-            // // words
-            // $scope.words=topogram.words;
-            // if(data.words.index!=undefined) $scope.wordsLength=topogram.words.index.length;
-            // $scope.wordForceStarted = true;
-
-            // // citations
-            // $scope.showCommunities=false; 
-            // $scope.citations=data.citations;
-            // if(data.citations.index!=undefined) $scope.citationsLength=data.citations.index.length;
-            // $scope.wordForceStarted = true;
 
       }, function (error){
           console.log(error);

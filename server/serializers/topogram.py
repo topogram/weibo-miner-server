@@ -15,5 +15,5 @@ class TopogramSerializer(Serializer):
     citations_patterns = fields.Nested(RegexpSerializer, many=True)
 
     class Meta:
-        fields = ("id", "description", "es_index_name", "es_query", "user", "dataset","dataset_id", "user_id", "created_at", "records_count", "words_limit", "citations_limit", "words", "citations", "status", "citations_patterns", "networks")
+        fields = ("id", "description", "es_index_name", "es_query", "user", "dataset","dataset_id", "user_id", "created_at", "records_count", "words_limit", "citations_limit", "words", "citations", "status", "citations_patterns", "networks", "stopwords")
 

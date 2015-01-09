@@ -1,10 +1,39 @@
-function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular, TopogramService, ConfigService) {
+function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular, searchService, TopogramService, ConfigService) {
 
+
+    // INIT
+    $scope.messages = [];
+    $scope.page = 0;        // A counter to keep track of our current page
+    $scope.allResults = false;  // Whether or not all results have been found.
+
+    
     // load topogram
     Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
-          console.log(topogram);
-          $scope.topogram = topogram;
-          $scope.dataset = topogram.dataset;
+            console.log(topogram);
+            
+            $scope.topogram = topogram;
+            $scope.dataset = topogram.dataset;
+
+            $scope.columns = [{"title": "Text", 'field': "text"}, {"title": "Creation Date", 'field': "created_at"},{"title": "Author", 'field': "source"} ]; 
+
+            // SEARCH RESULTS
+            searchService.search($scope.topogram.es_index_name, $scope.topogram.es_query).then(function(results){
+
+              $scope.totalResults=results.total;
+
+                var ii = 0;
+                for(;ii < results.messages.length; ii++){
+                  $scope.messages.push(results.messages[ii]);
+                }
+
+              if(results.histogram.length){
+                  $scope.start=results.histogram[0].time;
+                  $scope.end=results.histogram[results.histogram.length-1].time;
+                  $scope.timeData=results.histogram;
+              }
+        });
+
+
       });
 
     $scope.wordsLimit = 10;
@@ -24,6 +53,27 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
         $scope.citations=citations;
         $scope.citationsForceStarted = true;
     });
+
+    /**
+    * Load the next page of results, incrementing the page counter.
+    * When query is finished, push results onto $scope.recipes and decide
+    * whether all results have been returned (i.e. were 10 results returned?)
+    */
+
+    $scope.loadMore = function(){
+      searchService
+      .loadMore($scope.index, $scope.searchTerm, $scope.page++).then(function(results){
+        if(results.messages.length !== 10){
+          $scope.allResults = true;
+        }
+
+        var ii = 0;
+        for(;ii < results.messages.length; ii++){
+          $scope.messages.push(results.messages[ii]);
+        }
+      })
+    };
+
 
            /*
               // words
