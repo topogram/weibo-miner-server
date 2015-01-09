@@ -17,6 +17,8 @@ ASSETS_DIR = os.path.join(os.path.dirname(basedir), "client")
 
 app = Flask(__name__)
 
+print ASSETS_DIR
+
 # config
 app.config.from_object('config')
 secret_key="a_random_secret_key_$%#!@"
