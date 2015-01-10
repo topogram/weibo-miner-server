@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from server import app, restful, db
 from server.models.topogram import Topogram 
@@ -16,7 +16,8 @@ import pickle
 class TopogramListView(restful.Resource):
     @login_required
     def get(self):
-        topograms = Topogram.query.all()
+        topograms =current_user.topograms.all()
+        # topograms = Topogram.query.all()
         return TopogramSerializer(topograms, many=True).data
 
     @login_required

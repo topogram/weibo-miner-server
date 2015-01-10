@@ -6,7 +6,7 @@ import uuid
 import csv
 from flask import request
 from flask.ext.restful import reqparse
-from flask_login import login_required
+from flask_login import login_required, current_user
 from werkzeug import secure_filename
 
 from server import app, restful, db
@@ -32,9 +32,8 @@ class DatasetListView(restful.Resource):
 
     @login_required
     def get(self):
-        datasets = Dataset.query.all()
+        datasets =  current_user.datasets.all()
         return DatasetSerializer(datasets, many=True).data
-
 
     @login_required
     def post(self):
@@ -73,13 +72,15 @@ class DatasetView(restful.Resource):
         dataset = Dataset.query.filter_by(id=id).first()
         if dataset is None: return 404
 
+        # check user rights
+        if dataset.user.id != current_user.id : return 401
+
         d= DatasetSerializer(dataset).data
         if d["index_state"] == "done" : delete_index(d["index_name"])
 
         db.session.delete(dataset)
         db.session.commit()
         return 204
-
 
     @login_required
     def put(self, id):
@@ -93,6 +94,9 @@ class DatasetView(restful.Resource):
         dataset = Dataset.query.filter_by(id=id).first()
         if dataset is None: return 404
 
+        # check rights
+        if dataset.user.id != current_user.id : return 401
+        
         # validate values
         csv_corpus = CSVCorpus(form.filepath.data,
                                 source_column=form.source_column.data,
@@ -130,6 +134,9 @@ class DatasetView(restful.Resource):
 
         d = Dataset.query.filter_by(id=id).first()
         if d is None : return 404 # handle wrong ID request
+
+        # check rights
+        if d.user.id != current_user.id : return 401
 
         dataset= DatasetSerializer(d).data
         
