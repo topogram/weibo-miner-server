@@ -12,7 +12,7 @@ function UserCreateCtrl($scope, $location, flash, Restangular) {
             flash.success = "Thanks! You have been succesfully registered.";
         }, function(response) {
             console.log(response);
-            flash.error = "Error", response.status, " : ", response.status;
+            flash.error =  response.data;
         });
     }
 }

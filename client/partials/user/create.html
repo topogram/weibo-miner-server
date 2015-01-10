@@ -1,34 +1,46 @@
 <h1>Register</h1>
-<form ng-controller="UserCreateCtrl" ng-submit="submitRegisterForm()" role="form" class="form-horizontal">
-  <div class="form-group">
+<form ng-controller="UserCreateCtrl" ng-submit="submitRegisterForm()" role="form" class="form-horizontal" name="userForm" novalidate>
+  <div class="form-group" data-ng-class="( userForm.email.$dirty ? (userForm.email.$valid ? 'has-success has-feedback' : 'has-error has-feedback' ) : ' ')">
     <label for="inputEmail" class="col-sm-4 control-label">Email</label>
     <div class="col-sm-4">
-      <input id="inputEmail" type="text" placeholder="Email" ng-model="loginInfo.email" class="form-control"/>
+      <input id="inputEmail" name="email" type="email" placeholder="Email" ng-model="loginInfo.email" class="form-control" required="true"/>
+      <span ng-show="userForm.email.$error.email && userForm.email.$dirty" class="bg-danger pad">Please enter valid email.</span>
+      <span class="help-block" data-ng-show="userForm.email.$error.required && userForm.email.$dirty">This is required.</span></div>
+      <span ng-if='userForm.email.$valid' class="glyphicon glyphicon-ok form-control-feedback"></span>
+    </div>
     </div>
   </div>
-  <div class="form-group">
+  <div class="form-group"  data-ng-class="( userForm.password.$dirty ? (userForm.password.$valid ? 'has-success has-feedback' : 'has-error has-feedback' ) : ' ')">
     <label for="inputPassword" class="col-sm-4 control-label">Password</label>
     <div class="col-sm-4">
-      <input id="inputPassword" type="password" placeholder="Password" ng-model="loginInfo.password" class="form-control"/>
+      <input id="inputPassword" name="password" type="password" placeholder="Password" ng-model="loginInfo.password" class="form-control" required="true"/>
+      <span class="help-block" data-ng-show="userForm.password.$error.required && userForm.password.$dirty">This is required.</span></div>
+      <span ng-if='userForm.password.$valid' class="glyphicon glyphicon-ok form-control-feedback"></span>
     </div>
   </div>
-  <div class="form-group">
+  <div class="form-group" data-ng-class="( userForm.passwordMatch.$dirty ? (userForm.passwordMatch.$valid ? 'has-success has-feedback' : 'has-error has-feedback' ) : ' ')">
     <label for="inputPasswordMatch" class="col-sm-4 control-label">Confirm Password</label>
     <div class="col-sm-4">
-      <input id="inputPasswordMatch" type="password" placeholder="Password" password-match="loginInfo.password" ng-model="loginInfo.password2" class="form-control"/>
+      <input id="inputPasswordMatch" name="passwordMatch" type="password" placeholder="Password" match="loginInfo.password" ng-model="loginInfo.password2" class="form-control" required="true"/>
+      <span class="help-block" data-ng-show="userForm.passwordMatch.$error.required && userForm.passwordMatch.$dirty">This is required.</span></div>
+      <span class="help-block" data-ng-show="userForm.passwordMatch.$error.mismatch && userForm.passwordMatch.$dirty">Password doesn't match.</span></div>
+      <span ng-if='userForm.passwordMatch.$valid' class="glyphicon glyphicon-ok form-control-feedback"></span>
     </div>
   </div>
   
-  <div class="form-group">
+  <div class="form-group" data-ng-class="( userForm.invite.$dirty ? (userForm.invite.$valid ? 'has-success has-feedback' : 'has-error has-feedback' ) : ' ')">
     <label for="inputInviteCode" class="col-sm-4 control-label">Invite Code</label>
     <div class="col-sm-4">
-      <input id="inputInviteCode" type="text" placeholder="Type your code here..." ng-model="loginInfo.invite" class="form-control"/>
+      <input id="inputInviteCode" name="invite" type="text" placeholder="Type your code here..." ng-model="loginInfo.invite" class="form-control" required="true"/>
     </div>
+    <span class="help-block" data-ng-show="userForm.invite.$error.required && userForm.invite.$dirty">This is required.</span></div>
+    <span ng-if='userForm.invite.$valid' class="glyphicon glyphicon-ok form-control-feedback"></span>
+
   </div>
 
   <div class="form-group">
     <div class="col-sm-offset-4 col-sm-10">
-      <button type="submit" class="btn btn-default">Log In</button>
+      <button type="submit" class="btn btn-default">Register</button>
     </div>
   </div>
 </form>

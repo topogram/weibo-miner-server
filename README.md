@@ -22,8 +22,6 @@ Currently supported :
 * Keywords extraction (Chinese and English language) 
 * See the emergence of dynamics around words and users over time
 * Geo-location and tweets mapping
- 
-
 
 ## Run you own instance
 
@@ -34,6 +32,7 @@ You can easily run ```Topogram``` on your own machine at [http://localhost:5000]
     pip install -r requirements.txt
     python run.py
 
+The first user created wil get admin rights and therefore will be able to access ```/admin``` control panel.
 
 ###  Tests
 

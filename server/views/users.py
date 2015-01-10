@@ -14,6 +14,8 @@ from server.models.user import User
 from server.forms.user import UserCreateForm
 from server.serializers.user import UserSerializer
 
+# from server.lib.mailer import send_welcome_email
+
 import logging
 logger = logging.getLogger('topogram-server.views.user')
 
@@ -32,25 +34,35 @@ class UserView(restful.Resource):
         form = UserCreateForm()
 
         if not form.validate_on_submit():
-            return {"status" : "error", "message" : form.errors}, 422
+            return form.errors, 422
 
-        if form.invite.data != "invite":
-            return {"status" : "error", "message" : "Wrong invitation code."}, 410
+        # check invitation code
+        if form.invite.data != app.config["INVITE_CODE"] :
+            return "Wrong invitation code.", 410
 
         # check if user already exists before trying to create
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None:
-            return {"status" : "error", "message" : "User already exists."}, 401
+            return "User already exists.", 401
+
 
         # create user
         user = User(form.email.data, form.password.data)
+
         db.session.add(user)
         db.session.commit()
+
+        serialized_user = UserSerializer(user).data
+
+        # the first user created should have admin rights 
+        if user.id  == 1: 
+            user.role = "admin"
+            db.session.commit()
 
         # log user
         login_user(user, remember=True)
 
-        return UserSerializer(user).data, 201
+        return serialized_user, 201
 
     @login_required
     @admin_permission.require(http_exception=403)

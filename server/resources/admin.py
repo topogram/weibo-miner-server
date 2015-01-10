@@ -22,7 +22,7 @@ from server.models.topogram import Topogram
 from server.models.regexp import Regexp
 
 
-# from views import admin_permission
+from server.views.users import admin_permission
 
 
 # admin_role
@@ -39,9 +39,12 @@ class MyAdminIndexView(AdminIndexView):
     def is_accessible(self):
         if current_user.is_anonymous():
             # return redirect(url_for('.index'))
-            return False
+            return 401
+        # need(current_user)
+        # print need  
         return current_user.is_authenticated()
 
+    @admin_permission.require()
     @expose('/')
     def index(self):
         if not current_user.is_authenticated():
