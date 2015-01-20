@@ -1,4 +1,4 @@
-function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular, socket, flash) {
+function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular, socket, flash, modalService) {
 
     // set a default value 
     $scope.dataset = {};
@@ -73,12 +73,30 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
     });
 
     $scope.deleteTopogram = function(topogram) {
-        topogram.remove().then(function() {
-            $timeout(function() {
-                $location.path("/datasets/"+ $scope.dataset.id);
-            })
-            $scope.posts = _.without($scope.topograms, topogram);
+        var modalOptions = {
+            closeButtonText: 'Cancel',
+            actionButtonText: 'Delete',
+            headerText: 'Delete',
+            bodyText: 'Are you sure you want to delete this topogram?',
+            waitModal : false
+        };
+
+        modalService.showModal({}, modalOptions).then(function (deleted) {
+            console.log("deleted", deleted);
+            topogram.remove().then(function() {
+
+                // remove from scope
+                var index = $scope.topograms.indexOf(topogram);
+                if (index > -1) $scope.topograms.splice(index, 1);
+
+                // notify user
+                $timeout(function() { flash.success = "Topogram deleted" })
+            });
+        }, function () {
+            // TODO : hit cancel
+            console.info('Modal dismissed at: ' + new Date());
         });
+
     }
 }
 

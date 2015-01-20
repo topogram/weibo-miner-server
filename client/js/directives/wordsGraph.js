@@ -10,6 +10,7 @@ Topogram.directive("words", function () {
             var w=900,
                 h=500;
 
+            // setup SVG
             var viz=d3.select(element[0]).append("svg")
                 .attr("class","svg-viz")
                 .style("background","#fff")
@@ -29,72 +30,27 @@ Topogram.directive("words", function () {
             var wordsLegend=divWords.append("g")
                         .attr("class", "words-legend")
                         .attr("transform", "translate("+(100)+","+(h-200)+")");
-            
-            // draw legend
-            $scope.$watch('topogram.es_query', function(newVal, oldVal) {
 
-                if(newVal!=undefined) {                           
-                    wordsLegend.append("text")
-                        .attr("dx",1)
-                        .attr("dy",12)
-                        .text("Words correlation for '"+newVal+"'")
-                        .style("fill","#404040")
-                        .style("margin-left",5)
-                        .style("font-size",10)
-                        .call(wrap, 135);
-
-                    wordsLegend.append("text")
-                        .attr("transform","translate(0,30)")
-                        .attr("dx",1)
-                        .attr("dy",10)
-                        .text("Weighted co-occurences in tweets for 500 most used words")
-                        .style("fill","#aaa")
-                        .style("margin-left",5)
-                        .style("font-size",10)
-                        .call(wrap, 150);
-                }
-            });
-
-            function wrap(text, width) {
-                text.each(function() {
-                    var text = d3.select(this),
-                        words = text.text().split(/\s+/).reverse(),
-                        word,
-                        line = [],
-                        lineNumber = 0,
-                        lineHeight = 0.7, // ems
-                        y = text.attr("y"),
-                        dy = parseFloat(text.attr("dy")),
-                        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy );
-                    while (word = words.pop()) {
-                      line.push(word);
-                      tspan.text(line.join(" "));
-                      if (tspan.node().getComputedTextLength() > width) {
-                        line.pop();
-                        tspan.text(line.join(" "));
-                        line = [word];
-                        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy ).text(word);
-                      }
-                    }
-                });
-            }
-            
             // data 
             $scope.$watch("words.words", function(newVal,oldVal){
 
-                // console.log(newVal);
+                if(newVal == undefined) return // prevent error
 
-                if(newVal==undefined) return
+                // init
                 var wordsData=$scope.words.words;
-                // console.log(wordsData);
-
                 d3.selectAll(".word-link").remove();
                 d3.selectAll(".word").remove();
 
-                var wordsX={},
-                    wordsY={};
+                /*
+                *   DATA : compute data and store in nodes
+                */
 
-                updateWordXY= function updateWordXY() {
+                // arrays to store coordonates  
+                var wordsX={},
+                      wordsY={};
+
+                // update coordonates based on word and canvas size
+                var updateWordXY= function () {
                     var margin=30,
                         rgx=d3.scale.linear().domain([0,wordNodes.length]).range([margin,w-margin-200]),
                         s=d3.shuffle(wordNodes),
@@ -126,9 +82,15 @@ Topogram.directive("words", function () {
                         (wordsData.nodes[link.source] = {name: link.source});
                     link.target = wordsData.nodes[link.target] || 
                         (wordsData.nodes[link.target] = {name: link.target});
+                    console.log(link);
                     link.value = link.weight;
                 }
 
+                /*
+                *   DRAW : 
+                */
+
+                // create graph
                 var wordForce=d3.layout.force()
                         .nodes(wordsData.nodes)
                         .links(wordsData.links)
@@ -157,7 +119,7 @@ Topogram.directive("words", function () {
                     wordNodes.call(wordForce.drag);
                 }
 
-                drawWords();
+                drawWords(); // init
 
                 // scales
                 var fontScale=[15,60],
@@ -169,14 +131,13 @@ Topogram.directive("words", function () {
                 
                 $scope.selection=false;
 
+                // drwa all words
                 function drawWords() {
-
                     var ext=wordsData.nodes.map(function(d){ return d.children.length }), 
                         wordScaleSize=d3.scale.linear().domain(d3.extent(ext)).range([15, 45]),
                         wordScaleOpacity=d3.scale.linear().domain(d3.extent(ext)).range([.5,1]),
                         wordColor = d3.scale.linear().domain(d3.extent(ext)).range(["#a1d99b","#006d2c"]),
                         c=d3.scale.category10();
-
                     wordNodes.each(function (d, i) {
 
                         var self = d3.select(this);
@@ -192,13 +153,10 @@ Topogram.directive("words", function () {
                             .attr("dy", 8)
                             .style("font-size", function(d) { return wordScaleSize(d.children.length) })//scale_size(d.btw_cent) })
                             .style("fill", function(d) {  
-                                // return 
-                                // "#006d2c" 
-                                // console.log(d);
                                 return c(d.community)
                             })
-                            // .style("fill-opacity", function(d) {  return "#006d2c" })
-                            // .style("fill-opacity", function(d) {  return wordScaleOpacity(d.weight) })
+                            .style("fill-opacity", function(d) {  return "#006d2c" })
+                            .style("fill-opacity", function(d) {  return wordScaleOpacity(d.weight) })
                             .attr("text-anchor", "middle") // text-align: right
                             .text(function(d) { return d.id });
 
@@ -207,29 +165,20 @@ Topogram.directive("words", function () {
 
                         wordsX[d.id]=x;
                         wordsY[d.id]=y;
-                    }).on("mouseover",function(d,i,event){
-                        // console.log(d3.mouse());Z
-                        
+                    })
+                    .on("mouseover",function(d,i,event){
                         $scope.selection=true;
                         d.selected=true;
                         d.children.forEach(function(e){
                             e.selected=true;
                         })
-                        
-                        // drawWordPie(divWords.append("g").attr("transform",'translate(100,50)'),
-                        //     // $scope.wordProvinces[d.id],
-                        //     d.id
-                        //     )
-
                     }).on("mouseout",function(d,i){
-
                         $scope.selection=false;
                         d.selected=false;
                         d.children.forEach(function(e){
                             e.selected=false;
                         })
-                        d3.select(".pie-chart").remove()
-
+                        // d3.select(".pie-chart").remove()
                     });
                     // .on("click",function(d){
                     //     console.log(d);
@@ -239,94 +188,22 @@ Topogram.directive("words", function () {
                     drawWordPath();
                 }
 
-                function drawWordPie(element, _data, _word) {
-
-                  element.select(".pie-chart").remove()
-
-
-                    // parse only more than 3 % and group others
-                    data=[];
-                    var t=d3.sum(_data.map(function(d){ return d.value }));
-                    var others=0;
-
-                    
-                    _data.forEach(function (d){
-                        if(d.label == 0) return
-                        if(d.value/t*100>7) data.push({"label":d.label,
-                                    "color": $scope.geoColors[d.label], 
-                                    "value": d.value})
-                        else others+=d.value
-                    })
-                    if(others!=0) data.push({"label":"Others",
-                                        "color": "#CCC", 
-                                        "value": others})
-
-                    var width = 200,
-                        height = 200,
-                        radius = Math.min(width, height) / 2;
-
-                    var arc = d3.svg.arc()
-                      .outerRadius(radius - 10)
-                      .innerRadius(0);
-
-                    var pie = d3.layout.pie()
-                      .sort(null)
-                      .value(function(d) { return d.value; });
-
-                    var svg = element
-                      .append("g")
-                      .attr("class","pie-chart")
-                      .attr("width", 200)
-                      .attr("height", 200)
-                      .append("g")
-                      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-                    var g = svg.selectAll(".arc")
-                        .data(pie(data))
-                        .enter();
-
-                    g.append("path")
-                      .attr("class", "arc")
-                      .attr("d", arc)
-                      .attr("data-legend", function(d){ return d.data.label })
-                      .style("fill", function(d) { return d.data.color; });
-
-                    g.append("text")
-                      .attr("transform", function(d) { 
-                        return "translate(" + arc.centroid(d) + ")"; 
-                    })
-                      .attr("dy", ".25em")
-                      .style("fill","#000")
-                      .style("fill-opacity","0.8")
-                      .style("text-anchor", "middle")
-                      .style("font-size", 10)
-                      .style("fill","#000")
-                      .text(function(d) { return d.data.label; });
-
-                    svg.append("text")
-                      .attr("class", "legend")
-                      .style("text-anchor", "middle")
-                      .style("font-size", 11)
-                      .style("fill","#404040")
-                      .attr("transform", "translate(0,"+(-width/2)+")")
-                      .text("Word: "+_word)
-                }
-
+                // colors
                 function drawWordPath() {
-
                     var wordPathExt=wordsData.links.map(function(d){ return d.weight }),
                         wordPathWeight=d3.scale.linear().domain(d3.extent(wordPathExt)).range([1, 4]),
                         wordPathOpacity=d3.scale.linear().domain(d3.extent(wordPathExt)).range([.1, 1]);
                     
                     wordPath.each(function (d, i) {
                         var self = d3.select(this);
-                        
-                        self.style("stroke", function(d) { return "#de2d26" })
+                        self.style("stroke", function(d) { return "#000" })
                             .style("stroke-width", function(d) {  return wordPathWeight(d.weight) })
                             .style("stroke-opacity", function(d) {  return wordPathOpacity(d.weight) });
                     })
                 }
 
+
+                // 
                 var ext=wordsData.nodes.map(function(d){ return d.children.length }), 
                     wordScaleOpacity=d3.scale.linear().domain(d3.extent(ext)).range([.5,1]);
 
