@@ -23,7 +23,9 @@
 
               <p><a href="#" type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-primary btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>   or hit <small> Shift+W</small></p>
         </div>
-        <h5>10 most connected words</h5>
+        <h5>Most connected words</h5>
+        <a class="btn btn-xs" ng-click="prevTopWords()"><< prev</a> 
+        {{ wordsListStart }} | {{wordsListEnd}}<a class="btn btn-xs" ng-click="nextTopWords()">next >></a>
         <table ng-table show-filter="true" class="table table-condensed">
         <thead>
           <tr>
@@ -32,7 +34,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="row in words.top_words.slice(0,10)">
+        <tr ng-style="{color: wordColors(row.degree)}" ng-repeat="row in words.top_words.slice(wordsListStart,wordsListEnd)">
           <td>{{row.node }}</td>
           <td>{{row.degree }}</td>
         </tr>

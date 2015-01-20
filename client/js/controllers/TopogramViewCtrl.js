@@ -6,7 +6,6 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
     $scope.page = 0;        // A counter to keep track of our current page
     $scope.allResults = false;  // Whether or not all results have been found.
 
-    
     // load topogram
     Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
             console.log(topogram);
@@ -39,12 +38,32 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
     $scope.wordsLimit = 10;
     $scope.citationsLimit = 10;
 
+
+    $scope.wordsListStart = 0;
+    $scope.wordsListEnd = 10;
+
+      $scope.nextTopWords = function() {
+        if ($scope.wordsListStart + 10 < $scope.words.top_words.length  ){
+          $scope.wordsListStart +=10;
+          $scope.wordsListEnd +=10;
+        }
+      }
+
+      $scope.prevTopWords = function() {
+        if ($scope.wordsListStart -10 >=  0){
+                  $scope.wordsListStart -=10;
+                  $scope.wordsListEnd -=10;
+        }
+      }
+
+
     // WORDS 
+    $scope.wordColors = d3.scale.category10();
+
     Restangular.one('topograms',$routeParams.topogramId).one('words', $scope.wordsLimit).get().then(function(words) {
         console.log(words);
         $scope.words=words;
         $scope.wordsForceStarted = true;
-
     });
 
     // CITATIONS 
