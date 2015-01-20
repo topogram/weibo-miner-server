@@ -3,9 +3,6 @@ function DatasetCreateCtrl($scope, $timeout, $location, Restangular,FileUploader
     $scope.dataset = {};
     $scope.dataset.title = "";
 
-    $scope.$watch("dataset.title", function(n,o){
-        console.log(n);
-    })
 
     // FILE UPLOAD
     var uploader = $scope.uploader = new FileUploader({
