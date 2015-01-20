@@ -65,7 +65,7 @@ class TopogramView(restful.Resource):
 
     @login_required
     def delete(self, dataset_id, topogram_id):
-        topogram = topogram.query.filter_by(id=topogram_id).first()
+        topogram = Topogram.query.filter_by(id=topogram_id).first()
         db.session.delete(topogram)
         db.session.commit()
         return '{"ok" : post deleted"}', 204
@@ -115,8 +115,6 @@ class TopogramAsCSV(restful.Resource) :
     def get(self, topogram_id):
         t = Topogram.query.filter_by(id=topogram_id).first()
         topogram= TopogramSerializer(t).data
-
-        
 
 class TopogramTimeFramesList(restful.Resource):
     

@@ -8,6 +8,7 @@ function DatasetIndexCtrl($scope, $http, $location, $timeout, Restangular, flash
     });
     
     $scope.delete = function(dataset) {
+
         var modalOptions = {
             closeButtonText: 'Cancel',
             actionButtonText: 'Delete',
