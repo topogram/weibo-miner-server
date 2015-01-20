@@ -20,11 +20,13 @@ function DatasetIndexCtrl($scope, $http, $location, $timeout, Restangular, flash
             console.log("modal");
             console.log(deleted);
             dataset.remove().then(function() {
-                $timeout(function() {
-                                    // $location.path("/datasets");
-                                    flash.success = "Dataset deleted"
-                                })
-                $scope.posts = _.without($scope.datasets, dataset);
+
+                // remove from scope
+                var index = $scope.posts.indexOf(dataset);
+                if (index > -1) $scope.posts.splice(index, 1);
+
+                // notify user
+                $timeout(function() { flash.success = "Dataset deleted" })
             });
         }, function () {
             // TODO : hit cancel
