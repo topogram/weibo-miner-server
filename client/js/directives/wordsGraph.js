@@ -131,7 +131,7 @@ Topogram.directive("words", function () {
                 
                 $scope.selection=false;
 
-                // 
+                // drwa all words
                 function drawWords() {
                     var ext=wordsData.nodes.map(function(d){ return d.children.length }), 
                         wordScaleSize=d3.scale.linear().domain(d3.extent(ext)).range([15, 45]),
