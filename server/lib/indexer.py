@@ -90,4 +90,3 @@ def get_topogram(_topogram):
     t.networks = data
 
     db.session.commit()
-

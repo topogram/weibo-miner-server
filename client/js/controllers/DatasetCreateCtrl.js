@@ -1,12 +1,9 @@
 function DatasetCreateCtrl($scope, $timeout, $location, Restangular,FileUploader, modalService, flash) {
 
-    // Restangular.all('topotypes').getList().then(function(topotypes){
-    //     $scope.topotypes=topotypes;
-    //     console.log(topotypes);
-    // })
-
     $scope.dataset = {};
-    
+    $scope.dataset.title = "";
+
+
     // FILE UPLOAD
     var uploader = $scope.uploader = new FileUploader({
         url: '/api/v1/datasets',
@@ -18,42 +15,38 @@ function DatasetCreateCtrl($scope, $timeout, $location, Restangular,FileUploader
     uploader.filters.push({
         name: 'csvFilter',
         fn: function(item /*{File|FileLikeObject}*/, options) {
-            var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
-            return '|csv|'.indexOf(type) !== -1;
+            var filetype = item.name.split('.').pop();
+            var authorized  = ["csv", "txt"];
+            return authorized.indexOf(filetype) !== -1;
         }
     });
 
-    $scope.modalShow = function() {
-        // $scope.modalWait = modalService.showModal({}, { bodyText : "We are currently indexing your file. This may take some time, please be patient", waitModal : true }).then(function (ok) {
-        //                 // promise fullfiled 
-        //                  // console.log(ok);
-        //             }, function () {
-        //                 // TODO : hit cancel
-        //                 console.info('Modal dismissed at: ' + new Date());
-        //             });
-      };
+    uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
+                console.info('onWhenAddingFileFailed', item, filter, options);
+                flash.error = "Error when adding file ";
+            };
 
-    $scope.modalClose = function() {
-    modalService.closeAll();
-    }
-
-    uploader.onBeforeUploadItem = function(item) {
-            $scope.modalShow();
+    uploader.onAfterAddingFile = function(fileItem) {
+        console.info('onAfterAddingFile', fileItem);
+        console.log($scope.dataset);
     };
 
-        // function closeModal() { modalService.close(); }
-
-        uploader.onSuccessItem = function(fileItem, response, status, headers) {
-
-            console.log(response);
-            flash.success = "Dataset created ! " + response.id;
-
-            $timeout(function() {
-                $location.path("/datasets/"+response.id);
-            })
-        };
-
-        uploader.onErrorItem = function(fileItem, response, status, headers) {
-            flash.error = response
-        };
+    uploader.onBeforeUploadItem = function(item) {
+            uploader.formData = $scope.dataset;
     }
+
+    uploader.onSuccessItem = function(fileItem, response, status, headers) {
+
+        console.log(response);
+        flash.success = "Dataset created ! " + response.id;
+
+        $timeout(function() {
+            $location.path("/datasets/"+response.id);
+        })
+    };
+
+    uploader.onErrorItem = function(fileItem, response, status, headers) {
+        flash.error = response
+    };
+
+}

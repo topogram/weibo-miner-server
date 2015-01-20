@@ -3,27 +3,21 @@
 <!-- <button class="btn btn-default" ng-click="openWait()">Modal</button> -->
 
 
-<form ng-controller="DatasetCreateCtrl" role="form" class="form-horizontal" enctype="multipart/form-data" name="datasetForm" ng-submit="">
+<form ng-controller="DatasetCreateCtrl" role="form" class="form-horizontal" enctype="multipart/form-data" name="datasetForm" ng-submit="" novalidate>
 
   <div class="row">
     <div class="col-sm-6">
-      <!-- <div class="form-group"> -->
-        <!-- <div ng-show="uploader.isHTML5">
-          <div class="well my-drop-zone" nv-file-over="" uploader="uploader">
-              Base drop zone
-          </div>
-        </div> -->
-        <div class="form-group" ng-class="{ 'has-error' : datasetForm.title.$invalid && !datasetForm.title.$pristine }">
+
+        <div class="form-group" data-ng-class="( dataset.title.$dirty ? ( dataset.title.$valid ? 'has-success has-feedback' : 'has-error has-feedback' ) : ' ')"
           <label for="inputTitle" class="control-label">Title (required)</label>
-          <input id="inputTitle" type="text" placeholder="Your title..." ng-model="dataset.title" class="form-control" ng-required='true', ng-minlength=3/>
+          <input id="inputTitle" type="text" placeholder="Your title..." ng-model="dataset.title" class="form-control" ng-required='true' ng-minlength=3/>
         </div>
-        <div class="form-group" ng-class="{ 'has-error' : datasetForm.description.$invalid && !datasetForm.description.$pristine }">
+        <div class="form-group">
           <label for="inputDescription" class="control-label">Description</label>
-          <textarea id="inputDescription" placeholder="Your description..." rows="3" ng-model="dataset.description" class="form-control" ng-required='true', ng-minlength=3></textarea>
-          <p class="help-block">What is inside your file?</p>
+          <textarea id="inputDescription" placeholder="Your description..." rows="3" ng-model="dataset.description" class="form-control", ng-minlength=3></textarea>
+          <p class="help-block">Describe the source and the content of your file?</p>
         </div>
       </div>
-    <!-- </div> -->
 
     <div class="col-sm-1">
     </div>
@@ -32,7 +26,8 @@
     <div class="form-group">
     
       <label for="fileName" class="control-label">Dataset</label>
-      <input type="file" class="btn btn-default" nv-file-select uploader="uploader" id="fileName" data="dataset" />
+      <input type="file" class="btn btn-default" nv-file-select uploader="uploader" id="fileName" data="dataset" type="file" accept="text/plain .csv"/>
+      <p class="help-block">Only .csv or .txt are accepted</p>
     </div>
     <div class="form-group">
       <label for="userData" class="control-label">Network data (optional)</label>
