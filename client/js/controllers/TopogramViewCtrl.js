@@ -100,6 +100,18 @@ $('body').keydown(function (e) {
       else if (e.which==65 && e.shiftKey==true) $scope.saveAll()
 });
 
+$scope.downloadAsCSV = function() {
+    var csv = ConvertToCSV($scope.messages);
+    // console.log(csv);
+
+    var hiddenElement = document.createElement('a');
+
+    hiddenElement.href = 'data:attachment/csv,' + encodeURI(csv);
+    hiddenElement.target = '_blank';
+    hiddenElement.download = 'results.csv';
+    hiddenElement.click();
+}
+
 $scope.saveAll = function () {
   $scope.saveTime();
   $scope.saveWords();
@@ -140,7 +152,27 @@ $scope.downloadPNG=function(container, name) {
        a.href = img.getAttribute('src');
        a.click();
      });
+
+} // end controller
+
+ function ConvertToCSV(objArray) {
+        var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+        var str = '';
+
+        for (var i = 0; i < array.length; i++) {
+            var line = '';
+        for (var index in array[i]) {
+            if (line != '') line += ','
+
+            line += array[i][index];
+        }
+
+        str += line + '\r\n';
+    }
+
+    return str;
 }
+
 
     /*Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
         console.log(topogram);

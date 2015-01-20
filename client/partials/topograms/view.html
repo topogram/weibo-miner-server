@@ -1,34 +1,14 @@
-<h1>{{topogram.dataset.title}} <small>{{topogram.dataset.description}}</small></h1>
 
-<section class="row">
-  <div class="col-md-4">
-    <dl class="dl-horizontal">
-      <dt>Data source</dt>
-      <dd><a href="#/dataset/{{ topogram.dataset.id }}">{{ topogram.dataset.title}}</a></dd>
-      <dt>Data type</dt>
-      <dd>{{topogram.dataset.type}}</dd>
-      <dt>Creation date</dt>
-      <dd>{{topogram.created_at | date:medium}}</dd>
-      <dt>Search query</dt>
-      <dd>{{topogram.es_query}} in {{topogram.es_index_name}}</dd>
-      <dt>Messages Count</dt>
-      <dd>{{topogram.records_count}} messages</dd>
-      <dt>Timeframe Count</dt>
-      <dd>{{timeframes.length}} timeframes</dd>
-    </dl>
-  </div>
-  <div class="col-md-4">
-    <div ng-if="topogram.records_count == 0">
-      <button ng-click="getData(&quot;mongo&quot;)" class="btn btn-primary">Extract data</button>
-    </div>
-    <div ng-if="topogram.messages != 0">
-      <p></p><a target="_blank" href="/api/topogram/{{post._id}}/download.csv" download="{{post.name}}.csv" class="btn btn-default" disabled> Download search as CSV</a>
-    </div>
-  </div>
+<h3>Topogram #{{ topogram.id }} </h3>
+
+<section>
+
+    <p> Query :  {{topogram.es_query}} | <a target="_blank" ng-click="downloadAsCSV()" class="btn btn-default btn-xs"> Download search results as CSV</a></p>
+    <p>Source : <a href="#/dataset/{{ topogram.dataset.id }}">{{ topogram.dataset.title}}</a> {{topogram.dataset.description}}  | Created at {{topogram.created_at | date:'MM/dd/yyyy - h:mma'}} | Search index : <a href="#" title="{{topogram.es_index_name}}">active</a></p>
 </section>
 
 <section id="timeseries">
-  <h3>Total : {{ totalResults }} results<small> in {{ index }}</small></h3>
+  <h3>Total : {{ totalResults }} results</h3>
   <timeserie timeserie="" time-data="timeData" start="start" end="end" topogram-name="searchTerm"></timeserie>
 </section>
 

@@ -110,6 +110,14 @@ class TopogramCitationsView(restful.Resource):
 
         return data
 
+class TopogramAsCSV(restful.Resource) :
+    @login_required
+    def get(self, topogram_id):
+        t = Topogram.query.filter_by(id=topogram_id).first()
+        topogram= TopogramSerializer(t).data
+
+        
+
 class TopogramTimeFramesList(restful.Resource):
     
     def get(self, dataset_id, Topogram_id):
