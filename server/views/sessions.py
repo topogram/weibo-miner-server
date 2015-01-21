@@ -16,14 +16,14 @@ class SessionView(restful.Resource):
 
         form = SessionCreateForm()
         if not form.validate_on_submit():
-            return {"status" : "error", "message" : forms.errors }, 422
+            return  form.errors, 422
 
         user = User.query.filter_by(email=form.email.data).first()
         if user is None:
-            return {"status" : "error", "message" : "User does not exist."}, 401
+            return  "User does not exist.", 422
 
         if not  bcrypt.check_password_hash(user.password, form.password.data):
-            return {"status" : "error", "message" : "Invalid password."}, 401
+            return  "Invalid password.", 422
 
         # User is auth with flask-login
         login_user(user, remember=True)
