@@ -10,7 +10,7 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             console.log(dataset);
             $scope.dataset = dataset;
             $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
-            $scope.dataset.addColumns = [];
+            $scope.dataset.addColumns = dataset.additional_columns.split(",");
 
                 if ($scope.dataset.text_column == ""  && $scope.dataset.time_column == "" && $scope.dataset.source_column == "" ) {
                    $scope.isDescribed = false;

@@ -22,7 +22,7 @@ def tests():
 @manager.command
 def test():
     """Runs a single test."""
-    module="tests.test_indexer.TestIndexerViews"
+    module="tests.test_indexer.TestIndexer"
     test = unittest.TestLoader().loadTestsFromName(module)
     ColourTextTestRunner(verbosity=2).run(test)
 

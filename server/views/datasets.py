@@ -95,7 +95,7 @@ class DatasetView(restful.Resource):
         if dataset.user.id != current_user.id : return 401
 
         if len(form.additional_columns.data) : 
-            additional_columns =  form.additional_columns.data.split(",")
+            additional_columns =  form.additional_columns.data
         else :
             additional_columns = []
 
@@ -106,6 +106,7 @@ class DatasetView(restful.Resource):
                                 timestamp_column=form.time_column.data,
                                 time_pattern=form.time_pattern.data,
                                 additional_columns=additional_columns)
+
         try :
             csv_corpus.validate()
         except ValueError, e:
@@ -117,7 +118,7 @@ class DatasetView(restful.Resource):
         dataset.time_column = form.time_column.data
         dataset.time_pattern = form.time_pattern.data
         dataset.language = form.language.data
-        dataset.additional_columns = str(additional_columns)
+        dataset.additional_columns = any2utf8(additional_columns)
         db.session.commit() #save changes
 
         # get the modified version

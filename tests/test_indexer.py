@@ -3,10 +3,14 @@
 
 import os
 import json
+import unittest
 from base import BaseTestCase
 from server.models.user import User
 from server.models.dataset import Dataset
 from  server.lib.indexer import csv2elastic, get_index_info, delete_index, list_all_indices, create_index, get_index_name, search
+
+from flask_rq import RQ, config_value, get_connection, get_queue, \
+    get_server_url, get_worker
 
 
 class TestIndexer(BaseTestCase):
@@ -78,7 +82,7 @@ class TestIndexer(BaseTestCase):
 
             # add additional columns
             dataset_desc.pop("dataset", None)
-            dataset_desc["additional_columns"] = "deleted_last_seen,permission_denied"
+            dataset_desc["additional_columns"] = ["deleted_last_seen,permission_denied"]
             url = "/api/v1/datasets/"+dataset_id
             resp = self.client.put(url, data=dataset_desc)
             self.assertEquals(resp.status_code, 200)
@@ -89,12 +93,26 @@ class TestIndexer(BaseTestCase):
 
             # index dataset
             resp = csv2elastic(dataset)
+
+            # make sure the index exists
             self.assertEquals(resp["created"], True)
             self.assertEquals(resp["_index"], dataset["index_name"])
-            
-            # make sure it exists
+            self.assertRaises(Exception, lambda : create_index(dataset["index_name"])) 
+
+            # make sure that the job have been added to the queue 
+            self.assertEqual(len(get_queue("taf").jobs), 1)
+            get_worker("taf").work(True)
+
             results = search("*", dataset["index_name"])
-            self.assertEquals(results["hits"]["total"],0)
+            self.assertEquals(results["hits"]["total"],121)
+
+class TestWorker(unittest.TestCase):
+
+        def test_job_queue(self):
+            """ Ensure we can access job queue """
+            self.assertEqual(len(get_queue().jobs), 0)
+            get_worker("taf").work(True)
+
 
 class TestIndexerViews(BaseTestCase):
 

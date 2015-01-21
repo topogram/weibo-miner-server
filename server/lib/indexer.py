@@ -26,8 +26,15 @@ def csv2elastic(dataset):
 
     logger.info("loading csv file")
 
+    additional_columns =  str( dataset["additional_columns"] ).split(",")
+
     # open the corpus
-    csv_corpus = CSVCorpus(dataset["filepath"], timestamp_column = dataset["time_column"], time_pattern= dataset["time_pattern"], text_column=dataset["text_column"], source_column= dataset["source_column"], additional_columns= list(dataset["additional_columns"]))
+    csv_corpus = CSVCorpus(dataset["filepath"], 
+                            timestamp_column = dataset["time_column"], 
+                            time_pattern= dataset["time_pattern"], 
+                            text_column=dataset["text_column"], 
+                            source_column= dataset["source_column"],
+                            additional_columns= additional_columns)
 
     # ensure that index exists
     # get_index_info(dataset["index_name"])
@@ -40,7 +47,7 @@ def csv2elastic(dataset):
         if i%10 == 0: 
             # print "emit socket"
             socket.emit("progress", json.dumps({"count" : i}))
-        # print dataset["index_name"]
+
         res = elastic.index(dataset["index_name"], "message", row)
 
     # change the state to done

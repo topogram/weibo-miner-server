@@ -90,7 +90,7 @@
     <div class="input-group">
         <label for="inputAdditionalColumns" class="control-label">Time Pattern</label>
         <select  class="selectpicker form-control" id="inputAdditionalColumns" name="inputAdditionalColumns" multiple ng-model="dataset.addColumns">
-            <option ng-repeat="column in dataset.csv.headers" value="{{column}}">{{column}}</option>  
+            <option ng-repeat="column in dataset.csv.headers" value="{{column}}" ng-selected="{{dataset.addColumns.indexOf(column) != -1}}">{{column}}</option>  
         </select>
         <p class="help-block">Select columns will be stored for later analysis .</p>
     </div>
