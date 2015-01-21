@@ -44,3 +44,11 @@ Topogram.config(['flashProvider', function(flashProvider) {
 }])
 
 Topogram.filter('unsafe', function($sce) { return $sce.trustAsHtml; });
+
+Topogram.filter("round", function () {
+        return function(input, precision) {
+            return input ?
+                parseFloat(input).toFixed(precision) :
+                "";
+        };
+    });

@@ -22,6 +22,11 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
           }
       });
 
+    // some stats for the brave
+    $scope.stats = {}; 
+    $scope.stats.addCols = []; //  an array to store info about additional columns
+
+
     // load topogram
     Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
 
@@ -39,6 +44,7 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
               var addCol = topogram.dataset.additional_columns.split(",")
               for (i in addCol) {
                 $scope.columns.push({ "title": addCol[i] ,"field": i });
+                $scope.stats.addCols[i] = { "name" : addCol[i], "countNotNull" : 0, "total" : 0};
               }
             }
 
@@ -58,19 +64,40 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
                   // TODO : improve fallback to bypass sorting with non latin characters 
                   if(topogram.dataset.additional_columns) {
                       $scope.messages = [];
+
                       var addCol = topogram.dataset.additional_columns.split(",")
                       for (var i = 0; i < results.messages.length; i++) {
                             var m = results.messages[i];
                             for (var j = 0; j < addCol.length; j++) {
-                                m[j] = parseInt(m[addCol[j]]); // rename columns to latin 
+                              var value; 
+                              try {
+                                  value = parseInt(m[addCol[j]]) // TODO : fix nasty Int parsing
+                                  if(value != 0) {
+                                    $scope.stats.addCols[j].countNotNull++;
+                                    $scope.stats.addCols[j].total+=value;
+                                  };
+
+                              } catch(e) {
+                                value = m[addCol[j]];
+                              }
+                              m[j] = value; // rename columns to latin 
                             }
                             $scope.messages.push(m);
                       };
+
+                      // extract percent
+                      for (var i = 0; i < $scope.stats.addCols.length; i++) {
+                        $scope.stats.addCols[i].percentNotNull = ($scope.stats.addCols[i].countNotNull / $scope.totalResults)*100;
+                      }
+                      console.log($scope.stats);
                  } else {
                       $scope.messages = results.messages;
-                    }
-                }); // end searchAll
-            })
+                  }
+
+                  // get some stats
+
+              }); // end searchAll
+          })
       });
 
 

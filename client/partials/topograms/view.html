@@ -51,6 +51,11 @@
 
 
 <section class="messages">
+      <h3>Conversation</h3>
+      <ul>
+        <li ng-repeat="col in stats.addCols"> {{col.percentNotNull | round:2 }}% of the total corpus has not null {{ col.name}} ( total : {{ col.total}})</li>
+      </ul>
+
       <table ng-table="tableParams" show-filter="true" class="table table-condensed">
         <thead>
           <tr>
