@@ -85,20 +85,19 @@ class DatasetView(restful.Resource):
     @login_required
     def put(self, id):
 
-        print type(id)
         form = DatasetUpdateForm()
         if not form.validate_on_submit():
             return form.errors, 422
-        print "validated"
+
         # check if the record exists in the DB
         dataset = Dataset.query.filter_by(id=id).first()
         if dataset is None: return 404
 
         # check rights
         if dataset.user.id != current_user.id : return 401
-        
+
         # validate values
-        csv_corpus = CSVCorpus(form.filepath.data,
+        csv_corpus = CSVCorpus(dataset.filepath,
                                 source_column=form.source_column.data,
                                 text_column=form.text_column.data,
                                 timestamp_column=form.time_column.data,
@@ -108,8 +107,6 @@ class DatasetView(restful.Resource):
         except ValueError, e:
             return e.message, 422
 
-        print form.language.data
-        
         # add new values 
         dataset.source_column = form.source_column.data
         dataset.text_column = form.text_column.data
@@ -120,8 +117,6 @@ class DatasetView(restful.Resource):
 
         # get the modified version
         dataset = Dataset.query.filter_by(id=id).first()
-        print DatasetSerializer(dataset).data
-
         return 204, 
 
     @login_required
@@ -185,7 +180,6 @@ class DatasetEsView(restful.Resource) :
         dataset = DatasetSerializer(d).data
 
         index_state = dataset["index_state"]
-        print index_state
 
         # ensure that the index exists, if not reset state and recreate
         try : 

@@ -5,9 +5,9 @@ from base import BaseTestCase
 from server.models.user import User
 
 
-class TestTopograms(BaseTestCase):
+# class TestTopograms(BaseTestCase):
 
-    def test_a(self):
-        print self
-        print User.query.all()
-        self.assertEquals(True, False)
+#     def test_a(self):
+#         print self
+#         print User.query.all()
+#         self.assertEquals(True, False)

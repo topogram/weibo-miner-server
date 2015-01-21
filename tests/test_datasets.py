@@ -20,7 +20,6 @@ class TestDatasetViews(BaseTestCase):
         users = User.query.all() # results from another db
         self.assertTrue(True)
 
-    # Ensure datasets API return an index of all datasets  
     def test_get_datasets(self):
         """ Ensure datasets API return an index of all datasets """
         data = {"password" : "admin", "email" : "ad@min.com"}
@@ -31,14 +30,12 @@ class TestDatasetViews(BaseTestCase):
             self.assertEqual(resp.status_code,  200)
             self.assertTrue(resp.json ==  [])
 
-    # Ensure datasets API is accessible just to logged in users  
     def test_requires_logged_in(self):
         """ Ensure datasets API is accessible just to logged in users """
         self.client.delete("/api/v1/sessions")
         resp = self.client.get("/api/v1/datasets")
         self.assertEqual(resp.status_code,  401)
 
-    # Ensure uploading a dataset works
     def test_upload_dataset(self):
         """ Ensure uploading a dataset works """
         fname = os.path.join(os.path.dirname(__file__), "data/sample.csv")
@@ -52,30 +49,29 @@ class TestDatasetViews(BaseTestCase):
         self.assertEqual(dataset["time_column"], "sometime")
         self.assertEqual(dataset["time_pattern"], "somepattern")
 
-    # Ensure default values are available when uploading dataset
-    def test_get_dataset(self):
+    def test_default_values_dataset(self):
+        """Ensure default values are available when uploading dataset"""
         fname = os.path.join(os.path.dirname(__file__), "data/sample.csv")
         data = { "title" : "sometitle", "dataset" : open("./tests/data/sample.csv", 'rb') }
         resp = self.client.post("/api/v1/datasets", data=data)
 
         resp = self.client.get("/api/v1/datasets/1")
         dataset = resp.json
-        # print resp.json
         self.assertEqual(dataset["id"], 1)
         self.assertEqual(dataset["title"], "sometitle")
         self.assertEqual(dataset["index_state"], "raw")
-        self.assertEqual(dataset["source_column"], "source")
-        self.assertEqual(dataset["text_column"], "text")
+        self.assertEqual(dataset["source_column"], "")
+        self.assertEqual(dataset["text_column"], "")
 
-    # Ensure uploading wrong data returns error
     def test_upload_wrong_data(self):
+        """ Ensure uploading wrong data returns error """
         data = { "title" : ""}
         resp = self.client.post("/api/v1/datasets", data=data, )
         self.assertEqual(resp.status_code,  422)
         self.assertIn("field is required",resp.data)
 
-    # Ensure deleting dataset works properly
     def test_delete_dataset(self):
+        """ Ensure deleting dataset works properly """
         fname = os.path.join(os.path.dirname(__file__), "data/sample.csv")
         data = { "title" : "sometitle", "dataset" : open("./tests/data/sample.csv", 'rb') }
         self.client.post("/api/v1/datasets", data=data)
@@ -84,29 +80,65 @@ class TestDatasetViews(BaseTestCase):
         d = self.client.get("/api/v1/datasets/1")
         self.assertEqual(d.json,  404)
 
-    # Ensure access to a smaple of a dataset
     def test_dataset_sample(self):
+        """ Ensure access to a sample of a dataset """
+
         fname = os.path.join(os.path.dirname(__file__), "data/sample.csv")
         data = { "title" : "sometitle", "dataset" : open("./tests/data/sample.csv", 'rb') }
         self.client.post("/api/v1/datasets", data=data)
         resp = self.client.get("/api/v1/datasets/1/sample")
-        self.assertEqual(len(resp.json),10)
+
+        self.assertEqual(len(resp.json),50)
         self.assertEqual(type(resp.json[0]),dict)
         self.assertEqual(resp.status_code,  201)
 
     def test_sample_zh(self):
+        """ Ensure access that dataset sample is unicode/utf8 proof """
+
         fname = os.path.join(os.path.dirname(__file__), "data/zh_sample.csv")
         data = { "title" : "sometitle", "dataset" : open("./tests/data/sample.csv", 'rb') }
         self.client.post("/api/v1/datasets", data=data)
         resp = self.client.get("/api/v1/datasets/1/sample")
-        self.assertEqual(len(resp.json),10)
+        self.assertEqual(len(resp.json),50)
         self.assertEqual(type(resp.json[0]),dict)
         self.assertEqual(resp.status_code,  201)
 
-    def test_update_record(self):
+    def test_wrong_update_record(self):
+        """ Ensure that records can be updated only with correct values """
+
+        fname = os.path.join(os.path.dirname(__file__), "data/sample.csv")
+
+        data = { "title" : "sometitle", "dataset" : open(fname, 'rb') }
+        self.client.post("/api/v1/datasets", data=data)
+
         resp = self.client.put("/api/v1/datasets/1", data={"title" :"sometitle", "source_column" : "some_source_column","text_column" : "some_text_column","time_column" : "some_time_column","time_pattern" : "some_time_pattern"})
-        print resp.json
-        self.assertEqual(resp.json, "sometitle")
+
+        self.assertEqual(resp.status_code, 422)
+
+
+    def test_wrong_time_pattern(self):
+        """ Ensure that records can be updated only with the right time pattern """
+
+        fname = os.path.join(os.path.dirname(__file__), "data/sample.csv")
+        data = { "title" : "sometitle", "dataset" : open(fname, 'rb') }
+        self.client.post("/api/v1/datasets", data=data)
+
+        resp = self.client.put("/api/v1/datasets/1", data={"title" :"sometitle", "source_column" : "source","text_column" : "text","time_column" : "created_at","time_pattern" : "%Y-%m-%dT%H:%M:%S"})
+
+        self.assertEqual(resp.status_code, 422)
+        self.assertIn("time data", resp.data)
+        self.assertIn("does not match format", resp.data)
+
+    def test_update_ok(self):
+        """ Ensure that records can be updated with correct values """
+
+        fname = os.path.join(os.path.dirname(__file__), "data/sample.csv")
+        data = { "title" : "sometitle", "dataset" : open(fname, 'rb') }
+        self.client.post("/api/v1/datasets", data=data)
+
+        resp = self.client.put("/api/v1/datasets/1", data={"title" :"sometitle", "source_column" : "source","text_column" : "text","time_column" : "created_at", "time_pattern" : "%Y-%m-%d %H:%M:%S"})
+
+        self.assertEqual(resp.status_code, 200)
 
 
 class TestDatasetProcessing(BaseTestCase):
@@ -118,8 +150,8 @@ class TestDatasetProcessing(BaseTestCase):
         self.assertTrue(True)
 
 
-    # Ensure datasets is added to the processing queue while uploaded
     def test_process_data(self): 
+        """ Ensure datasets is added to the processing queue while uploaded """
         user_data = {"password" : "admin", "email" : "ad@min.com"}
         fname = os.path.join(os.path.dirname(__file__), "data/sample.csv")
         dataset_desc = { "title" : "sometitle", "dataset" : open(fname, 'rb'), "source_column" : "uid", "text_column" : "text", "time_column" : "created_at", "time_pattern": "%Y-%m-%d %H:%M:%S"}
@@ -128,17 +160,11 @@ class TestDatasetProcessing(BaseTestCase):
             login = self.client.post('/api/v1/sessions',data=user_data)
             resp = self.client.post("/api/v1/datasets", data=dataset_desc)
             dataset = resp.json
-            print Dataset.query.filter_by(id=dataset["id"]).first()
-            
+
             resp = self.client.get("/api/v1/datasets/"+ str(dataset["id"]) + "/index")
-            print resp.data
             self.assertIn("started", resp.data )
-            
-            # time.sleep(5)
-            resp = self.client.get("/api/v1/datasets/"+ str(dataset["id"])+"/index")
-            self.assertIn("ongoing", resp.data )
 
             resp = self.client.get("/api/v1/datasets/"+ str(dataset["id"])+"/index")
-            self.assertIn("done", resp.data )
+            self.assertIn("done", resp.json["status"] )
 
-#         self.assertEqual(resp.status_code, 401)
+        self.assertEqual(resp.status_code, 200)

@@ -26,16 +26,14 @@ import json
 def csv2elastic(dataset):
 
     logger.info("loading csv file")
+    
     # open the corpus
     csv_corpus = CSVCorpus(dataset["filepath"], timestamp_column = dataset["time_column"], time_pattern= dataset["time_pattern"], text_column=dataset["text_column"], source_column= dataset["source_column"])
 
     # ensure that index exists
     # get_index_info(dataset["index_name"])
 
-    # change the job state to "processing"
-    print dataset
     d = Dataset.query.filter_by(id=dataset["id"]).first()
-    print d
     d.index_state = "processing"
     db.session.commit()
 
@@ -44,8 +42,7 @@ def csv2elastic(dataset):
             # print "emit socket"
             socket.emit("progress", json.dumps({"count" : i}))
 
-        record = { "text" : row[0], "created_at" : row[1],"source" : row[2]}
-        res = elastic.index(dataset["index_name"], "message", record)
+        res = elastic.index(dataset["index_name"], "message", row)
 
     # change the state to done
     d.index_state = "done"

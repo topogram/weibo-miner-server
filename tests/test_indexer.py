@@ -20,7 +20,6 @@ class TestIndexer(BaseTestCase):
             
             resp = self.client.post("/api/v1/datasets", data=dataset_desc)
             dataset = resp.json
-            print dataset
             self.assertEquals(dataset["index_state"], "raw")
             
             # create dataset
@@ -28,12 +27,16 @@ class TestIndexer(BaseTestCase):
             
             resp = self.client.get("/api/v1/datasets/"+str(dataset["id"]))
             dataset = resp.json
-            print dataset
+
             self.assertEquals(dataset["index_state"], "done")
 
             # get dataset length 
             info = get_index_info(dataset["index_name"])
-            # print info
+            self.assertTrue(type(info), dict )
 
+            # delete dataset
             deleted = delete_index(dataset["index_name"])
-            self.assertEquals(True, False)
+            self.assertTrue(type(info), dict )
+            self.assertEquals(deleted["acknowledged"], True)
+
+
