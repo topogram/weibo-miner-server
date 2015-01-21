@@ -10,13 +10,19 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             console.log(dataset);
             $scope.dataset = dataset;
             $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
-            $scope.dataset.addColumns = dataset.additional_columns.split(",");
+            
 
-                if ($scope.dataset.text_column == ""  && $scope.dataset.time_column == "" && $scope.dataset.source_column == "" ) {
-                   $scope.isDescribed = false;
-                }
-                  else
-                    $scope.isDescribed = true;
+            if (dataset.additional_columns) {
+              $scope.dataset.addColumns = dataset.additional_columns.split(",");
+            } else {
+              $scope.dataset.addColumns = [];
+            }
+
+            if ($scope.dataset.text_column == ""  && $scope.dataset.time_column == "" && $scope.dataset.source_column == "" ) {
+               $scope.isDescribed = false;
+            }
+              else
+                $scope.isDescribed = true;
     });
 
     $scope.loadMoreSamples = function() {
@@ -61,8 +67,9 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             $scope.dataset.index_state = "processing";
 
             Restangular.one('datasets',$routeParams.datasetId).one("index").get().then(function(index) {
-              flash.success = "Index processing is " + index.status;
-                // console.log(index.status);
+              flash.success = "Dataset is now indexed";
+              console.log(index.status);
+              $scope.dataset.index_state = "done";
             });
     }
 

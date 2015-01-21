@@ -1,43 +1,81 @@
-function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular, searchService, TopogramService, ConfigService) {
+function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular, searchService, TopogramService, ConfigService, ngTableParams,  $filter) {
 
 
     // INIT
     $scope.messages = [];
-    $scope.page = 0;        // A counter to keep track of our current page
-    $scope.allResults = false;  // Whether or not all results have been found.
+    $scope.allResults = true;  // Whether or not all results have been found.
+
+    $scope.tableParams = new ngTableParams({
+          page: 1,            // show first page
+          count: 100,          // count per page
+          sorting: {
+              name: 'asc'     // initial sorting
+          }
+      }, {
+          total: $scope.messages.length, // length of data
+          getData: function($defer, params) {
+
+                var orderedData = params.sorting() ? $filter('orderBy')($scope.messages, params.orderBy()) :
+                            $scope.messages;
+
+                $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+          }
+      });
 
     // load topogram
     Restangular.one('datasets',$routeParams.datasetId).one("topograms", $routeParams.topogramId).get().then(function(topogram) {
-            console.log(topogram);
-            
+
             $scope.topogram = topogram;
             $scope.dataset = topogram.dataset;
 
-            $scope.columns = [{"title": "Text", 'field': "text"}, {"title": "Creation Date", 'field': "created_at"},{"title": "Author", 'field': "source"} ]; 
+            $scope.columns = [
+              {"title": "Text", 'field': "text_column"}, 
+              {"title": "Creation Date", 'field': "time_column"},
+              {"title": "Author", 'field': "source_column"} 
+            ]; 
+
+            // additional columns
+            if(topogram.dataset.additional_columns) {
+              var addCol = topogram.dataset.additional_columns.split(",")
+              for (i in addCol) {
+                $scope.columns.push({ "title": addCol[i] ,"field": i });
+              }
+            }
 
             // SEARCH RESULTS
             searchService.search($scope.topogram.es_index_name, $scope.topogram.es_query).then(function(results){
 
               $scope.totalResults=results.total;
 
-                var ii = 0;
-                for(;ii < results.messages.length; ii++){
-                  $scope.messages.push(results.messages[ii]);
+              if(results.histogram.length){
+                    $scope.start=results.histogram[0].time;
+                    $scope.end=results.histogram[results.histogram.length-1].time;
+                    $scope.timeData=results.histogram;
                 }
 
-              if(results.histogram.length){
-                  $scope.start=results.histogram[0].time;
-                  $scope.end=results.histogram[results.histogram.length-1].time;
-                  $scope.timeData=results.histogram;
-              }
-        });
+              searchService.loadAll($scope.index, $scope.searchTerm, results.total).then(function(results){
 
-
+                  // TODO : improve fallback to bypass sorting with non latin characters 
+                  if(topogram.dataset.additional_columns) {
+                      $scope.messages = [];
+                      var addCol = topogram.dataset.additional_columns.split(",")
+                      for (var i = 0; i < results.messages.length; i++) {
+                            var m = results.messages[i];
+                            for (var j = 0; j < addCol.length; j++) {
+                                m[j] = parseInt(m[addCol[j]]); // rename columns to latin 
+                            }
+                            $scope.messages.push(m);
+                      };
+                 } else {
+                      $scope.messages = results.messages;
+                    }
+                }); // end searchAll
+            })
       });
+
 
     $scope.wordsLimit = 10;
     $scope.citationsLimit = 10;
-
 
     $scope.wordsListStart = 0;
     $scope.wordsListEnd = 10;
@@ -55,7 +93,6 @@ function TopogramViewCtrl($scope, $routeParams, $timeout, $location, Restangular
                   $scope.wordsListEnd -=10;
         }
       }
-
 
     // WORDS 
     $scope.wordColors = d3.scale.category10();

@@ -95,9 +95,9 @@ class DatasetView(restful.Resource):
         if dataset.user.id != current_user.id : return 401
 
         if len(form.additional_columns.data) : 
-            additional_columns =  form.additional_columns.data
+            additional_columns =  any2utf8(form.additional_columns.data)
         else :
-            additional_columns = []
+            additional_columns = None
 
         # validate values
         csv_corpus = CSVCorpus(dataset.filepath,
@@ -118,7 +118,7 @@ class DatasetView(restful.Resource):
         dataset.time_column = form.time_column.data
         dataset.time_pattern = form.time_pattern.data
         dataset.language = form.language.data
-        dataset.additional_columns = any2utf8(additional_columns)
+        dataset.additional_columns = additional_columns
         db.session.commit() #save changes
 
         # get the modified version
@@ -152,7 +152,7 @@ class DatasetView(restful.Resource):
         # add elasticsearch info
         if dataset["index_state"] == "done" :
             es_info= get_index_info(dataset["index_name"])
-            dataset["records_count"] = es_info["indices"][dataset["index_name"]]["docs"]["num_docs"]
+            dataset["records_count"] = es_info["docs"]["num_docs"]
 
         return dataset
 

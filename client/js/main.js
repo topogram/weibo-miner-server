@@ -7,7 +7,8 @@ window.Topogram = angular.module('Blog', [
                                  'angularFileUpload',
                                  'elasticsearch',
                                  "ui.bootstrap",
-                                 "ui.bootstrap-slider"
+                                 "ui.bootstrap-slider",
+                                 "ngTable"
                                  ])
 .run(function($location, Restangular, AuthService) {
     Restangular.setFullRequestInterceptor(function(element, operation, route, url, headers, params, httpConfig) {

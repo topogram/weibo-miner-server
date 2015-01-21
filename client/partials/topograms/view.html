@@ -27,7 +27,7 @@
         <h5>Most connected words</h5>
         <a class="btn btn-xs" ng-click="prevTopWords()"><< prev</a> 
         {{ wordsListStart }} | {{wordsListEnd}}<a class="btn btn-xs" ng-click="nextTopWords()">next >></a>
-        <table ng-table show-filter="true" class="table table-condensed">
+        <table show-filter="true" class="table table-condensed">
         <thead>
           <tr>
             <th>Word</th>
@@ -49,24 +49,28 @@
 
 </section>
 
+
 <section class="messages">
-      <table ng-table show-filter="true" class="table table-condensed">
+      <table ng-table="tableParams" show-filter="true" class="table table-condensed">
         <thead>
           <tr>
-            <th ng-repeat="column in columns" class="text-center sortable"
-            >  {{column.field }}
+             <th ng-repeat="column in columns" class="text-center sortable" ng-class="{
+                    'sort-asc': tableParams.isSortBy(column.field, 'asc'),
+                    'sort-desc': tableParams.isSortBy(column.field, 'desc')
+                  }"
+                ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">
+                {{column.title}}
+            </th>
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="row in messages">
-          <td ng-repeat="column in columns" tooltip-append-to-body="true">
-            {{row[column.field] }}
-          </td>
+        <tr ng-repeat="row in $data">
+            <td ng-repeat="column in columns" sortable="'column.field'">
+                {{row[column.field]}}
+            </td>
         </tr>
-      </tbody>
     </table>
-    <div ng-cloak="" ng-hide="allResults" class="load-more"><a ng-click="loadMore()" class="btn btn-default">View more results...</a></div>
   </section>
 
 

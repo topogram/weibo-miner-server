@@ -30,7 +30,7 @@ Topogram.factory('searchService',
                 "facets" : {
                     "histogram" : {
                         "date_histogram" : {
-                            "field" : "created_at",
+                            "field" : "time_column",
                             "interval" : "hour"
                         }
                     }
@@ -91,6 +91,44 @@ Topogram.factory('searchService',
             return deferred.promise;
         };
 
+         /**
+         * Given an index, a term and an max number, load all results.
+         *
+         * Returns a promise.
+         */
+        var loadAll = function(index, term, max){
+            var deferred = $q.defer();
+            var query = {
+                "match": {
+                    "_all": term
+                }
+            };
+
+            client.search({
+                "index": index,
+                "type": 'message',
+                q: term,
+                "body": {
+                    "size": max,
+                    "from": 0
+                }
+            }).then(function(result) {
+                console.log(result);
+                var ii = 0, hits_in, hits_out = [];
+                hits_in = (result.hits || {}).hits || [];
+                for(;ii < hits_in.length; ii++){
+                    hits_out.push(hits_in[ii]._source);
+                }
+
+                deferred.resolve({
+                  "messages":hits_out,
+                  "total":result.hits.total
+                });
+
+            }, deferred.reject);
+            return deferred.promise;
+        };
+
         /**
          * Given nothing.
          *
@@ -116,7 +154,9 @@ Topogram.factory('searchService',
         return {
             "search": search,
             "loadMore": loadMore,
+            "loadAll": loadAll,
             "indexes" :indexes
+
         };
     }]
 );

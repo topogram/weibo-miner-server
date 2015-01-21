@@ -13,6 +13,7 @@ from topogram.topograms.basic import BasicTopogram
 from topogram.languages.zh import ChineseNLP
 from topogram.corpora.csv_file import CSVCorpus
 from topogram.corpora.elastic import ElasticCorpus
+from topogram.utils import any2utf8
 
 import logging
 logger = logging.getLogger("topogram-server.lib.indexer")
@@ -26,7 +27,8 @@ def csv2elastic(dataset):
 
     logger.info("loading csv file")
 
-    additional_columns =  str( dataset["additional_columns"] ).split(",")
+    if dataset["additional_columns"] : additional_columns = any2utf8(dataset["additional_columns"])
+    else : additional_columns = dataset["additional_columns"]
 
     # open the corpus
     csv_corpus = CSVCorpus(dataset["filepath"], 
@@ -34,7 +36,7 @@ def csv2elastic(dataset):
                             time_pattern= dataset["time_pattern"], 
                             text_column=dataset["text_column"], 
                             source_column= dataset["source_column"],
-                            additional_columns= additional_columns)
+                            additional_columns=additional_columns )
 
     # ensure that index exists
     # get_index_info(dataset["index_name"])
@@ -72,7 +74,6 @@ def get_topogram(_topogram):
     for word in _topogram["stopwords"].split(","): 
         nlp.stopwords.append(word)
         print word
-
 
     es = ElasticCorpus(elastic, _topogram["es_index_name"], _topogram["es_query"])
 
