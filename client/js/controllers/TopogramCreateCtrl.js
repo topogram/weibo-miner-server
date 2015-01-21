@@ -10,7 +10,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     $scope.allResults = false;  // Whether or not all results have been found.
     $scope.totalResults=0 // All messages matching the query
 
-    $scope.columns = [{"title": "Text", 'field': "text"}, {"title": "Creation Date", 'field': "created_at"},{"title": "Author", 'field': "source"} ]; 
+    $scope.columns = [{"title": "Text", 'field': "text_column"}, {"title": "Creation Date", 'field': "time_column"},{"title": "Author", 'field': "source_column"} ]; 
 
 
     // Search term from URL query term, plus a default one
@@ -29,6 +29,14 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           //   $scope.stopwords.push(stops[i])
           // }
           // socket.emit('progress', {"index_name": $scope.index});
+
+          if(dataset.additional_columns) {
+            var addCol = dataset.additional_columns.split(",")
+            for (i in addCol) {
+              $scope.columns.push({ "title": addCol[i] ,"field": addCol[i]});
+            }
+          }
+
     });
 
 

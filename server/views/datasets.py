@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import uuid
 import csv
 from flask import request
 from flask.ext.restful import reqparse
@@ -16,7 +15,7 @@ from server.forms.dataset import DatasetCreateForm, DatasetUpdateForm
 from server.serializers.dataset import DatasetSerializer
 from server.lib.queue import JobQueue
 
-from server.lib.indexer import csv2elastic, get_index_info, delete_index
+from server.lib.indexer import csv2elastic, get_index_info, delete_index, get_index_name
 
 
 from topogram.utils import any2utf8
@@ -55,9 +54,8 @@ class DatasetListView(restful.Resource):
             return "Bad file encoding. Please use UTF-8 for better compatibility.", 422
 
         #  elasticsearch index 
-        safename = "".join([c for c in fileName if c.isalpha() or c.isdigit() or c==' ']).rstrip()
-        es_index_name=(safename + "_"+ str(uuid.uuid4())).lower()
         index_state = "raw"
+        es_index_name = get_index_name(fileName)
 
         dataset = Dataset(form.title.data, form.description.data, str(file_path),es_index_name, index_state, source_column=form.source_column.data, text_column=form.text_column.data, time_column=form.time_column.data, time_pattern=form.time_pattern.data)
         db.session.add(dataset)
@@ -85,43 +83,46 @@ class DatasetView(restful.Resource):
     @login_required
     def put(self, id):
 
-        print type(id)
         form = DatasetUpdateForm()
         if not form.validate_on_submit():
             return form.errors, 422
-        print "validated"
+
         # check if the record exists in the DB
         dataset = Dataset.query.filter_by(id=id).first()
         if dataset is None: return 404
 
         # check rights
         if dataset.user.id != current_user.id : return 401
-        
+
+        if len(form.additional_columns.data) : 
+            additional_columns =  any2utf8(form.additional_columns.data)
+        else :
+            additional_columns = None
+
         # validate values
-        csv_corpus = CSVCorpus(form.filepath.data,
+        csv_corpus = CSVCorpus(dataset.filepath,
                                 source_column=form.source_column.data,
                                 text_column=form.text_column.data,
                                 timestamp_column=form.time_column.data,
-                                time_pattern=form.time_pattern.data)
+                                time_pattern=form.time_pattern.data,
+                                additional_columns=additional_columns)
+
         try :
             csv_corpus.validate()
         except ValueError, e:
             return e.message, 422
 
-        print form.language.data
-        
         # add new values 
         dataset.source_column = form.source_column.data
         dataset.text_column = form.text_column.data
         dataset.time_column = form.time_column.data
         dataset.time_pattern = form.time_pattern.data
         dataset.language = form.language.data
+        dataset.additional_columns = additional_columns
         db.session.commit() #save changes
 
         # get the modified version
         dataset = Dataset.query.filter_by(id=id).first()
-        print DatasetSerializer(dataset).data
-
         return 204, 
 
     @login_required
@@ -151,7 +152,7 @@ class DatasetView(restful.Resource):
         # add elasticsearch info
         if dataset["index_state"] == "done" :
             es_info= get_index_info(dataset["index_name"])
-            dataset["records_count"] = es_info["indices"][dataset["index_name"]]["docs"]["num_docs"]
+            dataset["records_count"] = es_info["docs"]["num_docs"]
 
         return dataset
 
@@ -185,7 +186,6 @@ class DatasetEsView(restful.Resource) :
         dataset = DatasetSerializer(d).data
 
         index_state = dataset["index_state"]
-        print index_state
 
         # ensure that the index exists, if not reset state and recreate
         try : 

@@ -24,7 +24,6 @@ class TestUser(BaseTestCase):
             user = User.query.filter_by(email=data["email"]).first()
             self.assertTrue(user.email == data["email"])
 
-    # Ensure errors are thrown during an incorrect user registration
     def test_incorrect_user_registeration(self):
         """ Ensure errors are thrown during an incorrect user registration """
         data = {"password" : "", "invite" : "invite", "email" : "test"}
@@ -33,13 +32,12 @@ class TestUser(BaseTestCase):
             self.assertIn(b'Invalid email address.', resp.data)
             self.assertIn(b'This field is required.', resp.data)
             self.assertEqual(resp.status_code, 422)
-    
-    # Ensure an invite cide is required for registering
+
     def test_require_invite(self):
-        """ Ensure an invite cide is required for registering """
+        """ Ensure an invite code is required for registering """
         data = {"password" : "djqsld", "email" : "test@test.com"}
         resp = self.client.post("/api/v1/users", data=data, follow_redirects=True)
-        self.assertEqual(resp.json["status"],  "error")
+
         self.assertIn(b'This field is required.', resp.data)
         self.assertEqual(resp.status_code,  422)
         data = {"password" : "djqsld", "invite" : "wrong", "email" : "test@test.com"}

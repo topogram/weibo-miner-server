@@ -82,7 +82,6 @@ Topogram.directive("words", function () {
                         (wordsData.nodes[link.source] = {name: link.source});
                     link.target = wordsData.nodes[link.target] || 
                         (wordsData.nodes[link.target] = {name: link.target});
-                    console.log(link);
                     link.value = link.weight;
                 }
 
@@ -95,9 +94,9 @@ Topogram.directive("words", function () {
                         .nodes(wordsData.nodes)
                         .links(wordsData.links)
                         .size([w,h])
-                        .linkDistance(150)
-                        .charge(-1000)
-                        .gravity(.4)
+                        .linkDistance(250)
+                        .charge(-1500)
+                        .gravity(.3)
                         .on("tick", tickWord);
 
                 var wordPath=wordEdges.selectAll(".word-link")
@@ -152,8 +151,8 @@ Topogram.directive("words", function () {
                             .attr("dx", 12)
                             .attr("dy", 8)
                             .style("font-size", function(d) { return wordScaleSize(d.children.length) })//scale_size(d.btw_cent) })
-                            .style("fill", function(d) {  
-                                return c(d.community)
+                            .style("fill", function(d) {
+                                return c(d.weight)
                             })
                             .style("fill-opacity", function(d) {  return "#006d2c" })
                             .style("fill-opacity", function(d) {  return wordScaleOpacity(d.weight) })
@@ -196,12 +195,11 @@ Topogram.directive("words", function () {
                     
                     wordPath.each(function (d, i) {
                         var self = d3.select(this);
-                        self.style("stroke", function(d) { return "#000" })
+                        self.style("stroke", function(d) { return "#BBB" })
                             .style("stroke-width", function(d) {  return wordPathWeight(d.weight) })
                             .style("stroke-opacity", function(d) {  return wordPathOpacity(d.weight) });
                     })
                 }
-
 
                 // 
                 var ext=wordsData.nodes.map(function(d){ return d.children.length }), 

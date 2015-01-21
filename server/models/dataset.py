@@ -29,6 +29,7 @@ class Dataset(db.Model):
     time_column = db.Column(db.String(120), default="created_at") 
     time_pattern = db.Column(db.String(120), default="%Y-%m-%d %H:%M:%S") 
     language = db.Column(db.String(120), default="en")
+    additional_columns = db.Column(db.String(150), default="")
 
     # foreign keys
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
