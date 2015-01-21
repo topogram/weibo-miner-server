@@ -10,6 +10,7 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             console.log(dataset);
             $scope.dataset = dataset;
             $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
+            $scope.dataset.addColumns = [];
 
                 if ($scope.dataset.text_column == ""  && $scope.dataset.time_column == "" && $scope.dataset.source_column == "" ) {
                    $scope.isDescribed = false;
@@ -39,6 +40,7 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
 
    // dataset description
     $scope.postDatasetDescription = function() {
+        $scope.dataset.additional_columns  = $scope.dataset.addColumns.join(",");
         console.log($scope.dataset);
         $scope.dataset.put().then(function(dataset) {
             flash.success = "Your dataset description has been updated";

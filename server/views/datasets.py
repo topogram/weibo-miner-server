@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import uuid
 import csv
 from flask import request
 from flask.ext.restful import reqparse
@@ -16,7 +15,7 @@ from server.forms.dataset import DatasetCreateForm, DatasetUpdateForm
 from server.serializers.dataset import DatasetSerializer
 from server.lib.queue import JobQueue
 
-from server.lib.indexer import csv2elastic, get_index_info, delete_index
+from server.lib.indexer import csv2elastic, get_index_info, delete_index, get_index_name
 
 
 from topogram.utils import any2utf8
@@ -55,9 +54,8 @@ class DatasetListView(restful.Resource):
             return "Bad file encoding. Please use UTF-8 for better compatibility.", 422
 
         #  elasticsearch index 
-        safename = "".join([c for c in fileName if c.isalpha() or c.isdigit() or c==' ']).rstrip()
-        es_index_name=(safename + "_"+ str(uuid.uuid4())).lower()
         index_state = "raw"
+        es_index_name = get_index_name(fileName)
 
         dataset = Dataset(form.title.data, form.description.data, str(file_path),es_index_name, index_state, source_column=form.source_column.data, text_column=form.text_column.data, time_column=form.time_column.data, time_pattern=form.time_pattern.data)
         db.session.add(dataset)
@@ -96,12 +94,18 @@ class DatasetView(restful.Resource):
         # check rights
         if dataset.user.id != current_user.id : return 401
 
+        if len(form.additional_columns.data) : 
+            additional_columns =  form.additional_columns.data.split(",")
+        else :
+            additional_columns = []
+
         # validate values
         csv_corpus = CSVCorpus(dataset.filepath,
                                 source_column=form.source_column.data,
                                 text_column=form.text_column.data,
                                 timestamp_column=form.time_column.data,
-                                time_pattern=form.time_pattern.data)
+                                time_pattern=form.time_pattern.data,
+                                additional_columns=additional_columns)
         try :
             csv_corpus.validate()
         except ValueError, e:
@@ -113,6 +117,7 @@ class DatasetView(restful.Resource):
         dataset.time_column = form.time_column.data
         dataset.time_pattern = form.time_pattern.data
         dataset.language = form.language.data
+        dataset.additional_columns = str(additional_columns)
         db.session.commit() #save changes
 
         # get the modified version

@@ -76,18 +76,25 @@
 
 <div class="form-group">
 
- <!-- <label for="inputTimePattern" class="control-label">Time Pattern</label> -->
- <div class="input-group">
-    <div class="input-group-addon">Time Pattern</div>
+     <div class="input-group">
+        <div class="input-group-addon">Time Pattern</div>
 
-    <input id="inputTimePattern" type="text" placeholder="Time format..." ng-model="dataset.time_pattern" class="form-control" ng-required='true', ng-minlength=3/>
+        <input id="inputTimePattern" type="text" placeholder="Time format..." ng-model="dataset.time_pattern" class="form-control" ng-required='true', ng-minlength=3/>
+    </div>
+
+    <p class="help-block"> Parse date column using <a href="https://docs.python.org/2/library/time.html#time.strftime">strftime</a> format</p>
+    <p class="well">{{ stfrDate(dataset.time_pattern) }} | <b>{{ regDate }}</b></p>
 </div>
 
-<p class="help-block"> Parse date column using <a href="https://docs.python.org/2/library/time.html#time.strftime">strftime</a> format</p>
-<p class="well">{{ stfrDate(dataset.time_pattern) }} | <b>{{ regDate }}</b></p>
-
+<div class="form-group">
+    <div class="input-group">
+        <label for="inputAdditionalColumns" class="control-label">Time Pattern</label>
+        <select  class="selectpicker form-control" id="inputAdditionalColumns" name="inputAdditionalColumns" multiple ng-model="dataset.addColumns">
+            <option ng-repeat="column in dataset.csv.headers" value="{{column}}">{{column}}</option>  
+        </select>
+        <p class="help-block">Select columns will be stored for later analysis .</p>
+    </div>
 </div>
-
 <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
             <button type="submit" class="btn btn-default">Update Description</button>
