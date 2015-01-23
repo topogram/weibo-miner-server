@@ -1,4 +1,4 @@
-function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService, socket, $timeout, $interval) {
+function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService, $timeout, $interval) {
 
     // Initialize the scope defaults.
     $scope.topogram = {};
@@ -190,6 +190,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
      $scope.loadingNetworks.percent= 0;
 
     // init socket.io
+    /*
     socket.on('connect', function () {
           console.log('connect');
     });
@@ -200,7 +201,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
         // console.log(typeof(data), typeof(d));
         // $scope.loadingNetworks=JSON.parse(data);
     });
-
+  */
      // $scope.$watch("loadingNetworks", function(newVal, oldVal){
 
      //      console.log("loadingNetworks", newVal);
