@@ -46,9 +46,9 @@ def csv2elastic(dataset):
     db.session.commit()
 
     for i, row in enumerate(csv_corpus) :
-        if i%10 == 0: 
-            # print "emit socket"
-            socket.emit("progress", json.dumps({"count" : i}))
+        # if i%10 == 0: 
+        #     # print "emit socket"
+        #     socket.emit("progress", json.dumps({"count" : i}))
 
         res = elastic.index(dataset["index_name"], "message", row)
 

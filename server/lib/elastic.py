@@ -7,11 +7,11 @@ import json
 import uuid
 import pandas as pd
 from time import time
-from flask.ext.socketio import send, emit
+# from flask.ext.socketio import send, emit
 
 from server import app
 from server.resources.elastic import elastic
-from server.resources.socket import socket
+# from server.resources.socket import socket
 from server.lib.queue import RedisQueue
 from server.lib.topograms import get_analyzer, get_topotype
 
