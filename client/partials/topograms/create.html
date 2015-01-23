@@ -29,12 +29,12 @@
             </div>
             <div class="form-group" >
                 <h4>Maximum Citations <small>({{topogram.words_limit}})</small>  </h4>
-                <slider ng-model="topogram.words_limit" min="0" step="1" max="10" data-slider-orientation="horizontal" id="wordsLimit"></slider>
+                <slider ng-model="topogram.words_limit" min="0" step="1" max="50" data-slider-orientation="horizontal" id="wordsLimit"></slider>
                 <p class="help-block">Maximum number of words in the graph.</p>
             </div>
             <div class="form-group" >
                 <h4>Maximum Citations <small>({{topogram.citations_limit}})</small>  </h4>
-                <slider ng-model="topogram.citations_limit" min="0" step="1" max="10" data-slider-orientation="horizontal" id="citationsLimit"></slider>
+                <slider ng-model="topogram.citations_limit" min="0" step="1" max="50" data-slider-orientation="horizontal" id="citationsLimit"></slider>
                 <p class="help-block">Maximum number of citations in the graph.</p>
             </div>
             <button type="submit" class="btn btn-primary">Create Topogram</button>
@@ -55,9 +55,11 @@
              </div>
                 <p class="help-block">Select  the citation patterns from existing or add one below.</p>
         </div>
-        
-        <h4>Add patterns</h4>
-        <form ng-submit="saveRegexp()">
+
+        <a href="" ng-click="toggleAddPatterns()" class="btn btn-default">Add a pattern</a> 
+
+        <form ng-submit="saveRegexp()" ng-hide="addPatternsVisible">
+            <h4>Add patterns</h4>
             <div class="form-group">
                 <div class="input-group">
                     <div class="input-group-addon">Pattern</div>
@@ -78,7 +80,7 @@
                     <input id="inputRegexpName" type="text" placeholder="Citation name..." ng-model="regexp.title" class="form-control" ng-required='true', ng-minlength=3/>
                 </div>
                 <p class="help-block">A short description of your citation patterns.</p>
-                <button type="submit" class="btn btn-default">Add pattern</button>
+                <button type="submit" class="btn btn-xs btn-primary">Save Pattern</button>
             </div>
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">

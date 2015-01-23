@@ -12,6 +12,12 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
     $scope.columns = [{"title": "Text", 'field': "text_column"}, {"title": "Creation Date", 'field': "time_column"},{"title": "Author", 'field': "source_column"} ]; 
 
+    $scope.addPatternsVisible = true;
+    $scope.toggleAddPatterns = function() {
+        $scope.addPatternsVisible = $scope.addPatternsVisible === false ? true: false;
+
+        console.log($scope.addPatternsVisible);
+    }; 
 
     // Search term from URL query term, plus a default one
     $scope.searchTerm = $location.search().q;
