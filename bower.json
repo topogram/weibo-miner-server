@@ -31,6 +31,6 @@
     "angular-file-upload": "1.1.5",
     "angular-bootstrap-slider": "latest",
     "socket.io-client": "0.9.16",
-    "Simg": "git://github.com/clemsos/simg#c198a7f62b4dc6c648bc20f56134e8806788fb48"
+    "simg": "git://github.com/clemsos/simg#c198a7f62b4dc6c648bc20f56134e8806788fb48"
   }
 }
