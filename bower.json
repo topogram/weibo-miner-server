@@ -14,7 +14,7 @@
   ],
   "dependencies": {
     "angular-route": "~1.2.21",
-    "angular-bootstrap" : "latest",
+    "angular-bootstrap": "latest",
     "bootstrap": "~3.2.0",
     "restangular": "~1.4.0",
     "angularjs": "~1.2.21",
@@ -23,15 +23,14 @@
     "d3": "3",
     "d3-tip": "latest",
     "queue-async": "latest",
-    "colorbrewer":"latest",
-    "bootstrap-slider":"latest",
-    "topojson":"latest",
-    "ng-table":"0.3.3",
-    "angular-flash" :"0.1.8",
-    "angular-file-upload":"1.1.5",
-    "ng-table":"0.3.3",
+    "colorbrewer": "latest",
+    "bootstrap-slider": "latest",
+    "topojson": "latest",
+    "ng-table": "0.3.3",
+    "angular-flash": "0.1.8",
+    "angular-file-upload": "1.1.5",
     "angular-bootstrap-slider": "latest",
-    "simg" : "https://github.com/clemsos/simg.git": "1.0.1",
-    "socket.io-client": "0.9.16"
+    "socket.io-client": "0.9.16",
+    "Simg": "git://github.com/clemsos/simg#c198a7f62b4dc6c648bc20f56134e8806788fb48"
   }
 }
