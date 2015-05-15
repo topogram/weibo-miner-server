@@ -17,7 +17,6 @@ from server.lib.queue import JobQueue
 
 from server.lib.indexer import csv2elastic, get_index_info, delete_index, get_index_name
 
-
 from topogram.utils import any2utf8
 from topogram.corpora.csv_file import CSVCorpus 
 
@@ -55,7 +54,7 @@ class DatasetListView(restful.Resource):
 
         #  elasticsearch index 
         index_state = "raw"
-        es_index_name = get_index_name(fileName)
+        es_index_name = "get_index_name(fileName)"
 
         dataset = Dataset(form.title.data, form.description.data, str(file_path),es_index_name, index_state, source_column=form.source_column.data, text_column=form.text_column.data, time_column=form.time_column.data, time_pattern=form.time_pattern.data)
         db.session.add(dataset)
@@ -74,7 +73,7 @@ class DatasetView(restful.Resource):
         if dataset.user.id != current_user.id : return 401
 
         d= DatasetSerializer(dataset).data
-        if d["index_state"] == "done" : delete_index(d["index_name"])
+        # if d["index_state"] == "done" : delete_index(d["index_name"])
 
         db.session.delete(dataset)
         db.session.commit()
@@ -150,9 +149,9 @@ class DatasetView(restful.Resource):
         dataset["csv"]["sample"] = csv_corpus.raw_sample(10)
 
         # add elasticsearch info
-        if dataset["index_state"] == "done" :
-            es_info= get_index_info(dataset["index_name"])
-            dataset["records_count"] = es_info["docs"]["num_docs"]
+        # if dataset["index_state"] == "done" :
+        #     es_info= get_index_info(dataset["index_name"])
+        #     dataset["records_count"] = es_info["docs"]["num_docs"]
 
         return dataset
 
@@ -172,7 +171,6 @@ class DatasetSampleView(restful.Resource):
 
         csv_sample = csv_corpus.raw_sample(50)
         return csv_sample, 201
-
 
 class DatasetEsView(restful.Resource) :
     @login_required
