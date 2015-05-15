@@ -13,7 +13,7 @@ class Dataset(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=db.func.now())
 
-    title = db.Column(db.String(120), nullable=False)
+    title = db.Column(db.String(120))
     description = db.Column(db.Text)
 
     # file

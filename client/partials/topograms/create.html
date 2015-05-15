@@ -1,5 +1,5 @@
-  <div class="page-header">
-  <h1>{{dataset.title}} <small>{{dataset.description}}</small></h1>
+<div class="page-header">
+  <h2>Create new topogram</h2>
 </div>
 
 
@@ -7,90 +7,55 @@
 <!-- <p><strong>Index</strong> : {{dataset.index_name}}</p>
   <p><strong>type</strong> : {{dataset.type}}</p> -->
 
-  <div class="row">
-    <div class="col-md-6 searchField ">
-        <form class="form-inline" ng-submit="search()" role="form">
-            <input ng-model="searchTerm" type="search" name="title" class="form-control" ng-required='true'/>
-            <button type="submit" class="btn btn-default">Get results</button>
-            <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p>
-        </form>
-        <form ng-submit="createTopogram()" ng-hide="!messages.length">
 
-            <div class="" >
-                <h4>Stopwords<small>({{topogram.stopwords.length}})</small></h4>
-                <div class="active">
-                    <p><span class="badge"ng-repeat="stopword in topogram.stopwords">{{ stopword }}</span></p>
-                    <div class="form-inline">
-                            <input type="text" class="form-control" ng-model="addedStopWord" placeholder="Add stopword">
-                            <a  type="submit" class="btn btn-default" ng-click="addWord()">Add</a>
-                    </div>
-                    <p class="help-block">Input here words to be ignored</p>
-                </div>
+<section class="row">
+    
+    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+        <h4>Stopwords<small>({{topogram.stopwords.length}})</small></h4>
+        <div class="active">
+            <div class="form-inline">
+                    <input type="text" class="form-control" ng-model="addedStopWord" placeholder="Add stopword">
+                    <a  type="submit" class="btn btn-default" ng-click="addWord()">Add</a>
             </div>
-            <div class="form-group" >
-                <h4>Maximum Citations <small>({{topogram.words_limit}})</small>  </h4>
-                <slider ng-model="topogram.words_limit" min="0" step="1" max="50" data-slider-orientation="horizontal" id="wordsLimit"></slider>
-                <p class="help-block">Maximum number of words in the graph.</p>
-            </div>
-            <div class="form-group" >
-                <h4>Maximum Citations <small>({{topogram.citations_limit}})</small>  </h4>
-                <slider ng-model="topogram.citations_limit" min="0" step="1" max="50" data-slider-orientation="horizontal" id="citationsLimit"></slider>
-                <p class="help-block">Maximum number of citations in the graph.</p>
-            </div>
-            <button type="submit" class="btn btn-primary">Create Topogram</button>
-
-        </form>
-    </div>
-
-    <div class="col-sm-6" ng-hide="!messages.length">
-        <h4>Citations & patterns</h4>
-
-        <div class="form-group">
-             <div class="input-group">
-                <select multiple class="form-control" ng-model="topogram.citation_patterns">
-                    <option ng-selected="{{operator == topogram.citation_patterns}}" ng-repeat="operator in regexps" value="{{operator.id}}"> 
-                    {{operator.title}} | {{operator.regexp}}
-                    </option>
-                </select>
-             </div>
-                <p class="help-block">Select  the citation patterns from existing or add one below.</p>
+            <p class="help-block">Input here words to be ignored</p>
+            <p><span class="badge"ng-repeat="stopword in topogram.stopwords">{{ stopword }}</span></p>
         </div>
-
-        <a href="" ng-click="toggleAddPatterns()" class="btn btn-default">Add a pattern</a> 
-
-        <form ng-submit="saveRegexp()" ng-hide="addPatternsVisible">
-            <h4>Add patterns</h4>
-            <div class="form-group">
-                <div class="input-group">
-                    <div class="input-group-addon">Pattern</div>
-                    <input id="inputRegexp" type="text" placeholder="Citation format..." ng-model="regexp.regexp" class="form-control" ng-required='true', ng-minlength=3/>
-                </div>
-                <p class="help-block"> <a href="https://docs.python.org/2/howto/regex.html">Regular expressions</a> to match citations in your text  (formatting for Python).</p>
-
-                <b>Sample</b> from row {{ currentColumn }} / {{ dataset.csv.sample.length }}
-                <a class="btn btn-xs" ng-click="prevColumn()"><< prev</a>
-                | <a class="btn btn-xs" ng-click="nextColumn()">next >></a>
-                <p class="">{{ regTxt}}</p>
-                <p class="well" ng-bind-html="regNewTxt | unsafe"></p>
-                
-            </div>
-            <div class="form-group">
-                <div class="input-group">
-                    <div class="input-group-addon">Title</div>
-                    <input id="inputRegexpName" type="text" placeholder="Citation name..." ng-model="regexp.title" class="form-control" ng-required='true', ng-minlength=3/>
-                </div>
-                <p class="help-block">A short description of your citation patterns.</p>
-                <button type="submit" class="btn btn-xs btn-primary">Save Pattern</button>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <div class="input-group">
-                    </div>
-                </div>
-            </div>
-        </form>
+    </div>
+    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group" >
+            <h4>Maximum Words <small>({{topogram.words_limit}})</small>  </h4>
+            <slider ng-model="topogram.words_limit" min="0" step="1" max="50" data-slider-orientation="horizontal" id="wordsLimit"></slider>
+            <p class="help-block">Maximum number of words in the graph.</p>
+        </div>
+        <button ng-click="getWordsGraph()" class="btn btn-primary">Create Word Graph</button>
     </div>
 
+    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+        <button class="btn btn-primary" ng-click="getMostFrequentWords()">Most Frequent Words</button>
+    </div>
+
+    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+        <button class="btn btn-primary" ng-click="getTimeSeries()">Time Series</button>
+    </div>
+
+</section>
+
+<section>
+  
+  <section id="timeseries">
+      <timeserie timeserie="" time-data="timeData" start="start" end="end" topogram-name="searchTerm"></timeserie>
+  </section>
+
+</section>
+
+<!--     <div class="form-group" >
+        <h4>Maximum Citations <small>({{topogram.citations_limit}})</small>  </h4>
+        <slider ng-model="topogram.citations_limit" min="0" step="1" max="50" data-slider-orientation="horizontal" id="citationsLimit"></slider>
+        <p class="help-block">Maximum number of citations in the graph.</p>
+    </div>
+ -->    
+
+<!-- 
       <div ng-hide="loadingNetworks.percent==0 || loadingNetworks.percent==100">
             <p>Now processing...</p>
             <progressbar class="progress-striped active" max="100" value=" loadingNetworks.percent" type="danger"><i>{{ loadingNetworks.current}} / {{ totalResults}}</i></progressbar>
@@ -104,11 +69,13 @@
                 <a type="submit" ng-click="saveTopogram()" class="btn btn-primary">Save</a>
               </div>
       </div>
-  </div>
+  </div> -->
  
-  <section class="results">
-    <h3 ng-hide="messages.length" class="no-recipes">No results</h3>
-
+  <!-- <section class="results"> -->
+    <!-- <h3 ng-hide="messages.length" class="no-recipes">No results</h3> -->
+    
+  <!-- </section> -->
+<!-- 
     <section ng-hide="!messages.length" class="recipe">
       <h3>Total : {{ totalResults }} results<small> in {{ index }}</small></h3>
       <timeserie timeserie="" time-data="timeData" start="start" end="end" topogram-name="searchTerm"></timeserie>
@@ -134,3 +101,4 @@
     <div ng-cloak="" ng-hide="allResults" class="load-more"><a ng-click="loadMore()" class="btn btn-default">View more results...</a></div>
   </section>
 </section>
+ -->
