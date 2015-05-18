@@ -1,8 +1,8 @@
-<h3>{{dataset.title}} <small>Dataset</small></h3>
-<p>{{dataset.description}}</p>
-<!-- <p><b>Creation Date : </b>{{dataset.created_at | date:'medium' }}</p>
-
- -->
+<div class="header">
+  <h3>Data preparation 
+    <small>Select the correct format for your data.</small>
+  </h3>
+</div>
 
 <div  ng-hide="dataset.index_state != 'done'">
     <h2>Topograms</h2>
@@ -29,7 +29,7 @@
 </div> 
 
 
-<section ng-hide=" dataset.index_state != 'processing' || !isIndexing">
+<section ng-hide="isIndexing == false || dataset.index_state != 'processing' ">
       <p></p>
       <p>indexing...</p>
       <div class="progress">
@@ -46,6 +46,7 @@
 
            <div class="form-group">
                 <!-- <label for="inputTextColumn" class="control-label">Text Column</label> -->
+                <p class="help-block">Which column contains the  text to process ?</p>
                 <div class="input-group">
                         <div class="input-group-addon">Text Column</div>
 
@@ -60,6 +61,7 @@
            </div>
 
            <div class="form-group">
+                <p class="help-block">Which language is the text ?</p>
               <div class="input-group">
                   <div class="input-group-addon">Language</div>
                   <select ng-model="dataset.language"id="inputLanguage" class="form-control">
@@ -68,31 +70,28 @@
                       value="{{operator}}">
                       {{operator}}
                   </option>
-
                   </select>
                   </div>
-                <p class="help-block">Name of the column with text and language of the text</p>
            </div>
 
 
           <div class="form-group">
               <!-- <label for="inputSourceColumn" class="control-label">Author Column</label> -->
+              <p class="help-block">Which columns contains the source / author(s) ?</p>
               <div class="input-group">
-                      <div class="input-group-addon">Author Column</div>
-
-                      <select class="form-control" id="inputSourceColumn" ng-model="dataset.source_column">
-                          <option ng-selected="{{operator == dataset.source_column}}"
-                          ng-repeat="operator in dataset.csv.headers"
-                          value="{{operator}}">
-                          {{operator}}
-                      </option>
-                  </select>
-
-              </div>
-              <p class="help-block">Name of the column with the author(s).</p>
+                    <div class="input-group-addon">Author Column</div>
+                          <select class="form-control" id="inputSourceColumn" ng-model="dataset.source_column">
+                              <option ng-selected="{{operator == dataset.source_column}}"
+                                ng-repeat="operator in dataset.csv.headers"
+                                value="{{operator}}">
+                                {{operator}}
+                              </option>
+                          </select>
+                    </div>
           </div>
 
           <div class="form-group">
+              <p class="help-block">Which  column contains time information ? </p>
               <!-- <label for="inputTimeColumn" class="control-label">Time Column</label> -->
               <div class="input-group">
                   <div class="input-group-addon">Time Column</div>
@@ -104,27 +103,24 @@
                   </option>
               </select>
               </div>
-              <p class="help-block">Name of the column with timestamps.</p>
           </div>
 
           <div class="form-group">
+              <p class="help-block"> What is the format of the  date ? (using <a href="https://docs.python.org/2/library/time.html#time.strftime">strftime</a> pattern)</p>
               <div class="input-group">
-                  <div class="input-group-addon">Time Pattern</div>
-
-                  <input id="inputTimePattern" type="text" placeholder="Time format..." ng-model="dataset.time_pattern" class="form-control" ng-required='true', ng-minlength=3/>
+                    <div class="input-group-addon">Time Pattern</div>
+                    <input id="inputTimePattern" type="text" placeholder="Time format..." ng-model="dataset.time_pattern" class="form-control" ng-required='true', ng-minlength=3/>
               </div>
-
-              <p class="help-block"> Parse date column using <a href="https://docs.python.org/2/library/time.html#time.strftime">strftime</a> format</p>
-              <p class="well">{{ stfrDate(dataset.time_pattern) }} | <b>{{ regDate }}</b></p>
+              <p class="well"><b>ex. {{ regDate }}</b>  | result : {{ stfrDate(dataset.time_pattern) }} </p>
           </div>
 
           <div class="form-group">
               <div class="input-group">
                   <label for="inputAdditionalColumns" class="control-label">Additional Columns (optional)</label>
+                <p class="help-block">The columns selected below will be stored but not processed.</p>
                   <select  class="selectpicker form-control" id="inputAdditionalColumns" name="inputAdditionalColumns" multiple ng-model="dataset.addColumns">
                       <option ng-repeat="column in dataset.csv.headers" value="{{column}}" ng-selected="{{dataset.addColumns.indexOf(column) != -1}}">{{column}}</option>  
                   </select>
-                  <p class="help-block">Select columns will be stored for later analysis .</p>
               </div>
           </div>
 

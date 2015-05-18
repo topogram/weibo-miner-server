@@ -3,6 +3,8 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     // Initialize the scope defaults.
     $scope.topogram = {};
     $scope.topogram.stopwords = [];
+    $scope.topogram.excludeWords = [];
+    $scope.topogram.includeWords = [];
 
     // $scope.messages = [];
     // $scope.rows = [];     // An array of messages results to display
@@ -14,7 +16,6 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
     // max size for networks
     $scope.topogram.citations_limit=5;
-    $scope.topogram.words_limit = 10;
 
     // load dataset info from DB
     Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
@@ -30,19 +31,24 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
     });
 
+    $scope.topogram.frequent_words_limit = 100;
     $scope.getMostFrequentWords = function() {
-        Restangular.one('datasets',$routeParams.datasetId).one("frequentWords").get().then(function(words) {
-              console.log(words);
+        Restangular.one('datasets',$routeParams.datasetId).one("frequentWords").one(String($scope.topogram.frequent_words_limit)).get().then(function(frequentWords) {
+              // console.log(frequentWords);
+              $scope.frequentWords = frequentWords;
         });
     }
 
+    $scope.topogram.words_limit = 50;
     $scope.getWordsGraph = function() {
         console.log($routeParams.datasetId);
         console.log($scope.topogram.words_limit);
         Restangular.one('datasets',$routeParams.datasetId).one("words").one(String($scope.topogram.words_limit)).get().then(function(wordsGraph) {
+            console.log(wordsGraph);
+            // $scope.words=wordsGraph;
+            // $scope.wordsForceStarted = true;
         });
     }
-
 
     $scope.getTimeSeries = function() {
         Restangular.one('datasets',$routeParams.datasetId).one("timeSeries").get().then(function(timeSeries) {

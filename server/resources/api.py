@@ -31,7 +31,7 @@ api.add_resource(TopogramView, '/api/v1/datasets/<int:dataset_id>/topograms/<int
 
 # data operations
 api.add_resource(TopogramWordsView, '/api/v1/datasets/<int:dataset_id>/words/<int:words_limit>')
-api.add_resource(TopogramFrequentWordsView, '/api/v1/datasets/<int:dataset_id>/frequentWords')
+api.add_resource(TopogramFrequentWordsView, '/api/v1/datasets/<int:dataset_id>/frequentWords/<int:words_limit>')
 api.add_resource(TopogramTimeSeries, '/api/v1/datasets/<int:dataset_id>/timeSeries')
 
 # api.add_resource(TopogramCitationsView, '/api/v1/topograms/<int:topogram_id>/citations/<int:citations_limit>')

@@ -1,7 +1,10 @@
 function DatasetIndexCtrl($scope, $http, $location, $timeout, Restangular, flash, modalService) {
 
     Restangular.all('datasets').getList().then(function(datasets){
-        $scope.posts = datasets;
+        $scope.posts = datasets.map(function(d){
+            d.csvfilename = d.filepath.replace(/^.*[\\\/]/, ''); // extract just file name
+            return d;
+        });
     }, function(err) {
         console.log(err);
         flash.error = err.status + " : "+ err.statusText;

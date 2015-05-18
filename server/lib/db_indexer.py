@@ -6,6 +6,8 @@ from collections import Counter
 from datetime import datetime
 import time
 
+from  itertools import combinations
+
 import logging
 logger = logging.getLogger("topogram-server.lib.db_indexer")
 
@@ -19,12 +21,16 @@ from topogram.utils import any2utf8
 from server import db
 from server import mongo
 
+import redis
+import pickle
+
+# basic cache with redis
+redis_cache = redis.Redis('localhost')
 
 def get_index_name(file_name):
     safename = "".join([c for c in file_name if c.isalpha() or c.isdigit() or c==' ']).rstrip()
     es_index_name=(safename + "_"+ str(uuid.uuid4())).lower()
     return es_index_name
-
 
 def get_topogram(dataset):
 
@@ -67,30 +73,58 @@ def index_csv_2_db(dataset):
     db.session.commit()
 
 
-def get_words_co_occurences(dataset):
+def get_words_co_occurences(dataset, words_limit):
 
     topogram = get_topogram(dataset)
+    words = redis_cache.get(dataset["index_name"])
+    print type(words)
 
-    # get records in the db
-    records= mongo.db[dataset["index_name"]].find()
-    for record in records:
+    ok_words = [word["word"] for word in get_most_frequent_words(dataset,words_limit)]
+    print len(ok_words)
+    if words == None :
 
-        keywords = record["text_column"]
+        # get records in the db
+        records= mongo.db[dataset["index_name"]].find()
+        for i,record in enumerate(records):
+            # print i
+            if i == 100 : break;
+            keywords = set(record["text_column"])
 
-        # compute word graph 
-        for w1 in keywords:
-            for w2 in keywords : 
-                if w1!=w2 :
-                    topogram.add_words_edge(w1, w2)
+            # intersec =  set(keywords).intersection(ok_words)
+            # print len(intersec) -1 == 0
 
-    data = {}
-    data["words"] = topogram.export_words_to_d3_js()
-    data["density"] = topogram.get_words_density()
+            # compute word graph 
+            for word in list(permutations(keywords, 2)) : # pair the words
+                topogram.add_words_edge(word[0], word[1])
+
+        print "computing graph ok "
+        # g = topogram.get_average_graph(topogram.words)
+
+        print "now applying algos"
+        clique = topogram.min_weighted_dominating_set(topogram.words)
+        print "clique", type(clique)
+        
+        # g= topogram.limit_node_network(topogram.words, 2) # filter out the marginal words (min =2)
+        # print type(g)
+        # pickle the whole topogram into redis
+        g_dump = topogram.export_words_to_json()
+        # redis_cache.set(dataset["index_name"], g_dump)
+
+    else : # get from redis
+        g = eval(words)
+        topogram.load_words_from_json(g)
+
+    words_networks = topogram.get_words_network(words_limit)
+    return words_networks
+
+    # data = {}
+    # data["words"] = topogram.export_words_to_d3_js()
+    # data["density"] = topogram.get_words_density()
     # data["top_words"] = topogram.get_top_words(words_limit)
 
-    return data
+    # return data
 
-def get_most_frequent_words(dataset):
+def get_most_frequent_words(dataset, words_limit):
 
     # topogram = get_topogram(dataset)
 
@@ -100,9 +134,9 @@ def get_most_frequent_words(dataset):
     for record in records:
         keywords += record["text_column"]
 
-    most_common = Counter(keywords).most_common(100)
-    return most_common
+    most_common = [ { "word" : c[0], "count" : c[1]}for c in Counter(keywords).most_common(words_limit)]
 
+    return most_common
 
 def get_time_series(dataset):
 

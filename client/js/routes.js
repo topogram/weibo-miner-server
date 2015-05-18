@@ -1,10 +1,11 @@
 // routes
 Topogram.config(function($routeProvider, RestangularProvider) {
  
+
     RestangularProvider.setBaseUrl('/api/v1');
- 
+
     var partialsDir = '../partials';
- 
+
     var redirectIfAuthenticated = function(route) {
         return function($location, $q, AuthService) {
  

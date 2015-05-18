@@ -1,7 +1,8 @@
-Topogram.directive('timeserie', function () {
+Topogram.directive('timeseries', function () {
     // var chart = d3.custom.timeSerie(),
     return {
         replace: false,
+        // templateUrl:'js/directives/timeseries/timeseries.html',
         scope: { 
             timeData: '=timeData',
             start: '=start',

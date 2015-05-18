@@ -67,16 +67,16 @@ class TopogramWordsView(restful.Resource):
 
         d = Dataset.query.filter_by(id=dataset_id).first()
         dataset = DatasetSerializer(d).data
-        words = get_words_co_occurences(dataset)
+        words = get_words_co_occurences(dataset, words_limit)
 
         return words
 
 class TopogramFrequentWordsView(restful.Resource):
-    def get(self, dataset_id):
+    def get(self, dataset_id, words_limit):
 
         d = Dataset.query.filter_by(id=dataset_id).first()
         dataset = DatasetSerializer(d).data
-        words = get_most_frequent_words(dataset)
+        words = get_most_frequent_words(dataset, words_limit)
         print words
         return words
 

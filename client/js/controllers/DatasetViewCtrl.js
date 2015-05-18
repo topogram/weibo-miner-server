@@ -10,7 +10,6 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             console.log(dataset);
             $scope.dataset = dataset;
             $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
-            
 
             if (dataset.additional_columns) {
               $scope.dataset.addColumns = dataset.additional_columns.split(",");
@@ -32,6 +31,13 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             });
     }
 
+
+    $scope.$watch('dataset.time_column', function(newVal, oldVal){
+      if(newVal != "undefined" && newVal != oldVal) {
+            $scope.regDate = $scope.dataset.csv.sample[0][newVal];
+            console.log($scope.dataset);
+      }
+    })
     // init socket.io
     /*
     socket.on('connect', function () {
@@ -61,7 +67,6 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
     $scope.stfrDate = function(pattern) {
         return strftime(pattern)
     }
-
 
 
 
@@ -171,6 +176,7 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             console.log('process  data');
             // $scope.dataset.index_state = "processing";
             $scope.isIndexing = true;
+            $scope.dataset.index_state = 'processing';
 
             Restangular.one('datasets',$routeParams.datasetId).one("index").get().then(function(index) {
 

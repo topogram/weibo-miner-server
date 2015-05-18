@@ -1,10 +1,11 @@
-window.Topogram = angular.module('Blog', [
+window.Topogram = angular.module('Topogram', [
                                  'ngRoute', 
                                  'restangular', 
                                  'LocalStorageModule',
                                  'angular-flash.service',
                                  'angular-flash.flash-alert-directive',
                                  'angularFileUpload',
+                                 'oc.lazyLoad',
                                  'elasticsearch',
                                  "ui.bootstrap",
                                  "ui.bootstrap-slider",
@@ -52,3 +53,13 @@ Topogram.filter("round", function () {
                 "";
         };
     });
+
+// load other scripts
+Topogram.config(['$ocLazyLoadProvider',function ($ocLazyLoadProvider) {
+
+    $ocLazyLoadProvider.config({
+      debug:false,
+      events:true,
+    });
+
+}]);
