@@ -6,7 +6,7 @@ from collections import Counter
 from datetime import datetime
 import time
 
-from  itertools import combinations
+from  itertools import permutations
 
 import logging
 logger = logging.getLogger("topogram-server.lib.db_indexer")
@@ -79,50 +79,51 @@ def get_words_co_occurences(dataset, words_limit):
     words = redis_cache.get(dataset["index_name"])
     print type(words)
 
-    ok_words = [word["word"] for word in get_most_frequent_words(dataset,words_limit)]
-    print len(ok_words)
+    # ok_words = [word["word"] for word in get_most_frequent_words(dataset,words_limit)]
+    # print len(ok_words)
+
     if words == None :
 
         # get records in the db
+        i=0 
         records= mongo.db[dataset["index_name"]].find()
         for i,record in enumerate(records):
             # print i
-            if i == 100 : break;
-            keywords = set(record["text_column"])
-
-            # intersec =  set(keywords).intersection(ok_words)
-            # print len(intersec) -1 == 0
+            # if i == 100 : break;
+            keywords = set(record["text_column"]) # set to avoid repetitions
 
             # compute word graph 
             for word in list(permutations(keywords, 2)) : # pair the words
                 topogram.add_words_edge(word[0], word[1])
 
         print "computing graph ok "
-        # g = topogram.get_average_graph(topogram.words)
 
-        print "now applying algos"
-        clique = topogram.min_weighted_dominating_set(topogram.words)
-        print "clique", type(clique)
+        print "reduce graph size"
+
+        # g = topogram.get_average_graph(topogram.words)
+        # clique = topogram.min_weighted_dominating_set(topogram.words)
+        # print "clique", type(clique)
         
-        # g= topogram.limit_node_network(topogram.words, 2) # filter out the marginal words (min =2)
+        g= topogram.limit_node_network(topogram.words, words_limit) # filter out the marginal words (min =2)
         # print type(g)
         # pickle the whole topogram into redis
-        g_dump = topogram.export_words_to_json()
+
+        # g_dump = topogram.export_words_to_json()
         # redis_cache.set(dataset["index_name"], g_dump)
 
     else : # get from redis
         g = eval(words)
         topogram.load_words_from_json(g)
 
-    words_networks = topogram.get_words_network(words_limit)
-    return words_networks
+    # words_networks = topogram.get_words_network(words_limit)
+    # return words_networks
 
-    # data = {}
-    # data["words"] = topogram.export_words_to_d3_js()
-    # data["density"] = topogram.get_words_density()
-    # data["top_words"] = topogram.get_top_words(words_limit)
+    data = {}
+    data["words"] = topogram.get_words_network(words_limit)
+    data["density"] = topogram.get_words_density()
+    data["top_words"] = topogram.get_nodes_degree( topogram.words)
 
-    # return data
+    return data
 
 def get_most_frequent_words(dataset, words_limit):
 

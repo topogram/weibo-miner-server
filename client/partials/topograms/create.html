@@ -59,16 +59,29 @@
     </div>
 </section> -->
 
-
 <section id="words">
     <h4>Semantic graph <small>Co-occurences of words in the datasets</small></h4>
-     <button ng-click="getWordsGraph()" class="btn btn-sm btn-primary">Compute Word Graph</button>
-    <p class="help-block">This operation make take some time, depending of the structure of the graph.</p>
+     <button ng-click="getWordsGraph()" ng-disabled="wordsGraphLoading"  class="btn btn-sm btn-primary">Compute Word Graph</button>
+     <img ng-hide="!wordsGraphLoading" src="/img/circle-loader.gif" alt=""></div>
+    <p ng-hide="!wordsGraphLoading" class="help-block">This operation make take some time. Thanks !</p>
+
+    <span ng-hide="!wordsGraphTooBig" class="alert-danger" >
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        The graph is too big to be displayed. Please  adjust the minimum threshold for  words
+    </span>
+
+     <div> 
 
      <p>Minimum degree in the graph <small>({{topogram.words_limit}})</small>  </p>
-    <div class="form-group" >
-        <slider ng-model="topogram.words_limit" min="10" step="10" max="500" data-slider-orientation="horizontal" id="wordsLimit"></slider>
-        <p class="help-block">Maximum number of words in the graph.</p>
+    <div class="form-inline" >
+        <div class="form-group">
+              <a class="btn btn-default btn-xs" ng-click="topogram.words_limit = topogram.words_limit + 10">+</a>
+              <input type="text" class="form-control" ng-model="topogram.words_limit">
+              <a class="btn btn-default btn-xs" ng-click="topogram.words_limit = topogram.words_limit - 10">-</a>
+          </div>
+        <!-- <slider ng-model="topogram.words_limit" min="0" step="10" max="{{topogram.words_limit*2}}" value="{{topogram.words_limit}}" data-slider-orientation="horizontal" id="wordsLimit"></slider> -->
+        <p class="help-block">Max words in the graph : 250</p>
     </div>
 
     <div class="row">
@@ -85,26 +98,30 @@
                     <p><a href="#" type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-primary btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>   or hit <small> Shift+W</small></p>
               </div>
               <h5>Most connected words</h5>
-              <a class="btn btn-xs" ng-click="prevTopWords()"><< prev</a> 
-              {{ wordsListStart }} | {{wordsListEnd}}<a class="btn btn-xs" ng-click="nextTopWords()">next >></a>
-              <table show-filter="true" class="table table-condensed">
-              <thead>
-                <tr>
-                  <th>Word</th>
-                  <th>Degree</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr ng-style="{color: wordColors(row.degree)}" ng-repeat="row in words.top_words.slice(wordsListStart,wordsListEnd)">
-                <td>{{row.node }}</td>
-                <td>{{row.degree }}</td>
-              </tr>
-            </tbody>
-          </table>
+              <!-- <a class="btn btn-xs" ng-click="prevTopWords()"><< prev</a> 
+              {{ wordsListStart }} | {{wordsListEnd}}<a class="btn btn-xs" ng-click="nextTopWords()">next >></a> -->
+              <div style="height:220px; overflow:auto;">
+                  <table show-filter="true" class="table table-condensed" style="height:220px; overflow:scroll">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Word</th>
+                          <th>Degree</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-style="{color: wordColors(row.degree)}" ng-repeat="row in wordsGraph.top_words.slice(wordsListStart,wordsListEnd)">
+                        <td>{{$index + 1}}</td>
+                        <td>{{row.node }}</td>
+                        <td>{{row.degree }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+              </div>
           </div>
 
           <div class="col-xs-9 col-sm-9">
-                <words start="start" end="end" class="words-container"></words>
+                <words words="" words-graph="wordsGraph" words-force-started="wordsForceStarted" start="start" end="end" class="words-container"></words>
           </div>
     </div>
 </section>

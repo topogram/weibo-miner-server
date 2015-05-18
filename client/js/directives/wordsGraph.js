@@ -1,10 +1,13 @@
 Topogram.directive("words", function () {
      return {
         replace: false,
-        restrict: 'E',
+        scope: { 
+              wordsGraph: '=wordsGraph',
+              wordsForceStarted :'=wordsForceStarted'
+        },
         link: function ($scope, element, attrs) {
 
-            console.log($scope);
+            console.log("$scope.wordsGraph");
 
             //SVG Setup
             var w=900,
@@ -32,18 +35,20 @@ Topogram.directive("words", function () {
                         .attr("transform", "translate("+(100)+","+(h-200)+")");
 
             // data 
-            $scope.$watch("words.words", function(newVal,oldVal){
-
-                if(newVal == undefined) return // prevent error
+            $scope.$watch("wordsGraph.words", function(newVal,oldVal){
+                console.log(newVal);
+                if(newVal == undefined && newVal == oldVal) return // prevent error
 
                 // init
-                var wordsData=$scope.words.words;
+                var wordsData = newVal;
                 d3.selectAll(".word-link").remove();
                 d3.selectAll(".word").remove();
 
                 /*
                 *   DATA : compute data and store in nodes
                 */
+
+                newVal
 
                 // arrays to store coordonates  
                 var wordsX={},

@@ -8,7 +8,7 @@ from flask.ext.restful import reqparse
 from flask_login import login_required, current_user
 from werkzeug import secure_filename
 
-from server import app, restful, db
+from server import app, restful, db, mongo
 
 from server.models.dataset import Dataset 
 from server.forms.dataset import DatasetCreateForm, DatasetUpdateForm
@@ -180,9 +180,6 @@ class DatasetSampleView(restful.Resource):
         csv_sample = csv_corpus.raw_sample(50)
         return csv_sample, 201
 
-
-
-
 class DatasetProcessView(restful.Resource) :
     @login_required
     def get(self, id):
@@ -195,7 +192,14 @@ class DatasetProcessView(restful.Resource) :
 
         index_csv_2_db(dataset) # index into db
 
+class DatasetSizeView(restful.Resource) :
+    @login_required
+    def get(self, id):
+        d = Dataset.query.filter_by(id=id).first()
+        dataset = DatasetSerializer(d).data
 
+        count = mongo.db[dataset["index_name"]].count()
+        return {"index_name" : dataset["index_name"], "count" : count}
 
 # class DatasetEsView(restful.Resource) :
 #     @login_required

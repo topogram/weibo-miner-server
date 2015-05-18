@@ -39,7 +39,7 @@ window.Topogram = angular.module('Topogram', [
     });
 })
 
-// fix for bootstrap 3
+// fix for flash alerts bootstrap 3
 Topogram.config(['flashProvider', function(flashProvider) {
   flashProvider.errorClassnames.push('alert-danger');
 }])

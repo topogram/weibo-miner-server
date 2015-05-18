@@ -31,31 +31,53 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
     });
 
-    $scope.topogram.frequent_words_limit = 100;
-    $scope.getMostFrequentWords = function() {
-        Restangular.one('datasets',$routeParams.datasetId).one("frequentWords").one(String($scope.topogram.frequent_words_limit)).get().then(function(frequentWords) {
-              // console.log(frequentWords);
-              $scope.frequentWords = frequentWords;
-        });
-    }
+      // most frequent words 
+      $scope.topogram.frequent_words_limit = 50;
+      $scope.getMostFrequentWords = function() {
+          Restangular.one('datasets',$routeParams.datasetId).one("frequentWords").one(String($scope.topogram.frequent_words_limit)).get().then(function(frequentWords) {
+                // console.log(frequentWords);
+                $scope.frequentWords = frequentWords;
+          });
+      }
 
-    $scope.topogram.words_limit = 50;
-    $scope.getWordsGraph = function() {
-        console.log($routeParams.datasetId);
-        console.log($scope.topogram.words_limit);
-        Restangular.one('datasets',$routeParams.datasetId).one("words").one(String($scope.topogram.words_limit)).get().then(function(wordsGraph) {
-            console.log(wordsGraph);
-            // $scope.words=wordsGraph;
-            // $scope.wordsForceStarted = true;
-        });
-    }
 
+    // word graph
+    $scope.topogram.words_limit = 0;
+    $scope.wordsGraphLoading = false;
+
+    // load number of posts to estimate the size of the graph 
+    Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
+
+          $scope.topogram.words_limit = datasetSize.count / 25; // for now, arbitrary value 
+          $scope.getWordsGraph = function() {
+              $scope.wordsGraphLoading = true; // display loader
+              $scope.wordsGraphTooBig = false;
+              // load graph
+              Restangular.one('datasets',$routeParams.datasetId).one("words").one(String($scope.topogram.words_limit)).get().then(function(wordsGraph) {
+                  if (wordsGraph.top_words.length > 250) {
+                    $scope.wordsGraphTooBig = true;
+                    $scope.wordsGraphLoading = false;
+
+                  } else {
+                    $scope.wordsGraph=wordsGraph;
+                    $scope.wordsForceStarted = true;
+                    console.log($scope.wordsGraph);
+                    $scope.wordsGraphLoading = false;
+                  }
+                  
+              });
+          }
+    });
+
+    // time series
     $scope.getTimeSeries = function() {
         Restangular.one('datasets',$routeParams.datasetId).one("timeSeries").get().then(function(timeSeries) {
             console.log(timeSeries);
             $scope.start=timeSeries[0].time;
             $scope.end=timeSeries[timeSeries.length-1].time;
-            $scope.timeData = timeSeries;
+            $scope.timeData = timeSeries.map(function(d){
+                return { "count" : d.count, "time" : new Date(d.time*1000)};
+            });
         });
     }
 

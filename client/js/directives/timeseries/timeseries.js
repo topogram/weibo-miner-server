@@ -36,7 +36,7 @@ Topogram.directive('timeseries', function () {
 
                 if(updatedTimeData != undefined && $scope.start!= undefined && $scope.end!= undefined) {
 
-                    // console.log('draw timeline');
+                    console.log(updatedTimeData);
 
                     var _data=updatedTimeData;
 
@@ -50,7 +50,7 @@ Topogram.directive('timeseries', function () {
                     var xAxis = d3.svg.axis()
                         .scale(x)
                         .orient("bottom")
-                        // .ticks(d3.time.month, 1)
+                        .ticks(10)
                         .tickFormat(d3.time.format("%d %B"));
 
                     var yAxis = d3.svg.axis()
