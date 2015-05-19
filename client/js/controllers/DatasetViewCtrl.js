@@ -182,10 +182,12 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
 
               $scope.isIndexing = false;
               $timeout(function() {
-                $location.path("/datasets/"+ $routeParams.datasetId + "/topograms/create");
+                  $location.path("/datasets/"+ $routeParams.datasetId + "/topograms/create");
               })
               flash.success = "Dataset is now indexed";
-
+            }, function (error){
+                console.log(error);
+                flash.error = error.data;
             });
     }
 

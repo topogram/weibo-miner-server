@@ -7,6 +7,7 @@ from flask import request
 from flask.ext.restful import reqparse
 from flask_login import login_required, current_user
 from werkzeug import secure_filename
+from bson import json_util
 
 from server import app, restful, db, mongo
 
@@ -190,7 +191,10 @@ class DatasetProcessView(restful.Resource) :
         d = Dataset.query.filter_by(id=id).first()
         dataset = DatasetSerializer(d).data
 
-        index_csv_2_db(dataset) # index into db
+        try :  
+            index_csv_2_db(dataset) # index into db
+        except ValueError, e:
+             return e.message, 422
 
 class DatasetSizeView(restful.Resource) :
     @login_required
@@ -200,6 +204,26 @@ class DatasetSizeView(restful.Resource) :
 
         count = mongo.db[dataset["index_name"]].count()
         return {"index_name" : dataset["index_name"], "count" : count}
+
+class DatasetPaginateView(restful.Resource) :
+    @login_required
+    
+    def __init__(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('sort', type=str, help='Sort by DB field')
+        self.args = parser.parse_args()
+
+    def get(self, id, start, qty):
+        d = Dataset.query.filter_by(id=id).first()
+        dataset = DatasetSerializer(d).data
+        sort_col = "_id"
+        try :
+            sort_col = self.args["sort"]
+            print sort_col
+            results = mongo.db[dataset["index_name"]].find().sort({ sort_col: -1}).skip(start).limit(start+qty)
+        except TypeError:
+            results = mongo.db[dataset["index_name"]].find().skip(start).limit(start+qty)
+        return json_util.dumps(results)
 
 # class DatasetEsView(restful.Resource) :
 #     @login_required

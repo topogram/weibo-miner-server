@@ -8,7 +8,7 @@ from server import app
 from server.views.users import UserView
 from server.views.sessions import SessionView
 from server.views.regexps import RegexpListView, RegexpView
-from server.views.datasets import DatasetListView, DatasetView, DatasetSampleView, DatasetProcessView,DatasetSizeView
+from server.views.datasets import DatasetListView, DatasetView, DatasetSampleView, DatasetProcessView,DatasetSizeView, DatasetPaginateView
 from server.views.topograms import TopogramListView, TopogramWordsView, TopogramCitationsView, TopogramsByDataset, TopogramView, TopogramTimeFramesView,TopogramFrequentWordsView, TopogramTimeSeries
 
 # doc for flask restful with swagger
@@ -24,6 +24,7 @@ api.add_resource(DatasetView, '/api/v1/datasets/<int:id>')
 api.add_resource(DatasetProcessView, '/api/v1/datasets/<int:id>/index')
 api.add_resource(DatasetSampleView, '/api/v1/datasets/<int:id>/sample')
 api.add_resource(DatasetSizeView, '/api/v1/datasets/<int:id>/size')
+api.add_resource(DatasetPaginateView, '/api/v1/datasets/<int:id>/from/<int:start>/qty/<int:qty>')
 
 # topograms
 api.add_resource(TopogramListView, '/api/v1/topograms')

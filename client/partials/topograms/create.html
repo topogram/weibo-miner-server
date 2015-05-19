@@ -1,5 +1,6 @@
 <div class="page-header">
-  <h3>Create Topogram</h3>
+  <h3>Create Topogram <small>{{dataset.name}} - {{ dataset.filename}}</small></h3>
+
 </div>
 
 <section id="timeseries">
@@ -8,6 +9,9 @@
             <a class="btn btn-sm btn-primary" ng-click="getTimeSeries()">Update Time Series</a> 
         </p>
         <timeseries ng-hide="!timeData" timeseries="" time-data="timeData" start="start" end="end"></timeseries>
+
+        <p ng-hide="!timeData"><a href="#" type="button" ng-click="saveTimeSeries(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>  or hit <small> Shift+T</small></p>
+
 </section>
 <hr>
 <section  class="frequent-words">
@@ -16,7 +20,7 @@
           <small>Display the most used  words in the dataset.</small>
       </h4>
       <div class="row">
-          <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
               <button class="btn btn-sm btn-primary" ng-click="getMostFrequentWords()">Most Frequent Words</button>
 
               <form class="form-inline">
@@ -29,7 +33,9 @@
                     <p class="help-block">Select the number of words you want.</p>
               </form>
           </div>
-          <div ng-hide="!frequentWords.length" id="frequent-words" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+          <p ng-hide="!frequentWords.length"><a href="#" type="button" ng-click='downloadAsCSV(frequentWords, "frequent_words"); $event.preventDefault()' class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span> Download as CSV</a></p>
+
+          <div ng-hide="!frequentWords.length" id="frequent-words" class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
               <div style="height:250px; overflow:auto">
                   <table show-filter="true" class="table table-condensed">
                       <thead>
@@ -84,7 +90,7 @@
         <p class="help-block">Max words in the graph : 250</p>
     </div>
 
-    <div class="row">
+    <div class="row" ng-hide="!wordsForceStarted">
           <div class="col-xs-3 col-sm-3">
               <div class="well">
                     <h4><small><a data-toggle="popover" popover-placement="right" popover-title="Help - Read the Semantic Graph" tooltip-html-unsafe="true" popover="
@@ -95,7 +101,7 @@
 
                     <p class="help-block">This graph represents the co-occurence of words quoted in the corpus.</p>
 
-                    <p><a href="#" type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-primary btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>   or hit <small> Shift+W</small></p>
+                    <p><a href="#" type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>   or hit <small> Shift+W</small></p>
               </div>
               <h5>Most connected words</h5>
               <!-- <a class="btn btn-xs" ng-click="prevTopWords()"><< prev</a> 
@@ -125,6 +131,41 @@
           </div>
     </div>
 </section>
+<hr>
+<section ng-hide="" class="recipe">
+    <h4>Messages <small> {{ dataset.size }} results  from the datasets</small></h4>
+    <ul class="pagination">
+        <p><li data-ng-click="getPrevRecords()"><a>&laquo;</a></li>
+        <!-- <li data-ng-click="changePage(page.pageOffset)" data-ng-repeat="page in pageObjs"><a>{{page.pageNumber + 1}}</a>
+        </li> -->
+        <li><a href="">Records {{recordOffset}} to {{recordOffset + recordStep }}</a> </li>
+        <li data-ng-click="getNextRecords()"><a>&raquo;</a></li>
+        </p>
+    </ul>
+
+    <div class="messages" ng-hide="!messages.length" style="height:500px; overflow:auto;">
+          <table  class="table table-condensed">
+            <thead>
+              <tr>
+              <th>Index</th>
+                <th ng-repeat="column in columns" class="text-center sortable"
+                >  {{column.field }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="row in messages">
+            <td>{{$index}}</td>
+              <td ng-repeat="column in columns" tooltip-append-to-body="true">
+                {{row[column.field] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- <div ng-cloak="" ng-hide="allResults" class="load-more"><a ng-click="loadMore()" class="btn btn-default">View more results...</a></div> -->
+      </div>
+</section>
+
 
 <!-- <section class="row" id="filter-words">
   <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
@@ -183,30 +224,6 @@
     <!-- <h3 ng-hide="messages.length" class="no-recipes">No results</h3> -->
     
   <!-- </section> -->
-<!-- 
-    <section ng-hide="!messages.length" class="recipe">
-      <h3>Total : {{ totalResults }} results<small> in {{ index }}</small></h3>
-      <timeserie timeserie="" time-data="timeData" start="start" end="end" topogram-name="searchTerm"></timeserie>
-    </section>
 
-    <section class="messages" ng-hide="!messages.length">
-      <table ng-table show-filter="true" class="table table-condensed">
-        <thead>
-          <tr>
-            <th ng-repeat="column in columns" class="text-center sortable"
-            >  {{column.field }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="row in messages">
-          <td ng-repeat="column in columns" tooltip-append-to-body="true">
-            {{row[column.field] }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div ng-cloak="" ng-hide="allResults" class="load-more"><a ng-click="loadMore()" class="btn btn-default">View more results...</a></div>
-  </section>
-</section>
- -->
+    
+

@@ -66,8 +66,14 @@ def index_csv_2_db(dataset):
 
     for i, row in enumerate(topogram.process()):
         print i
-        mongo.db[dataset["index_name"]].insert(row) # write row to db
-    
+        try : 
+            mongo.db[dataset["index_name"]].insert(row) # write row to db
+        except ValueError,e :
+            d.index_state = "error line %s"%i
+            db.session.commit()
+            if "time" in e : return "error line %s"%i
+
+
     # change the state to done
     d.index_state = "done"
     db.session.commit()

@@ -84,7 +84,7 @@ Topogram.directive('timeseries', function () {
                         .append("text")
                         .style("font-size",9)
                         .style("color", "#404040")
-                        .text("Volume of tweets in topogram "+$scope.topogramName +" (year 2012)")
+                        .text("Volume of messages")
 
                     bars.transition()
                         .duration(duration)

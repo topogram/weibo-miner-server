@@ -196,23 +196,24 @@ $scope.downloadAsCSV = function() {
 }
 
 $scope.saveAll = function () {
-  $scope.saveTime();
+  $scope.saveTimeSeries();
   $scope.saveWords();
   // $scope.saveMap();
   $scope.saveUsers();
 }
 
-$scope.saveTime = function(){
-  var sv=new Simg($(".time-container svg")[0]);
-  var fn="time_"+$scope.dataset.title +"_"+$scope.searchTerm
-  sv.download(fn);
+$scope.saveTimeSeries = function(){
+  console.log('saveTimeSeries');
+  var sv=new Simg($("#timeseries  svg")[0]);
+  // var fn="time_"+$scope.dataset.title;
+  sv.download();
 }
 
 $scope.saveWords = function(){
   var name ="words_"+$scope.dataset.title +"_"+$scope.searchTerm;
   // $scope.downloadPNG($(".words-container svg")[0], name);
      var sv=new Simg($(".words-container svg")[0]);
-     console.log(sv);
+     // console.log(sv);
      sv.download();
 }
 
@@ -235,9 +236,20 @@ $scope.downloadPNG=function(container, name) {
        a.href = img.getAttribute('src');
        a.click();
      });
-
 } // end controller
 
+
+    $scope.downloadAsCSV = function() {
+        var csv = ConvertToCSV($scope.messages);
+        // console.log(csv);
+
+        var hiddenElement = document.createElement('a');
+
+        hiddenElement.href = 'data:attachment/csv,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'results.csv';
+        hiddenElement.click();
+    }
  function ConvertToCSV(objArray) {
         var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
         var str = '';

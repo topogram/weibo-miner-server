@@ -21,15 +21,54 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
           $scope.dataset = dataset;
           $scope.index = dataset.index_name;
+          $scope.dataset.filename =  dataset.filepath.replace(/^.*[\\\/]/, ''); // extract just file name
+          // console.log(dataset);
 
+          // additional columns
           if(dataset.additional_columns) {
             var addCol = dataset.additional_columns.split(",")
             for (i in addCol) {
               $scope.columns.push({ "title": addCol[i] ,"field": addCol[i]});
             }
           }
-
     });
+
+      // load data
+      Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
+            $scope.dataset.size = datasetSize.count;
+            // load number of posts to estimate the size of the graph 
+            $scope.topogram.words_limit = Math.round(datasetSize.count / 25); // for now, arbitrary value 
+      });
+
+      $scope.recordOffset = 0;
+      $scope.recordStep = 100;
+      
+      $scope.getRecords = function(start,qty) {
+          Restangular.one('datasets',$routeParams.datasetId).one("from", $scope.recordOffset).one("qty",$scope.recordStep ).get().then(function(datasample) {
+              var data = JSON.parse( JSON.parse(datasample));
+              console.log(data);
+              $scope.messages = data;
+          });
+        }
+
+      $scope.getNextRecords =function() {
+        if ($scope.recordOffset + $scope.recordStep >  $scope.dataset.size) return
+        $scope.recordOffset = $scope.recordOffset + $scope.recordStep ;
+        $scope.getRecords($scope.recordStart, $scope.recordQty);
+      }
+
+      $scope.getPrevRecords =function() {
+        if( $scope.recordOffset - $scope.recordStep < 0) return
+        $scope.recordOffset = $scope.recordOffset - $scope.recordStep ;
+        $scope.getRecords($scope.recordStart, $scope.recordQty);
+      }
+
+      $scope.getRecords(0, $scope.recordQty); // init
+
+
+
+
+
 
       // most frequent words 
       $scope.topogram.frequent_words_limit = 50;
@@ -45,29 +84,26 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     $scope.topogram.words_limit = 0;
     $scope.wordsGraphLoading = false;
 
-    // load number of posts to estimate the size of the graph 
-    Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
+    
+    $scope.getWordsGraph = function() {
+        $scope.wordsGraphLoading = true; // display loader
+        $scope.wordsGraphTooBig = false;
+        // load graph
+        Restangular.one('datasets',$routeParams.datasetId).one("words").one(String($scope.topogram.words_limit)).get().then(function(wordsGraph) {
+            if (wordsGraph.top_words.length > 250) {
+              $scope.wordsGraphTooBig = true;
+              $scope.wordsGraphLoading = false;
 
-          $scope.topogram.words_limit = datasetSize.count / 25; // for now, arbitrary value 
-          $scope.getWordsGraph = function() {
-              $scope.wordsGraphLoading = true; // display loader
-              $scope.wordsGraphTooBig = false;
-              // load graph
-              Restangular.one('datasets',$routeParams.datasetId).one("words").one(String($scope.topogram.words_limit)).get().then(function(wordsGraph) {
-                  if (wordsGraph.top_words.length > 250) {
-                    $scope.wordsGraphTooBig = true;
-                    $scope.wordsGraphLoading = false;
+            } else {
+              $scope.wordsGraph=wordsGraph;
+              $scope.wordsForceStarted = true;
+              console.log($scope.wordsGraph);
+              $scope.wordsGraphLoading = false;
+            }
+            
+        });
+    }
 
-                  } else {
-                    $scope.wordsGraph=wordsGraph;
-                    $scope.wordsForceStarted = true;
-                    console.log($scope.wordsGraph);
-                    $scope.wordsGraphLoading = false;
-                  }
-                  
-              });
-          }
-    });
 
     // time series
     $scope.getTimeSeries = function() {
@@ -82,17 +118,8 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     }
 
     /*
-    SIZE LIMITS
+    STOPWORDS
     */
-
-    // $scope.$watch("wordsLimit", function(value) {
-    //   console.log('new words limit : ' + value);
-    // });
-
-    // $scope.$watch("citationsLimit", function(value) {
-    //   console.log('new citations limit : ' + value);
-    // });
-
 
     // stopwords
     $scope.addWord =function() {
@@ -103,6 +130,76 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           }
     }
 
+    /* SAVE IMAGES */
+    $('body').keydown(function (e) {
+          if(e.which==87 && e.shiftKey==true) $scope.saveWords() // W
+          else if (e.which==71 && e.shiftKey==true) $scope.saveMap() // G
+          else if (e.which==67 && e.shiftKey==true) $scope.saveUsers() //C
+          else if (e.which==84 && e.shiftKey==true) $scope.saveTimeSeries()
+          else if (e.which==65 && e.shiftKey==true) $scope.saveAll()
+    });
+
+    $scope.saveTimeSeries = function(){
+      var fn="time_"+$scope.dataset.title;
+      $scope.downloadPNG($("#timeseries  svg")[0], fn);
+      // var sv=new Simg($("#timeseries  svg")[0]);
+      // sv.download();
+    }
+
+    $scope.saveWords = function(){
+      var name ="words_"+$scope.dataset.title;
+      $scope.downloadPNG($(".words-container svg")[0], name);
+       // var sv=new Simg($(".words-container svg")[0]);
+       // sv.download();
+    }
+
+    $scope.downloadPNG=function(container, name) {
+
+        var sv=new Simg(container);
+        // console.log(sv);
+        // sv.download();
+        // sv.downloadWithName(name);
+
+        // rewrite download function
+         sv.toImg(function(img){
+           var a = document.createElement("a");
+           a.download = name+".png";
+           a.href = img.getAttribute('src');
+           a.click();
+         });
+
+    } // end controller
+
+    $scope.downloadAsCSV = function(dataObject, filename) {
+        // remove angular verbose stuff
+        var cleanObject = dataObject.map(function(d) { delete d["$$hashKey"] ; return d})
+        // convert to csv dialect
+        var csv = ConvertToCSV( cleanObject);
+        // download as file
+        var hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:attachment/csv,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = filename+'.csv';
+        hiddenElement.click();
+    }
+
+     function ConvertToCSV(objArray) {
+            var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+            var str = '';
+
+            for (var i = 0; i < array.length; i++) {
+                var line = '';
+            for (var index in array[i]) {
+                if (line != '') line += ','
+
+                line += array[i][index];
+            }
+
+            str += line + '\r\n';
+        }
+
+        return str;
+    }
 
     /*
     $scope.saveTopogram = function () {
