@@ -83,7 +83,8 @@ def get_words_co_occurences(dataset, words_limit):
 
     topogram = get_topogram(dataset)
     # words = redis_cache.get(dataset["index_name"])
-    print type(words)
+    words = None
+    # print type(words)
 
     # ok_words = [word["word"] for word in get_most_frequent_words(dataset,words_limit)]
     # print len(ok_words)
