@@ -21,11 +21,11 @@ from topogram.utils import any2utf8
 from server import db
 from server import mongo
 
-import redis
+# import redis
 import pickle
 
 # basic cache with redis
-redis_cache = redis.Redis('localhost')
+# redis_cache = redis.Redis('localhost')
 
 def get_index_name(file_name):
     safename = "".join([c for c in file_name if c.isalpha() or c.isdigit() or c==' ']).rstrip()
@@ -82,7 +82,7 @@ def index_csv_2_db(dataset):
 def get_words_co_occurences(dataset, words_limit):
 
     topogram = get_topogram(dataset)
-    words = redis_cache.get(dataset["index_name"])
+    # words = redis_cache.get(dataset["index_name"])
     print type(words)
 
     # ok_words = [word["word"] for word in get_most_frequent_words(dataset,words_limit)]
