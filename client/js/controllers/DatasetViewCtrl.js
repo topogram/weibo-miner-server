@@ -10,7 +10,6 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             console.log(dataset);
             $scope.dataset = dataset;
             $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
-            
 
             if (dataset.additional_columns) {
               $scope.dataset.addColumns = dataset.additional_columns.split(",");
@@ -32,6 +31,13 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             });
     }
 
+
+    $scope.$watch('dataset.time_column', function(newVal, oldVal){
+      if(newVal != "undefined" && newVal != oldVal) {
+            $scope.regDate = $scope.dataset.csv.sample[0][newVal];
+            console.log($scope.dataset);
+      }
+    })
     // init socket.io
     /*
     socket.on('connect', function () {
@@ -62,17 +68,6 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
         return strftime(pattern)
     }
 
-    // indexing
-    $scope.indexDataset =function() {
-            console.log('index dataset');
-            $scope.dataset.index_state = "processing";
-
-            Restangular.one('datasets',$routeParams.datasetId).one("index").get().then(function(index) {
-              flash.success = "Dataset is now indexed";
-              console.log(index.status);
-              $scope.dataset.index_state = "done";
-            });
-    }
 
 
     // Topograms
@@ -108,6 +103,95 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
         });
 
     }
+     /* 
+    REGEXPS
+    */
+
+      // iterator for browsing sample data
+      $scope.currentColumn = 1;
+      $scope.regTxt = "";
+      $scope.regexp ={}
+      $scope.regexp.regexp=undefined;
+      $scope.regexps = [];
+
+      $scope.addPatternsVisible = true
+
+      $scope.toggleAddPatterns = function() {
+          $scope.addPatternsVisible = $scope.addPatternsVisible === false ? true: false;
+      //    console.log($scope.addPatternsVisible);
+      }; ;
+
+      Restangular.one('regexps').getList().then(function(regexps) {
+        $scope.regexps = regexps;
+      });
+
+
+      // regexp
+      $scope.nextColumn = function() {
+        if($scope.currentColumn != $scope.dataset.csv.sample.length)
+          $scope.currentColumn++;
+        else  $scope.currentColumn = $scope.dataset.csv.sample.length;
+        $scope.updateRegTxt();
+      }
+
+      $scope.prevColumn = function() {
+          if($scope.currentColumn != 1) {$scope.currentColumn--;}
+          else $scope.currentColumn = 1;
+          $scope.updateRegTxt();
+      }
+
+      $scope.updateRegTxt = function() {
+          $scope.regTxt = $scope.dataset.csv.sample[$scope.currentColumn-1][$scope.dataset.text_column];
+          $scope.updateNewRegTxt();
+      }
+
+      $scope.updateNewRegTxt = function () {
+           if( $scope.regexp.regexp != undefined) {
+                var re = new RegExp($scope.regexp.regexp, "gi");
+                $scope.regNewTxt = $scope.regTxt.replace(re, function(str) {return '<mark>'+str+'</mark>'}); 
+          } else {
+            $scope.regNewTxt = $scope.regTxt;
+          }
+      }
+
+      // auto update when typing
+      $scope.$watch( "regexp.regexp", function(newVal, oldVal){
+            // \b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^\p{P}\s]|/)))
+                $scope.updateNewRegTxt();
+      }); 
+
+      $scope.saveRegexp = function() {
+          console.log($scope.regexp);
+          Restangular.all('regexps').post($scope.regexp).then(function(regexp) {
+              console.log(regexp);
+              $scope.regexps.push(regexp);
+              flash.success = "Your pattern has been saved";
+          });
+      } 
+
+      // DATA processing 
+      $scope.isIndexing = false;
+      $scope.processData = function() {
+
+            console.log('process  data');
+            // $scope.dataset.index_state = "processing";
+            $scope.isIndexing = true;
+            $scope.dataset.index_state = 'processing';
+
+            Restangular.one('datasets',$routeParams.datasetId).one("index").get().then(function(index) {
+
+              $scope.isIndexing = false;
+              $timeout(function() {
+                  $location.path("/datasets/"+ $routeParams.datasetId + "/topograms/create");
+              })
+              flash.success = "Dataset is now indexed";
+            }, function (error){
+                console.log(error);
+                flash.error = error.data;
+            });
+    }
+
+
 }
 
 

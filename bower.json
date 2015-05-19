@@ -27,10 +27,14 @@
     "bootstrap-slider": "latest",
     "topojson": "latest",
     "ng-table": "0.3.3",
+    "metisMenu": "latest",
     "angular-flash": "0.1.8",
     "angular-file-upload": "1.1.5",
     "angular-bootstrap-slider": "latest",
+    "font-awesome": "4.3.0",
+    "oclazyload": "~0.5.2",
     "socket.io-client": "0.9.16",
-    "simg": "git://github.com/clemsos/simg#c198a7f62b4dc6c648bc20f56134e8806788fb48"
+    "simg": "git://github.com/clemsos/simg#c198a7f62b4dc6c648bc20f56134e8806788fb48",
+    "d3.layout.cloud":"latest"
   }
 }

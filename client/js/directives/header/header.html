@@ -1,0 +1,26 @@
+<nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+    </div>
+    <ul class="nav navbar-nav">
+        <li>
+            <a href="/" class="navbar-brand" ng-class="{active: isActive('/')}">Topogram <small><i>beta</i></small></a>
+        </li>
+        <li ng-if="isLogged()" ng-class="{active: isActive('/datasets')}">
+            <a href="#/datasets"><i class="fa fa-table fa-fw"></i> Datasets</a>
+        </li>
+        <li ng-if="isLogged()">
+            <a class="blog-nav-item" href="#/datasets/create"  ng-class="{active: isActive('/datasets/create')}"><i class="fa fa-upload fa-fw"></i> New dataset</a>
+        </li>
+    </ul>
+    
+    <!-- /.navbar-header -->
+    <header-notification></header-notification>
+    
+    <!-- <sidebar></sidebar> -->
+</nav>

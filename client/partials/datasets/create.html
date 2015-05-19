@@ -1,7 +1,6 @@
-<h1>Upload a new dataset</h1>
-
-<!-- <button class="btn btn-default" ng-click="openWait()">Modal</button> -->
-
+<div class="header">
+  <h3>Upload a new dataset </h3>
+</div>
 
 <form ng-controller="DatasetCreateCtrl" role="form" class="form-horizontal" enctype="multipart/form-data" name="datasetForm" ng-submit="" novalidate>
 
@@ -9,30 +8,34 @@
     <div class="col-sm-6">
 
         <div class="form-group" data-ng-class="( dataset.title.$dirty ? ( dataset.title.$valid ? 'has-success has-feedback' : 'has-error has-feedback' ) : ' ')"
-          <label for="inputTitle" class="control-label">Title (required)</label>
-          <input id="inputTitle" type="text" placeholder="Your title..." ng-model="dataset.title" class="form-control" ng-required='true' ng-minlength=3/>
+          <label for="inputTitle" class="control-label"><b>Title</b></label>
+          <input id="inputTitle" type="text" placeholder="Your title..." ng-model="dataset.title" ng-required='true' ng-minlength=3 class="form-control"/>
+          <p class="help-block">The title of your data project</p>
         </div>
+
         <div class="form-group">
           <label for="inputDescription" class="control-label">Description</label>
           <textarea id="inputDescription" placeholder="Your description..." rows="3" ng-model="dataset.description" class="form-control", ng-minlength=3></textarea>
-          <p class="help-block">Describe the source and the content of your file?</p>
+          <p class="help-block">Additional information about the data (source, copyright, content etc.)</p>
         </div>
       </div>
 
     <div class="col-sm-1">
     </div>
 
-    <div class="col-sm-5">
+    <div class="col-sm-4">
     <div class="form-group">
-    
-      <label for="fileName" class="control-label">Dataset</label>
+    <h4>Upload your file <i class="fa fa-upload"></i></h4>
+      <label for="fileName" class="control-label">Dataset File</label>
+      <p class="help-block"> The first row of the files need to contain  the name of columns in order to be processed. UTF-8 encoding only.</p>
+      
       <input type="file" class="btn btn-default" nv-file-select uploader="uploader" id="fileName" data="dataset" type="file" accept="text/plain .csv"/>
-      <p class="help-block">Only .csv or .txt are accepted</p>
+      <p class="help-block"> You can upload data file in .csv or .txt format.</p> 
     </div>
-    <div class="form-group">
+<!--     <div class="form-group">
       <label for="userData" class="control-label">Network data (optional)</label>
       <input class="btn btn-default" type="file" nv-file-select uploader="uploader" id="userData" disabled/><br/>
-    </div>
+    </div> -->
 
     <!-- <p>Files uploaded : {{ uploader.queue.length }}</p> -->
     <div ng-repeat="item in uploader.queue">

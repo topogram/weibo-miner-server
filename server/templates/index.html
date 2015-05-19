@@ -1,82 +1,59 @@
 <!DOCTYPE html>
-<html ng-app="Blog" ng-controller="ApplicationCtrl">
+<html>
+
     <head>
-        <meta charset="utf-8" />
-        <title>Topogram</title>
-        <link rel="stylesheet" type="text/css" href="./bower_components/bootstrap/dist/css/bootstrap.css">
-        <!-- <link rel="stylesheet" type="text/css" href="./bower_components/bootstrap-slider/slider.css"> -->
-        <link rel="stylesheet" type="text/css" href="./css/theme.css">
-        <link rel="stylesheet" type="text/css" href="./css/styles.css">
-        <link rel="stylesheet" type="text/css" href="./css/slider.css">
+            <meta charset="utf-8" />
+            <title>Topogram</title>
+            <meta name="description" content="">
+            <meta name="viewport" content="width=device-width">
+            <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+
+            <link rel="stylesheet" type="text/css" href="./bower_components/bootstrap/dist/css/bootstrap.min.css">
+            <!-- <link rel="stylesheet" type="text/css" href="./bower_components/bootstrap-slider/slider.css"> -->
+            <!-- <link rel="stylesheet" type="text/css" href="./css/theme.css"> -->
+            <!-- <link rel="stylesheet" type="text/css" href="./css/styles.css"> -->
+            <link rel="stylesheet" type="text/css" href="./css/main.css">
+            <link rel="stylesheet" type="text/css" href="./css/sb-admin-2.css">
+            <link rel="stylesheet" type="text/css" href="./css/slider.css">
+
+            <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css" type="text/css">
+
     </head>
-    <body>
- 
-        <div class="blog-masthead">
-            <div class="container">
-                <nav role="navigation" class="navbar-tools navbar-default navbar-tools navbar-fixed-top navbar-inverse">
-                    <div class="container-fluid">
-                      <!-- Brand and toggle get grouped for better mobile display-->
-                      <div class="navbar-header">
-                        <button type="button" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
-                      </div>
 
-                         <ul class="nav navbar-nav">
-                            <li>
-                                <a href="/" class="navbar-brand" ng-class="{active: isActive('/')}">Topogram</a>
-                            </li>
-                        </ul>
-                        <ul class="nav navbar-nav">
-                            <li ng-if="isLogged()">
-                                <a class="blog-nav-item" href="#/datasets"  ng-class="{active: isActive('/datasets/create')}">Your Datasets</a>
-                            </li>
-                            <li ng-if="isLogged()">
-                                <a class="blog-nav-item" href="#/datasets/create"  ng-class="{active: isActive('/datasets/create')}">Upload a dataset</a>
-                            </li>
-                        </ul>
+    <body ng-app="Topogram" ng-controller="ApplicationCtrl">
 
-                        <ul class="nav navbar-nav navbar-right">
-                            <!-- <li><a href="/api/v1/spec.html">Help</a></li> -->
-                            <!-- <li><a href="#">About</a></li> -->
-                            <li class="divider-vertical"></li>
-                            <li ng-if="isLogged()">
-                                <a href="#/sessions/destroy">Logout</a>
-                            </li>
-                            <!-- <li ng-if="!isLogged()">
-                                <a href="#/users/create" title="Register">Register</a>
-                            </li> -->
-                            <li ng-if="!isLogged()"><a href="#/sessions/create" ng-class="{active: isActive('/sessions/create')}">Login</a></li>
-                        </ul>
-                    </div>
-                </nav>
+        <header></header>
+        <!-- <sidebar></sidebar>   -->
+
+        <div id="page-wrapper">
+            <!-- Subscribe to success flash messages. -->
+            <div flash-alert="success" active-class="in alert" class="fade">
+                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <strong class="alert-heading">Congrats!</strong>
+                <span class="alert-message">{{flash.message}}</span>
             </div>
-        </div>
 
-        <!-- Subscribe to success flash messages. -->
-        <div flash-alert="success" active-class="in alert" class="fade">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            <strong class="alert-heading">Congrats!</strong>
-            <span class="alert-message">{{flash.message}}</span>
-        </div>
+            <!-- Subscribe to error flash messages. -->
+            <div flash-alert="error" active-class="in alert" class="fade">
+                <strong class="alert-heading">Boo!</strong>
+                <span class="alert-message">{{flash.message}}</span>
+            </div>
 
-        <!-- Subscribe to error flash messages. -->
-        <div flash-alert="error" active-class="in alert" class="fade">
-            <strong class="alert-heading">Boo!</strong>
-            <span class="alert-message">{{flash.message}}</span>
-        </div>
-
-        <div class="container main-view">
+        <div class="main-view">
  
             <div ng-view></div>
  
         </div><!-- /.container -->
  
-        <div class="blog-footer">
-            <!-- <p>Application built by <a href="https://twitter.com/clemsos">@clemsos</a> using Flask and AngularJS.</p> -->
+        <!-- <div class="blog-footer">
+            <p>Application built by <a href="https://twitter.com/clemsos">@clemsos</a> using Flask and AngularJS.</p>
             <p>
                 <a href="#">Back to top</a>
             </p>
-        </div>
- 
+        </div> -->
+    </div>
+
         <script type="text/javascript" src="./bower_components/angularjs/angular.js"></script>
         <script type="text/javascript" src="./bower_components/angular-route/angular-route.js"></script>
         <script type="text/javascript" src="./bower_components/lodash/dist/lodash.js"></script>
@@ -103,9 +80,12 @@
         <script type="text/javascript" src="./bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 
         <script type="text/javascript" src="./bower_components/angular-bootstrap-slider/slider.js"></script>
+        <script type="text/javascript" src="./bower_components/oclazyload/dist/ocLazyLoad.js"></script>
 
         <!-- <script type="text/javascript" src="./bower_components/simg/dist/simg.min.js"></script> -->
         <script type="text/javascript" src="./bower_components/simg/src/simg.js"></script>
+        <script type="text/javascript" src="./bower_components/d3.layout.cloud/d3.layout.cloud.js"></script>
+        <script type="text/javascript" src="./bower_components/metisMenu/dist/metisMenu.js"></script>
 
         <!-- <script type="text/javascript" src="./bower_components/socket.io-client/dist/socket.io.min.js"></script> -->
 
@@ -135,10 +115,15 @@
         <script type="text/javascript" src="./js/services/SocketIOService.js"></script>
 
         <script type="text/javascript" src="./js/directives/match.js"></script>
-        <script type="text/javascript" src="./js/directives/timeSeries.js"></script>
+        <script type="text/javascript" src="./js/directives/timeseries/timeseries.js"></script>
         <script type="text/javascript" src="./js/directives/timeSlider.js"></script>
         <script type="text/javascript" src="./js/directives/wordsGraph.js"></script>
         <script type="text/javascript" src="./js/directives/citationsGraph.js"></script>
+        <script type="text/javascript" src="./js/directives/tagCloud.js"></script>
+
+        <script type="text/javascript" src="./js/directives/header/header.js"></script>
+        <script type="text/javascript" src="./js/directives/header/header-notification/header-notification.js"></script>
+        <script type="text/javascript" src="./js/directives/sidebar/sidebar.js"></script>
 
         <!-- <script type="text/javascript" src="./js/others.js"></script> -->
 

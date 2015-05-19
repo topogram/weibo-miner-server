@@ -7,16 +7,18 @@ from flask import request
 from flask.ext.restful import reqparse
 from flask_login import login_required, current_user
 from werkzeug import secure_filename
+from bson import json_util
 
-from server import app, restful, db
+from server import app, restful, db, mongo
 
 from server.models.dataset import Dataset 
 from server.forms.dataset import DatasetCreateForm, DatasetUpdateForm
 from server.serializers.dataset import DatasetSerializer
 from server.lib.queue import JobQueue
 
-from server.lib.indexer import csv2elastic, get_index_info, delete_index, get_index_name
+# from server.lib.indexer import csv2elastic, get_index_info, delete_index, get_index_name
 
+from server.lib.db_indexer import index_csv_2_db, get_index_name
 
 from topogram.utils import any2utf8
 from topogram.corpora.csv_file import CSVCorpus 
@@ -57,7 +59,12 @@ class DatasetListView(restful.Resource):
         index_state = "raw"
         es_index_name = get_index_name(fileName)
 
-        dataset = Dataset(form.title.data, form.description.data, str(file_path),es_index_name, index_state, source_column=form.source_column.data, text_column=form.text_column.data, time_column=form.time_column.data, time_pattern=form.time_pattern.data)
+        dataset = Dataset(form.title.data, 
+                          form.description.data, 
+                          str(file_path),
+                          es_index_name, 
+                          index_state, 
+                          source_column=form.source_column.data, text_column=form.text_column.data, time_column=form.time_column.data, time_pattern=form.time_pattern.data)
         db.session.add(dataset)
         db.session.commit()
 
@@ -74,7 +81,7 @@ class DatasetView(restful.Resource):
         if dataset.user.id != current_user.id : return 401
 
         d= DatasetSerializer(dataset).data
-        if d["index_state"] == "done" : delete_index(d["index_name"])
+        # if d["index_state"] == "done" : delete_index(d["index_name"])
 
         db.session.delete(dataset)
         db.session.commit()
@@ -123,6 +130,7 @@ class DatasetView(restful.Resource):
 
         # get the modified version
         dataset = Dataset.query.filter_by(id=id).first()
+
         return 204, 
 
     @login_required
@@ -150,9 +158,9 @@ class DatasetView(restful.Resource):
         dataset["csv"]["sample"] = csv_corpus.raw_sample(10)
 
         # add elasticsearch info
-        if dataset["index_state"] == "done" :
-            es_info= get_index_info(dataset["index_name"])
-            dataset["records_count"] = es_info["docs"]["num_docs"]
+        # if dataset["index_state"] == "done" :
+        #     es_info= get_index_info(dataset["index_name"])
+        #     dataset["records_count"] = es_info["docs"]["num_docs"]
 
         return dataset
 
@@ -173,44 +181,87 @@ class DatasetSampleView(restful.Resource):
         csv_sample = csv_corpus.raw_sample(50)
         return csv_sample, 201
 
-
-class DatasetEsView(restful.Resource) :
+class DatasetProcessView(restful.Resource) :
     @login_required
     def get(self, id):
-        """" 
-        Index data into elasticsearch
-        Works as a state machine based on a job queue
+        """ 
+        Use user-defined model to index data into the db
         """
-        
+
         d = Dataset.query.filter_by(id=id).first()
         dataset = DatasetSerializer(d).data
 
-        index_state = dataset["index_state"]
+        try :  
+            index_csv_2_db(dataset) # index into db
+        except ValueError, e:
+             return e.message, 422
 
-        # ensure that the index exists, if not reset state and recreate
-        try : 
-            get_index_info(dataset["index_name"])
-        except :
-            index_state ="raw"
+class DatasetSizeView(restful.Resource) :
+    @login_required
+    def get(self, id):
+        d = Dataset.query.filter_by(id=id).first()
+        dataset = DatasetSerializer(d).data
 
-        if index_state == "raw" :
-            csv2elastic(dataset)
-            return { "status": "started"}, 201
+        count = mongo.db[dataset["index_name"]].count()
+        return {"index_name" : dataset["index_name"], "count" : count}
 
-        elif index_state == "processing" :
-            es_info= get_index_info(dataset["index_name"])
-            es_info["status"] = "processing"
-            return es_info, 201
+class DatasetPaginateView(restful.Resource) :
+    @login_required
+    
+    def __init__(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('sort', type=str, help='Sort by DB field')
+        self.args = parser.parse_args()
 
-        elif index_state == "done" :
-            es_info= get_index_info(dataset["index_name"])
-            es_info["status"] = "done"
-            return es_info, 200
+    def get(self, id, start, qty):
+        d = Dataset.query.filter_by(id=id).first()
+        dataset = DatasetSerializer(d).data
+        sort_col = "_id"
+        try :
+            sort_col = self.args["sort"]
+            print sort_col
+            results = mongo.db[dataset["index_name"]].find().sort({ sort_col: -1}).skip(start).limit(start+qty)
+        except TypeError:
+            results = mongo.db[dataset["index_name"]].find().skip(start).limit(start+qty)
+        return json_util.dumps(results)
 
-        return 201
-        # return {
-            # "index_name" : dataset["index_name"],
-            # "count" : es_info["indices"][dataset["index_name"]]["docs"]["num_docs"]
-            # "info" : es_info["indices"][dataset["index_name"]]
-            # "info" : es_info[""]
-            # }
+# class DatasetEsView(restful.Resource) :
+#     @login_required
+#     def get(self, id):
+#         """" 
+#         Index data into elasticsearch
+#         Works as a state machine based on a job queue
+#         """
+        
+#         d = Dataset.query.filter_by(id=id).first()
+#         dataset = DatasetSerializer(d).data
+
+#         index_state = dataset["index_state"]
+
+#         # ensure that the index exists, if not reset state and recreate
+#         try : 
+#             get_index_info(dataset["index_name"])
+#         except :
+#             index_state ="raw"
+
+#         if index_state == "raw" :
+#             csv2elastic(dataset)
+#             return { "status": "started"}, 201
+
+#         elif index_state == "processing" :
+#             es_info= get_index_info(dataset["index_name"])
+#             es_info["status"] = "processing"
+#             return es_info, 201
+
+#         elif index_state == "done" :
+#             es_info= get_index_info(dataset["index_name"])
+#             es_info["status"] = "done"
+#             return es_info, 200
+
+#         return 201
+#         # return {
+#             # "index_name" : dataset["index_name"],
+#             # "count" : es_info["indices"][dataset["index_name"]]["docs"]["num_docs"]
+#             # "info" : es_info["indices"][dataset["index_name"]]
+#             # "info" : es_info[""]
+#             # }

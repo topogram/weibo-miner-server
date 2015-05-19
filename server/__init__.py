@@ -11,6 +11,12 @@ from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import LoginManager
 from flask.ext.principal import Principal
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.pymongo import PyMongo
+
+MONGO_URL = os.environ.get('MONGO_URL')
+if not MONGO_URL:
+    MONGO_URL = "mongodb://localhost:27017/topogram";
+
 
 basedir = os.path.dirname(os.path.realpath(__file__))
 ASSETS_DIR = os.path.join(os.path.dirname(basedir), "client")
@@ -44,6 +50,11 @@ login_manager.init_app(app)
 
 # User Rights
 principals = Principal(app)
+
+# mongo
+app.config['MONGO_URI'] = MONGO_URL
+mongo = PyMongo(app)
+
 
 import server.resources.admin
 import server.resources.routes

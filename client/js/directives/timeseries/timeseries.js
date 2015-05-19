@@ -1,7 +1,8 @@
-Topogram.directive('timeserie', function () {
+Topogram.directive('timeseries', function () {
     // var chart = d3.custom.timeSerie(),
     return {
         replace: false,
+        // templateUrl:'js/directives/timeseries/timeseries.html',
         scope: { 
             timeData: '=timeData',
             start: '=start',
@@ -35,7 +36,7 @@ Topogram.directive('timeserie', function () {
 
                 if(updatedTimeData != undefined && $scope.start!= undefined && $scope.end!= undefined) {
 
-                    // console.log('draw timeline');
+                    console.log(updatedTimeData);
 
                     var _data=updatedTimeData;
 
@@ -49,7 +50,7 @@ Topogram.directive('timeserie', function () {
                     var xAxis = d3.svg.axis()
                         .scale(x)
                         .orient("bottom")
-                        // .ticks(d3.time.month, 1)
+                        .ticks(10)
                         .tickFormat(d3.time.format("%d %B"));
 
                     var yAxis = d3.svg.axis()
@@ -83,7 +84,7 @@ Topogram.directive('timeserie', function () {
                         .append("text")
                         .style("font-size",9)
                         .style("color", "#404040")
-                        .text("Volume of tweets in topogram "+$scope.topogramName +" (year 2012)")
+                        .text("Volume of messages")
 
                     bars.transition()
                         .duration(duration)

@@ -1,96 +1,210 @@
-  <div class="page-header">
-  <h1>{{dataset.title}} <small>{{dataset.description}}</small></h1>
+<div class="page-header">
+  <h3>Create Topogram <small>{{dataset.name}} - {{ dataset.filename}}</small></h3>
+
 </div>
 
+<section id="timeseries">
+        <h4>Time series  <small>Quantity of data over time</small></h4>
+        <p>
+            <a class="btn btn-sm btn-primary" ng-click="getTimeSeries()">Update Time Series</a> 
+        </p>
+        <timeseries ng-hide="!timeData" timeseries="" time-data="timeData" start="start" end="end"></timeseries>
 
-<!-- <h4>index data</h4> -->
-<!-- <p><strong>Index</strong> : {{dataset.index_name}}</p>
-  <p><strong>type</strong> : {{dataset.type}}</p> -->
+        <p ng-hide="!timeData"><a href="#" type="button" ng-click="saveTimeSeries(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>  or hit <small> Shift+T</small></p>
 
-  <div class="row">
-    <div class="col-md-6 searchField ">
-        <form class="form-inline" ng-submit="search()" role="form">
-            <input ng-model="searchTerm" type="search" name="title" class="form-control" ng-required='true'/>
-            <button type="submit" class="btn btn-default">Get results</button>
-            <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p>
-        </form>
-        <form ng-submit="createTopogram()" ng-hide="!messages.length">
+</section>
+<hr>
+<section  class="frequent-words">
 
-            <div class="" >
-                <h4>Stopwords<small>({{topogram.stopwords.length}})</small></h4>
-                <div class="active">
-                    <p><span class="badge"ng-repeat="stopword in topogram.stopwords">{{ stopword }}</span></p>
-                    <div class="form-inline">
-                            <input type="text" class="form-control" ng-model="addedStopWord" placeholder="Add stopword">
-                            <a  type="submit" class="btn btn-default" ng-click="addWord()">Add</a>
+      <h4>Most frequent words
+          <small>Display the most used  words in the dataset.</small>
+      </h4>
+      <div class="row">
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+              <button class="btn btn-sm btn-primary" ng-click="getMostFrequentWords()">Most Frequent Words</button>
+
+              <form class="form-inline">
+                    <label>Word count : </label>
+                    <div class="form-group">
+                      <a class="btn btn-default btn-xs" ng-click="topogram.frequent_words_limit = topogram.frequent_words_limit + 10">+</a>
+                      <input type="text" class="form-control" ng-model="topogram.frequent_words_limit">
+                      <a class="btn btn-default btn-xs" ng-click="topogram.frequent_words_limit = topogram.frequent_words_limit - 10">-</a>
                     </div>
-                    <p class="help-block">Input here words to be ignored</p>
-                </div>
-            </div>
-            <div class="form-group" >
-                <h4>Maximum Citations <small>({{topogram.words_limit}})</small>  </h4>
-                <slider ng-model="topogram.words_limit" min="0" step="1" max="50" data-slider-orientation="horizontal" id="wordsLimit"></slider>
-                <p class="help-block">Maximum number of words in the graph.</p>
-            </div>
-            <div class="form-group" >
-                <h4>Maximum Citations <small>({{topogram.citations_limit}})</small>  </h4>
-                <slider ng-model="topogram.citations_limit" min="0" step="1" max="50" data-slider-orientation="horizontal" id="citationsLimit"></slider>
-                <p class="help-block">Maximum number of citations in the graph.</p>
-            </div>
-            <button type="submit" class="btn btn-primary">Create Topogram</button>
+                    <p class="help-block">Select the number of words you want.</p>
+              </form>
+          </div>
+          <p ng-hide="!frequentWords.length"><a href="#" type="button" ng-click='downloadAsCSV(frequentWords, "frequent_words"); $event.preventDefault()' class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span> Download as CSV</a></p>
 
-        </form>
-    </div>
-
-    <div class="col-sm-6" ng-hide="!messages.length">
-        <h4>Citations & patterns</h4>
-
-        <div class="form-group">
-             <div class="input-group">
-                <select multiple class="form-control" ng-model="topogram.citation_patterns">
-                    <option ng-selected="{{operator == topogram.citation_patterns}}" ng-repeat="operator in regexps" value="{{operator.id}}"> 
-                    {{operator.title}} | {{operator.regexp}}
-                    </option>
-                </select>
-             </div>
-                <p class="help-block">Select  the citation patterns from existing or add one below.</p>
+          <div ng-hide="!frequentWords.length" id="frequent-words" class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+              <div style="height:250px; overflow:auto">
+                  <table show-filter="true" class="table table-condensed">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Word</th>
+                          <th>Count</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-style="{color: wordColors(row.degree)}" ng-repeat="word in frequentWords">
+                        <td>{{$index + 1}}</td>
+                        <td>{{word.word }}</td>
+                        <td>{{word.count }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+              </div>
+          </div>
+      </div>
+</section>
+<hr>
+<!-- <section class="words-graph">
+    <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
         </div>
+    </div>
+</section> -->
 
-        <a href="" ng-click="toggleAddPatterns()" class="btn btn-default">Add a pattern</a> 
+<section id="words">
+    <h4>Semantic graph <small>Co-occurences of words in the datasets</small></h4>
+     <button ng-click="getWordsGraph()" ng-disabled="wordsGraphLoading"  class="btn btn-sm btn-primary">Compute Word Graph</button>
+     <img ng-hide="!wordsGraphLoading" src="/img/circle-loader.gif" alt=""></div>
+    <p ng-hide="!wordsGraphLoading" class="help-block">This operation make take some time. Thanks !</p>
 
-        <form ng-submit="saveRegexp()" ng-hide="addPatternsVisible">
-            <h4>Add patterns</h4>
-            <div class="form-group">
-                <div class="input-group">
-                    <div class="input-group-addon">Pattern</div>
-                    <input id="inputRegexp" type="text" placeholder="Citation format..." ng-model="regexp.regexp" class="form-control" ng-required='true', ng-minlength=3/>
-                </div>
-                <p class="help-block"> <a href="https://docs.python.org/2/howto/regex.html">Regular expressions</a> to match citations in your text  (formatting for Python).</p>
+    <span ng-hide="!wordsGraphTooBig" class="alert-danger" >
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        The graph is too big to be displayed. Please  adjust the minimum threshold for  words
+    </span>
 
-                <b>Sample</b> from row {{ currentColumn }} / {{ dataset.csv.sample.length }}
-                <a class="btn btn-xs" ng-click="prevColumn()"><< prev</a>
-                | <a class="btn btn-xs" ng-click="nextColumn()">next >></a>
-                <p class="">{{ regTxt}}</p>
-                <p class="well" ng-bind-html="regNewTxt | unsafe"></p>
-                
-            </div>
-            <div class="form-group">
-                <div class="input-group">
-                    <div class="input-group-addon">Title</div>
-                    <input id="inputRegexpName" type="text" placeholder="Citation name..." ng-model="regexp.title" class="form-control" ng-required='true', ng-minlength=3/>
-                </div>
-                <p class="help-block">A short description of your citation patterns.</p>
-                <button type="submit" class="btn btn-xs btn-primary">Save Pattern</button>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <div class="input-group">
-                    </div>
-                </div>
-            </div>
-        </form>
+     <div> 
+
+     <p>Minimum degree in the graph <small>({{topogram.words_limit}})</small>  </p>
+    <div class="form-inline" >
+        <div class="form-group">
+              <a class="btn btn-default btn-xs" ng-click="topogram.words_limit = topogram.words_limit + 10">+</a>
+              <input type="text" class="form-control" ng-model="topogram.words_limit">
+              <a class="btn btn-default btn-xs" ng-click="topogram.words_limit = topogram.words_limit - 10">-</a>
+          </div>
+        <!-- <slider ng-model="topogram.words_limit" min="0" step="10" max="{{topogram.words_limit*2}}" value="{{topogram.words_limit}}" data-slider-orientation="horizontal" id="wordsLimit"></slider> -->
+        <p class="help-block">Max words in the graph : 250</p>
     </div>
 
+    <div class="row" ng-hide="!wordsForceStarted">
+          <div class="col-xs-3 col-sm-3">
+              <div class="well">
+                    <h4><small><a data-toggle="popover" popover-placement="right" popover-title="Help - Read the Semantic Graph" tooltip-html-unsafe="true" popover="
+                    Stroke weight represents link intensity between 2 words.
+                    Size represent the degree of each words.
+                    Colors represent the degree of each words.
+                    "  popover-append-to-body="true">Help</a></small></h4>
+
+                    <p class="help-block">This graph represents the co-occurence of words quoted in the corpus.</p>
+
+                    <p><a href="#" type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>   or hit <small> Shift+W</small></p>
+              </div>
+              <h5>Most connected words</h5>
+              <!-- <a class="btn btn-xs" ng-click="prevTopWords()"><< prev</a> 
+              {{ wordsListStart }} | {{wordsListEnd}}<a class="btn btn-xs" ng-click="nextTopWords()">next >></a> -->
+              <div style="height:220px; overflow:auto;">
+                  <table show-filter="true" class="table table-condensed" style="height:220px; overflow:scroll">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Word</th>
+                          <th>Degree</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-style="{color: wordColors(row.degree)}" ng-repeat="row in wordsGraph.top_words.slice(wordsListStart,wordsListEnd)">
+                        <td>{{$index + 1}}</td>
+                        <td>{{row.node }}</td>
+                        <td>{{row.degree }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+              </div>
+          </div>
+
+          <div class="col-xs-9 col-sm-9">
+                <words words="" words-graph="wordsGraph" words-force-started="wordsForceStarted" start="start" end="end" class="words-container"></words>
+          </div>
+    </div>
+</section>
+<hr>
+<section ng-hide="" class="recipe">
+    <h4>Messages <small> {{ dataset.size }} results  from the datasets</small></h4>
+    <ul class="pagination">
+        <p><li data-ng-click="getPrevRecords()"><a>&laquo;</a></li>
+        <!-- <li data-ng-click="changePage(page.pageOffset)" data-ng-repeat="page in pageObjs"><a>{{page.pageNumber + 1}}</a>
+        </li> -->
+        <li><a href="">Records {{recordOffset}} to {{recordOffset + recordStep }}</a> </li>
+        <li data-ng-click="getNextRecords()"><a>&raquo;</a></li>
+        </p>
+    </ul>
+
+    <div class="messages" ng-hide="!messages.length" style="height:500px; overflow:auto;">
+          <table  class="table table-condensed">
+            <thead>
+              <tr>
+              <th>Index</th>
+                <th ng-repeat="column in columns" class="text-center sortable"
+                >  {{column.field }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="row in messages">
+            <td>{{$index}}</td>
+              <td ng-repeat="column in columns" tooltip-append-to-body="true">
+                {{row[column.field] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- <div ng-cloak="" ng-hide="allResults" class="load-more"><a ng-click="loadMore()" class="btn btn-default">View more results...</a></div> -->
+      </div>
+</section>
+
+
+<!-- <section class="row" id="filter-words">
+  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+      <div class="active">
+          <div class="form-inline">
+                  <h4>
+                      Excluded Words<small>({{topogram.excludeWords.length}})</small>
+                  </h4>
+                  <input type="text" class="form-control" ng-model="addedStopWord" placeholder="Add stopword">
+                  <a  type="submit" class="btn btn-default" ng-click="addWord()">Add</a>
+          </div>
+          <p class="help-block">Those words will be ignored</p>
+          <p><span class="badge"ng-repeat="stopword in topogram.stopwords">{{ stopword }}</span></p>
+      </div>
+  </div>
+  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+      <div class="active">
+          <div class="form-inline">
+                  <h4>
+                      Included Words<small>({{topogram.includeWords.length}})</small>
+                  </h4>
+                  
+                  <input type="text" class="form-control" ng-model="addedStopWord" placeholder="Add stopword">
+                  <a  type="submit" class="btn btn-default" ng-click="addWord()">Add</a>
+          </div>
+          <p class="help-block">Those words will be ignored</p>
+          <p><span class="badge"ng-repeat="stopword in topogram.stopwords">{{ stopword }}</span></p>
+      </div>
+  </div>  
+</section> -->
+
+<!--     <div class="form-group" >
+        <h4>Maximum Citations <small>({{topogram.citations_limit}})</small>  </h4>
+        <slider ng-model="topogram.citations_limit" min="0" step="1" max="50" data-slider-orientation="horizontal" id="citationsLimit"></slider>
+        <p class="help-block">Maximum number of citations in the graph.</p>
+    </div>
+ -->    
+
+<!-- 
       <div ng-hide="loadingNetworks.percent==0 || loadingNetworks.percent==100">
             <p>Now processing...</p>
             <progressbar class="progress-striped active" max="100" value=" loadingNetworks.percent" type="danger"><i>{{ loadingNetworks.current}} / {{ totalResults}}</i></progressbar>
@@ -104,33 +218,12 @@
                 <a type="submit" ng-click="saveTopogram()" class="btn btn-primary">Save</a>
               </div>
       </div>
-  </div>
+  </div> -->
  
-  <section class="results">
-    <h3 ng-hide="messages.length" class="no-recipes">No results</h3>
+  <!-- <section class="results"> -->
+    <!-- <h3 ng-hide="messages.length" class="no-recipes">No results</h3> -->
+    
+  <!-- </section> -->
 
-    <section ng-hide="!messages.length" class="recipe">
-      <h3>Total : {{ totalResults }} results<small> in {{ index }}</small></h3>
-      <timeserie timeserie="" time-data="timeData" start="start" end="end" topogram-name="searchTerm"></timeserie>
-    </section>
+    
 
-    <section class="messages" ng-hide="!messages.length">
-      <table ng-table show-filter="true" class="table table-condensed">
-        <thead>
-          <tr>
-            <th ng-repeat="column in columns" class="text-center sortable"
-            >  {{column.field }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="row in messages">
-          <td ng-repeat="column in columns" tooltip-append-to-body="true">
-            {{row[column.field] }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div ng-cloak="" ng-hide="allResults" class="load-more"><a ng-click="loadMore()" class="btn btn-default">View more results...</a></div>
-  </section>
-</section>

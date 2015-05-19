@@ -1,10 +1,11 @@
-window.Topogram = angular.module('Blog', [
+window.Topogram = angular.module('Topogram', [
                                  'ngRoute', 
                                  'restangular', 
                                  'LocalStorageModule',
                                  'angular-flash.service',
                                  'angular-flash.flash-alert-directive',
                                  'angularFileUpload',
+                                 'oc.lazyLoad',
                                  'elasticsearch',
                                  "ui.bootstrap",
                                  "ui.bootstrap-slider",
@@ -38,7 +39,7 @@ window.Topogram = angular.module('Blog', [
     });
 })
 
-// fix for bootstrap 3
+// fix for flash alerts bootstrap 3
 Topogram.config(['flashProvider', function(flashProvider) {
   flashProvider.errorClassnames.push('alert-danger');
 }])
@@ -52,3 +53,13 @@ Topogram.filter("round", function () {
                 "";
         };
     });
+
+// load other scripts
+Topogram.config(['$ocLazyLoadProvider',function ($ocLazyLoadProvider) {
+
+    $ocLazyLoadProvider.config({
+      debug:false,
+      events:true,
+    });
+
+}]);

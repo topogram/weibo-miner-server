@@ -1,0 +1,23 @@
+<ul class="nav navbar--links navbar-right">
+    <li ng-if="!isLogged()"><a href="#/sessions/create" ng-class="{active: isActive('/sessions/create')}">Login</a></li>
+
+    <li ng-if="isLogged()" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-user">
+            <!-- <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+            </li>
+             -->
+             <li><a href="#/settings"><i class="fa fa-gear fa-fw"></i> Settings</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+                <a href="#/sessions/destroy"><i class="fa fa-sign-out fa-fw"></i>Logout</a>
+            </li>
+            </li>
+        </ul>
+        <!-- /.dropdown-user -->
+    </li>
+    <!-- /.dropdown -->
+</ul>
