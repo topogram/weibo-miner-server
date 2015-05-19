@@ -42,4 +42,3 @@ redis
 coverage
 colour-runner
 chardet
-itertools
