@@ -191,8 +191,8 @@ class DatasetProcessView(restful.Resource) :
         d = Dataset.query.filter_by(id=id).first()
         dataset = DatasetSerializer(d).data
 
-        process_dataset(dataset)
-        return "data is now processing..."
+        jobs_keys = process_dataset(dataset)
+        return jobs_keys
 
 class DatasetSizeView(restful.Resource) :
     @login_required
@@ -204,13 +204,12 @@ class DatasetSizeView(restful.Resource) :
         return {"index_name" : dataset["index_name"], "count" : count}
 
 class DatasetPaginateView(restful.Resource) :
-    @login_required
-    
     def __init__(self):
         parser = reqparse.RequestParser()
         parser.add_argument('sort', type=str, help='Sort by DB field')
         self.args = parser.parse_args()
 
+    @login_required
     def get(self, id, start, qty):
         d = Dataset.query.filter_by(id=id).first()
         dataset = DatasetSerializer(d).data

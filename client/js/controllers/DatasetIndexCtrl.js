@@ -1,4 +1,4 @@
-function DatasetIndexCtrl($scope, $http, $location, $timeout, Restangular, flash, modalService) {
+function DatasetIndexCtrl($scope, $http, $location, $timeout, Restangular, flash, modalService, socket) {
 
     Restangular.all('datasets').getList().then(function(datasets){
         $scope.posts = datasets.map(function(d){
@@ -12,6 +12,19 @@ function DatasetIndexCtrl($scope, $http, $location, $timeout, Restangular, flash
         flash.error = err.status + " : "+ err.statusText;
     });
     
+    // init socket.io
+
+    socket.on('connect', function () {
+          console.log('connect');
+    });
+
+    socket.on('progress', function (data) {
+        console.log(data);
+        // var d=JSON.parse(data)
+        // console.log(typeof(data), typeof(d));
+        // $scope.loadingNetworks=JSON.parse(data);
+    });
+
     $scope.delete = function(dataset) {
 
         var modalOptions = {

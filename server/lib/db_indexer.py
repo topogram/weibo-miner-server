@@ -22,16 +22,12 @@ from server import app
 from server import db
 from server import mongo
 from server.resources.socketio import socket
+from server.resources.rqueue import q
 
 import pickle
 
-from flask.ext.rq import get_queue
-
-
-@socket.on('updates')
-def send_updates(data):
-    with app.app_context() :
-        socket.emit("progress", data)
+def job_done(job):
+    print "job is done! "
 
 def get_index_name(file_name):
     safename = "".join([c for c in file_name if c.isalpha() or c.isdigit() or c==' ']).rstrip()
@@ -61,9 +57,11 @@ def get_topogram(dataset):
 
 def process_dataset(dataset):
 
-    q = get_queue("taf")
-    q.enqueue(index_csv_2_db, dataset,  timeout=500)
-    q.enqueue(process_words_co_occurences, dataset, timeout=500)
+    job1 = q.enqueue(index_csv_2_db, dataset,  timeout=500)
+    job2 = q.enqueue(process_words_co_occurences, dataset, timeout=500)
+
+
+    return { "jobs" : [job1.key, job2.key]}
 
 def index_csv_2_db(dataset):
 
@@ -77,6 +75,7 @@ def index_csv_2_db(dataset):
         db.session.commit()
 
         for i, row in enumerate(topogram.process()):
+            # if i == 10 : break
             try : 
                 row
             except ValueError,e :
@@ -88,6 +87,8 @@ def index_csv_2_db(dataset):
         # change the state to done
         d.index_state = "done"
         db.session.commit()
+
+        job_done("parsing csv")
 
 def process_words_co_occurences(dataset):
     with app.app_context() :
@@ -121,9 +122,10 @@ def process_words_co_occurences(dataset):
         d.index_state = "done"
         db.session.commit()
 
+        job_done("doing nasty stuff")
+
 def get_words_co_occurences(dataset, words_limit):
 
-    send_updates("hohoh")
     topogram = get_topogram(dataset)
     words = mongo.db["wordGraphs"].find_one({ "name" : dataset["index_name"]})
     topogram.load_words_from_json(words["words"])

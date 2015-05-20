@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from server import app
-from flask.ext.rq import RQ
+import redis
 
-rq = RQ(app)
+from rq import Queue
+
+# setup redis connection
+redis_url = 'redis://localhost:6379'
+conn = redis.from_url(redis_url)
+
+q = Queue("taf", connection=conn)

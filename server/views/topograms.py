@@ -12,6 +12,8 @@ from server.forms.topogram import TopogramCreateForm
 from server.serializers.topogram import TopogramSerializer
 from server.serializers.dataset import DatasetSerializer
 
+# from server.resources.socketio import send_updates
+
 from server.lib.db_indexer import get_words_co_occurences, get_most_frequent_words, get_time_series
 import pickle
 

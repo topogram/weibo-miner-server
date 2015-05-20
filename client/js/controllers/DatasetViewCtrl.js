@@ -1,4 +1,4 @@
-function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular, flash, modalService, socket) {
+function DatasetViewCtrl($scope, $routeParams, $timeout, $interval, $location, Restangular, flash, modalService, socket) {
 
     // set a default value 
     $scope.dataset = {};
@@ -7,7 +7,7 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
 
     // load dataset description from db
     Restangular.one('datasets',$routeParams.datasetId).get().then(function(dataset) {
-            console.log(dataset);
+            // console.log(dataset);
             $scope.dataset = dataset;
             $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
 
@@ -23,6 +23,11 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             }
               else
                 $scope.isDescribed = true;
+
+            // restitute state
+            console.log($scope.dataset.index_state);
+            if ($scope.dataset.index_state == 'processing' ) $scope.isIndexing = true; 
+
     });
 
     $scope.loadMoreSamples = function() {
@@ -32,24 +37,12 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             });
     }
 
-
     $scope.$watch('dataset.time_column', function(newVal, oldVal){
       if(newVal != "undefined" && newVal != oldVal) {
             $scope.regDate = $scope.dataset.csv.sample[0][newVal];
       }
     })
-    // init socket.io
-
-    socket.on('connect', function () {
-          console.log('connect');
-    });
-
-    socket.on('progress', function (data) {
-        console.log(data);
-        // var d=JSON.parse(data)
-        // console.log(typeof(data), typeof(d));
-        // $scope.loadingNetworks=JSON.parse(data);
-    });
+    
   
    // dataset description
     $scope.postDatasetDescription = function() {
@@ -70,38 +63,38 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
 
 
     // Topograms
-    $scope.topogram = [];
-    Restangular.one('datasets',$routeParams.datasetId).getList('topograms').then(function(topograms) {
-            // console.log(topograms);
-            $scope.topograms = topograms;
-    });
+    // $scope.topogram = [];
+    // Restangular.one('datasets',$routeParams.datasetId).getList('topograms').then(function(topograms) {
+    //         // console.log(topograms);
+    //         $scope.topograms = topograms;
+    // });
 
-    $scope.deleteTopogram = function(topogram) {
-        var modalOptions = {
-            closeButtonText: 'Cancel',
-            actionButtonText: 'Delete',
-            headerText: 'Delete',
-            bodyText: 'Are you sure you want to delete this topogram?',
-            waitModal : false
-        };
+    // $scope.deleteTopogram = function(topogram) {
+    //     var modalOptions = {
+    //         closeButtonText: 'Cancel',
+    //         actionButtonText: 'Delete',
+    //         headerText: 'Delete',
+    //         bodyText: 'Are you sure you want to delete this topogram?',
+    //         waitModal : false
+    //     };
 
-        modalService.showModal({}, modalOptions).then(function (deleted) {
-            console.log("deleted", deleted);
-            topogram.remove().then(function() {
+    //     modalService.showModal({}, modalOptions).then(function (deleted) {
+    //         console.log("deleted", deleted);
+    //         topogram.remove().then(function() {
 
-                // remove from scope
-                var index = $scope.topograms.indexOf(topogram);
-                if (index > -1) $scope.topograms.splice(index, 1);
+    //             // remove from scope
+    //             var index = $scope.topograms.indexOf(topogram);
+    //             if (index > -1) $scope.topograms.splice(index, 1);
 
-                // notify user
-                $timeout(function() { flash.success = "Topogram deleted" })
-            });
-        }, function () {
-            // TODO : hit cancel
-            console.info('Modal dismissed at: ' + new Date());
-        });
+    //             // notify user
+    //             $timeout(function() { flash.success = "Topogram deleted" })
+    //         });
+    //     }, function () {
+    //         // TODO : hit cancel
+    //         console.info('Modal dismissed at: ' + new Date());
+    //     });
+    // }
 
-    }
      /* 
     REGEXPS
     */
@@ -168,28 +161,67 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
           });
       } 
 
+      // init 
+
+       // init socket.io
+        socket.on('connect', function () {
+              console.log('connect');
+        });
+
+      $scope.reqs = {}; //init
+      $scope.getJobState= function(job_keys) {
+          if ($scope.isIndexing == true) {
+               $scope.reqs = $interval(function() {
+                  // console.log("get job_key", job_keys);
+                  socket.emit("job", job_keys)
+              }, 2000);
+          } 
+      }
+
+      $scope.endProcessing = function() {
+          // $scope.dataset.index_state == "done";
+          // $interval.cancel($scope.reqs);
+          $timeout(function() {
+                $location.path("/datasets/"+ $routeParams.datasetId + "/topograms/create");
+            })
+      }
+
+      socket.on('job_progress', function (jobs_finished) {
+          // console.log(jobs_finished)
+          if (jobs_finished[0] && ! jobs_finished[1]) {
+            flash.success = "Processing 1/2 : dataset is indexed";
+          }
+          else if (jobs_finished[0]  && jobs_finished[1]) {
+            flash.success = "Processing 2/2 : dataset is processed.";
+            $scope.endProcessing();
+          }
+      });
+
+
+
+
+
       // DATA processing 
       $scope.isIndexing = false;
       $scope.processData = function() {
 
-            Restangular.one('datasets',$routeParams.datasetId).one("index").get().then(function(index) {
+            Restangular.one('datasets',$routeParams.datasetId).one("index").get().then(function(job_keys) {
 
-              $scope.isIndexing = false;
-              $scope.isIndexing = true;
-              $scope.dataset.index_state = 'processing';
-              // $timeout(function() {
-              //     $location.path("/datasets/"+ $routeParams.datasetId + "/topograms/create");
-              // })
-              flash.success = "Dataset "+$scope.dataset.filename+" is now indexing";
+                    // notify processing start 
+                    flash.success = "Dataset "+$scope.dataset.filename+" is now indexing";
+                    $scope.isIndexing = true;
+                    $scope.dataset.index_state = 'processing';
+
+                    // request jobs state at regular interval
+                    $scope.getJobState(job_keys);
+
             }, function (error){
                 console.log(error);
                 flash.error = error.data;
             });
     }
 
-
 }
-
 
 //
 // strftime

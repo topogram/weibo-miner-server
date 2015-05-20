@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import redis
-from server.resources.rqueue import rq
+from server.resources.rqueue import q
 
 class JobQueue(object):
     """Job Queue using RQ to process data async"""
