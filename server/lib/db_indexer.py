@@ -62,8 +62,8 @@ def get_topogram(dataset):
 def process_dataset(dataset):
 
     q = get_queue("taf")
-    q.enqueue(index_csv_2_db, dataset, timeout=500)
-    q.enqueue(process_words_co_occurences, dataset, timeout=500)
+    q.enqueue(index_csv_2_db, dataset, kwargs={'bar': 'foo'}, timeout=500)
+    q.enqueue(process_words_co_occurences, dataset, kwargs={'bar': 'foo'}, timeout=500)
 
 def index_csv_2_db(dataset):
 
