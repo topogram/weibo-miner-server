@@ -34,7 +34,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
           // load data
           Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
-                console.log($scope.dataset);
+                // console.log($scope.dataset);
                 $scope.dataset.size = datasetSize.count;
                 // load number of posts to estimate the size of the graph 
                 $scope.topogram.words_limit = Math.round(datasetSize.count / 25); // for now, arbitrary value 
@@ -61,7 +61,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       $scope.getRecords = function(start,qty) {
           Restangular.one('datasets',$routeParams.datasetId).one("from", $scope.recordOffset).one("qty",$scope.recordStep ).get().then(function(datasample) {
               var data = JSON.parse( JSON.parse(datasample));
-              console.log(data);
+              // console.log(data);
               $scope.messages = data;
           });
         }
@@ -80,11 +80,6 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
       $scope.getRecords(0, $scope.recordQty); // init
 
-
-
-
-
-
       // most frequent words 
       $scope.topogram.frequent_words_limit = 50;
       $scope.getMostFrequentWords = function() {
@@ -94,7 +89,6 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           });
       }
 
-
     // word graph
     $scope.topogram.words_limit = 0;
     $scope.wordsGraphLoading = false;
@@ -103,8 +97,12 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     $scope.getWordsGraph = function() {
         $scope.wordsGraphLoading = true; // display loader
         $scope.wordsGraphTooBig = false;
-        // load graph
-        Restangular.one('datasets',$routeParams.datasetId).one("words").one(String($scope.topogram.words_limit)).get().then(function(wordsGraph) {
+        
+        // require graph to server
+        var data = { "dataset": $scope.dataset , "words_limit" : $scope.topogram.words_limit  }
+        console.log(data);
+
+         Restangular.one('datasets',$routeParams.datasetId).one("words").one(String($scope.topogram.words_limit)).get().then(function(wordsGraph) {
             if (wordsGraph.top_words.length > 250) {
               $scope.wordsGraphTooBig = true;
               $scope.wordsGraphLoading = false;
@@ -117,7 +115,13 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
             }
             
         });
+        
     }
+
+    
+
+       
+
 
 
     // time series

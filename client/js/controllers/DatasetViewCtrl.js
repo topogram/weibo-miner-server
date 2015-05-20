@@ -1,4 +1,4 @@
-function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular, flash, modalService) {
+function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular, flash, modalService, socket) {
 
     // set a default value 
     $scope.dataset = {};
@@ -11,6 +11,7 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
             $scope.dataset = dataset;
             $scope.dataset.time_pattern = "%Y-%m-%d %H:%M";
 
+            $scope.dataset.filename = $scope.dataset.filepath.replace(/^.*[\\\/]/, ''); // extract just file name
             if (dataset.additional_columns) {
               $scope.dataset.addColumns = dataset.additional_columns.split(",");
             } else {
@@ -35,11 +36,10 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
     $scope.$watch('dataset.time_column', function(newVal, oldVal){
       if(newVal != "undefined" && newVal != oldVal) {
             $scope.regDate = $scope.dataset.csv.sample[0][newVal];
-            console.log($scope.dataset);
       }
     })
     // init socket.io
-    /*
+
     socket.on('connect', function () {
           console.log('connect');
     });
@@ -50,11 +50,10 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
         // console.log(typeof(data), typeof(d));
         // $scope.loadingNetworks=JSON.parse(data);
     });
-  */
+  
    // dataset description
     $scope.postDatasetDescription = function() {
         $scope.dataset.additional_columns  = $scope.dataset.addColumns.join(",");
-        console.log($scope.dataset);
         $scope.dataset.put().then(function(dataset) {
             flash.success = "Your dataset description has been updated";
             $scope.isDescribed = true;
@@ -173,18 +172,15 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $location, Restangular,
       $scope.isIndexing = false;
       $scope.processData = function() {
 
-            console.log('process  data');
-            // $scope.dataset.index_state = "processing";
-            $scope.isIndexing = true;
-            $scope.dataset.index_state = 'processing';
-
             Restangular.one('datasets',$routeParams.datasetId).one("index").get().then(function(index) {
 
               $scope.isIndexing = false;
-              $timeout(function() {
-                  $location.path("/datasets/"+ $routeParams.datasetId + "/topograms/create");
-              })
-              flash.success = "Dataset is now indexed";
+              $scope.isIndexing = true;
+              $scope.dataset.index_state = 'processing';
+              // $timeout(function() {
+              //     $location.path("/datasets/"+ $routeParams.datasetId + "/topograms/create");
+              // })
+              flash.success = "Dataset "+$scope.dataset.filename+" is now indexing";
             }, function (error){
                 console.log(error);
                 flash.error = error.data;

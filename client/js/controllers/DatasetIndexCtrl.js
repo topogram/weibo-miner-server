@@ -4,6 +4,8 @@ function DatasetIndexCtrl($scope, $http, $location, $timeout, Restangular, flash
         $scope.posts = datasets.map(function(d){
             d.csvfilename = d.filepath.replace(/^.*[\\\/]/, ''); // extract just file name
             return d;
+        }).sort(function(a,b){
+              return new Date(b.created_at) - new Date(a.created_at); // sort by date
         });
     }, function(err) {
         console.log(err);

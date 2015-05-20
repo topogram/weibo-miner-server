@@ -18,7 +18,7 @@ from server.lib.queue import JobQueue
 
 # from server.lib.indexer import csv2elastic, get_index_info, delete_index, get_index_name
 
-from server.lib.db_indexer import index_csv_2_db, get_index_name
+from server.lib.db_indexer import process_dataset, get_index_name
 
 from topogram.utils import any2utf8
 from topogram.corpora.csv_file import CSVCorpus 
@@ -191,10 +191,8 @@ class DatasetProcessView(restful.Resource) :
         d = Dataset.query.filter_by(id=id).first()
         dataset = DatasetSerializer(d).data
 
-        try :  
-            index_csv_2_db(dataset) # index into db
-        except ValueError, e:
-             return e.message, 422
+        process_dataset(dataset)
+        return "data is now processing..."
 
 class DatasetSizeView(restful.Resource) :
     @login_required

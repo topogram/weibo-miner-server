@@ -18,15 +18,20 @@ from topogram.languages.zh import ChineseNLP
 from topogram.corpora.csv_file import CSVCorpus
 from topogram.utils import any2utf8
 
+from server import app
 from server import db
 from server import mongo
-from server.resources import socketio
+from server.resources.socketio import socket
 
-# import redis
 import pickle
 
-# basic cache with redis
-# redis_cache = redis.Redis('localhost')
+from flask.ext.rq import get_queue
+
+
+@socket.on('updates')
+def send_updates(data):
+    with app.app_context() :
+        socket.emit("progress", data)
 
 def get_index_name(file_name):
     safename = "".join([c for c in file_name if c.isalpha() or c.isdigit() or c==' ']).rstrip()
@@ -54,46 +59,47 @@ def get_topogram(dataset):
 
     return topogram
 
+def process_dataset(dataset):
+
+    q = get_queue("taf")
+    q.enqueue(index_csv_2_db, dataset)
+    q.enqueue(process_words_co_occurences, dataset)
+
 def index_csv_2_db(dataset):
 
-    logger.info("writing parsed csv file into %s"%dataset["index_name"])
+    with app.app_context() :
 
-    topogram = get_topogram(dataset)
+        topogram = get_topogram(dataset)
 
-    # update state machine
-    d = Dataset.query.filter_by(id=dataset["id"]).first()
-    d.index_state = "processing"
-    db.session.commit()
+        # update state machine
+        d = Dataset.query.filter_by(id=dataset["id"]).first()
+        d.index_state = "processing"
+        db.session.commit()
 
-    for i, row in enumerate(topogram.process()):
-        print i
-        try : 
+        for i, row in enumerate(topogram.process()):
+            try : 
+                row
+            except ValueError,e :
+                d.index_state = "error line %s"%i
+                db.session.commit()
+                return "error line %s"%i
             mongo.db[dataset["index_name"]].insert(row) # write row to db
-        except ValueError,e :
-            d.index_state = "error line %s"%i
-            db.session.commit()
-            if "time" in e : return "error line %s"%i
 
+        # change the state to done
+        d.index_state = "done"
+        db.session.commit()
 
-    # change the state to done
-    d.index_state = "done"
-    db.session.commit()
+def process_words_co_occurences(dataset):
+    with app.app_context() :
+        topogram = get_topogram(dataset)
 
-
-def get_words_co_occurences(dataset, words_limit):
-
-    topogram = get_topogram(dataset)
-    # words = redis_cache.get(dataset["index_name"])
-    words = None
-    # print type(words)
-
-    # ok_words = [word["word"] for word in get_most_frequent_words(dataset,words_limit)]
-    # print len(ok_words)
-
-    if words == None :
+        # update state machine
+        d = Dataset.query.filter_by(id=dataset["id"]).first()
+        d.index_state = "processing"
+        db.session.commit()
 
         # get records in the db
-        i=0 
+        i=0
         records= mongo.db[dataset["index_name"]].find()
         for i,record in enumerate(records):
             # print i
@@ -104,27 +110,26 @@ def get_words_co_occurences(dataset, words_limit):
             for word in list(permutations(keywords, 2)) : # pair the words
                 topogram.add_words_edge(word[0], word[1])
 
-        print "computing graph ok "
+        print "computing graph ok"
+        print "reducing graph size"
 
-        print "reduce graph size"
-
-        # g = topogram.get_average_graph(topogram.words)
-        # clique = topogram.min_weighted_dominating_set(topogram.words)
-        # print "clique", type(clique)
+        words = topogram.get_words_network(10) # reduce size under 5
+        mongo.db["wordGraphs"].insert({ "name" : dataset["index_name"], "words" :words})
+        print "graph saved in db"
         
-        g= topogram.limit_node_network(topogram.words, words_limit) # filter out the marginal words (min =2)
-        # print type(g)
-        # pickle the whole topogram into redis
+        # change the state to done
+        d.index_state = "done"
+        db.session.commit()
 
-        # g_dump = topogram.export_words_to_json()
-        # redis_cache.set(dataset["index_name"], g_dump)
+def get_words_co_occurences(dataset, words_limit):
 
-    else : # get from redis
-        g = eval(words)
-        topogram.load_words_from_json(g)
+    send_updates("hohoh")
+    topogram = get_topogram(dataset)
+    words = mongo.db["wordGraphs"].find_one({ "name" : dataset["index_name"]})
+    topogram.load_words_from_json(words["words"])
 
-    # words_networks = topogram.get_words_network(words_limit)
-    # return words_networks
+    print "reduce graph size"
+    g= topogram.limit_node_network(topogram.words, words_limit) # filter out the 
 
     data = {}
     data["words"] = topogram.get_words_network(words_limit)
