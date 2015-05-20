@@ -42,3 +42,4 @@ redis
 coverage
 colour-runner
 chardet
+gevent

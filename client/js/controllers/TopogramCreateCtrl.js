@@ -1,4 +1,4 @@
-function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService, $timeout, $interval) {
+function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService, socket, $timeout, $interval) {
 
     // Initialize the scope defaults.
     $scope.topogram = {};
@@ -31,14 +31,29 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
               $scope.columns.push({ "title": addCol[i] ,"field": addCol[i]});
             }
           }
+
+          // load data
+          Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
+                console.log($scope.dataset);
+                $scope.dataset.size = datasetSize.count;
+                // load number of posts to estimate the size of the graph 
+                $scope.topogram.words_limit = Math.round(datasetSize.count / 25); // for now, arbitrary value 
+          });
     });
 
-      // load data
-      Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
-            $scope.dataset.size = datasetSize.count;
-            // load number of posts to estimate the size of the graph 
-            $scope.topogram.words_limit = Math.round(datasetSize.count / 25); // for now, arbitrary value 
-      });
+
+        // init socket.io
+        socket.on('connect', function () {
+              console.log('connect');
+        });
+
+        socket.on('progress', function (data) {
+            console.log(data);
+            // var d=JSON.parse(data)
+            // console.log(typeof(data), typeof(d));
+            // $scope.loadingNetworks=JSON.parse(data);
+        });
+      
 
       $scope.recordOffset = 0;
       $scope.recordStep = 100;

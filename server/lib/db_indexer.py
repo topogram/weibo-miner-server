@@ -20,6 +20,7 @@ from topogram.utils import any2utf8
 
 from server import db
 from server import mongo
+from server.resources import socketio
 
 # import redis
 import pickle
