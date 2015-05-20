@@ -1,14 +1,14 @@
-<div class="header">
-  <h3>Data preparation 
-    <small>Select the correct format for your data.</small>
-  </h3>
-</div>
-
-<div  ng-hide="dataset.index_state != 'done'">
-    <h2>Topograms</h2>
-    <a href="#/datasets/{{ dataset.id }}/topograms/create" class="btn btn-primary">Create New Topogram</a>
+<div  class="header"  ng-hide="dataset.index_state != 'done'">
+    <h2>Dataset <small>{{dataset.name}} {{dataset.filename}}</small>
+    </h2>
     <br>
-    <table ng-table="" class="table table-striped">
+</div> 
+<section ng-hide="dataset.index_state != 'done'">
+  <a href="#/datasets/{{ dataset.id }}/topograms/create" class="btn btn-xs btn-primary">Create New Topogram <i class="fa fa-icon fa-plus"></i></a>
+</section>
+
+
+<!--     <table ng-table="" class="table table-striped">
             <thead>
                 <tr>
                     <th>Query</th>
@@ -25,9 +25,7 @@
                     <td data-title="'Delete'"><a ng-click="deleteTopogram(post)" role="button" class="btn btn-primary btn-sm">Delete</a></td>
                 </tr>
             </tbody>
-    </table>
-</div> 
-
+    </table> -->
 
 <section ng-hide="isIndexing == false || dataset.index_state != 'processing' ">
       <p></p>
@@ -40,6 +38,11 @@
 </section>
 
 <section class="row" ng-hide="dataset.index_state != 'raw'">
+    <div class="header">
+        <h3>Data preparation 
+          <small>Select the correct format for your data.</small>
+        </h3>
+      </div>
     <div class="col-sm-6">
         <h4>Describe this dataset</h4>
         <form class="form" ng-submit="postDatasetDescription()">
@@ -184,11 +187,13 @@
     </div>
 </section>
 
-
-<section class="sample row" ng-hide="!dataset.csv.sample">
-    <h3>Dataset sample</h3>
-    <a href="" ng-click="loadMoreSamples()">Load more...</a>
-    <table ng-table show-filter="true" class="table table-condensed table-es-results">
+<section class="sample" ng-hide="!dataset.csv.sample">
+    <h4> Sample
+        <small>
+          <a href="" ng-click="loadMoreSamples()">Load more...</a>
+        </small>
+    </h4>
+    <table style="table-layout: fixed; width: 100%" ng-table show-filter="true" class="table table-condensed table-es-results">
         <thead>
             <tr>
 
@@ -199,8 +204,11 @@
     </thead>
     <tbody>
         <tr ng-repeat="row in dataset.csv.sample">
-            <td ng-repeat="column in dataset.csv.headers" tooltip='{{row[column.field]}}' tooltip-append-to-body="true">
-                <a href="{{row[column]}}" class="disabled" disabled onclick="return false">{{row[column] }}</a>
+            <td style="word-wrap: break-word" ng-repeat="column in dataset.csv.headers">
+                <a href="#" ng-mouseover="hoverShow = true" ng-mouseleave="hoverShow = false">+</a>
+                <p ng-show="!hoverShow">{{row[column] | limitTo: 15 }}</p>
+                <p ng-show="hoverShow">{{row[column]}}</p>
+
             </td>
         </tr>
     </tbody>
