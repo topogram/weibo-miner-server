@@ -1,4 +1,4 @@
-function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService, socket, $timeout, $interval) {
+function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, socket, $timeout, $interval) {
 
     // Initialize the scope defaults.
     $scope.topogram = {};
