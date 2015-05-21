@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from flask_login import login_required, current_user
+from flask.ext.restful import reqparse
 
 from server import app, restful, db
 from server.models.topogram import Topogram 
@@ -64,22 +65,55 @@ class TopogramsByDataset(restful.Resource):
         return topograms
 
 class TopogramWordsView(restful.Resource):
+    def __init__(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('sort', type=str, help='Sort by DB field')
+        parser.add_argument('q', type=unicode, help='Search query')
+        parser.add_argument('stopwords', type=unicode, help='Words to exclude')
+        self.args = parser.parse_args()
+
     @login_required
     def get(self, dataset_id, words_limit):
 
         d = Dataset.query.filter_by(id=dataset_id).first()
         dataset = DatasetSerializer(d).data
-        words = get_words_co_occurences(dataset, words_limit)
+
+        # search term
+        q =self.args["q"]
+        if q is not None : q.split(",")
+
+        # stopwords
+        stopwords =self.args["stopwords"]
+        if stopwords is not None : stopwords = eval(stopwords)
+
+        words = get_words_co_occurences(dataset, words_limit, q=q, stopwords=stopwords)
 
         return words
 
 class TopogramFrequentWordsView(restful.Resource):
+
+    def __init__(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('sort', type=str, help='Sort by DB field')
+        parser.add_argument('q', type=unicode, help='Search query')
+        parser.add_argument('stopwords', type=unicode, help='Words to exclude')
+        self.args = parser.parse_args()
+
     def get(self, dataset_id, words_limit):
 
         d = Dataset.query.filter_by(id=dataset_id).first()
         dataset = DatasetSerializer(d).data
-        words = get_most_frequent_words(dataset, words_limit)
-        print words
+
+        # search term
+        q =self.args["q"]
+        if q is not None : q.split(",")
+
+        # stopwords
+        stopwords =self.args["stopwords"]
+        if stopwords is not None : stopwords = eval(stopwords)
+
+        words = get_most_frequent_words(dataset, words_limit, q=q, stopwords=stopwords)
+
         return words
 
 class TopogramCitationsView(restful.Resource):
@@ -105,12 +139,27 @@ class TopogramAsCSV(restful.Resource) :
         topogram= TopogramSerializer(t).data
 
 class TopogramTimeSeries(restful.Resource):
+
+    def __init__(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('sort', type=str, help='Sort by DB field')
+        parser.add_argument('q', type=unicode, help='Search query')
+        parser.add_argument('stopwords', help='Words to exclude')
+        self.args = parser.parse_args()
+
     def get(self, dataset_id):
         d = Dataset.query.filter_by(id=dataset_id).first()
         dataset = DatasetSerializer(d).data
-        print dataset
-        time_series = get_time_series(dataset)
-        print time_series
+        
+        # search term
+        q =self.args["q"]
+        if q is not None : q.split(",")
+
+        # stopwords
+        stopwords =self.args["stopwords"]
+        if stopwords is not None : stopwords = eval(stopwords)
+
+        time_series = get_time_series(dataset, q=q, stopwords=stopwords)
         return time_series
 
 class TopogramTimeFramesView(restful.Resource):

@@ -18,7 +18,7 @@ from server.lib.queue import JobQueue
 
 # from server.lib.indexer import csv2elastic, get_index_info, delete_index, get_index_name
 
-from server.lib.db_indexer import process_dataset, get_index_name
+from server.lib.db_indexer import process_dataset, get_index_name, get_data_by_search_word
 
 from topogram.utils import any2utf8
 from topogram.corpora.csv_file import CSVCorpus 
@@ -221,6 +221,24 @@ class DatasetPaginateView(restful.Resource) :
         except TypeError:
             results = mongo.db[dataset["index_name"]].find().skip(start).limit(start+qty)
         return json_util.dumps(results)
+
+class DatasetSearchWordView(restful.Resource): 
+
+    def __init__(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('sort', type=str, help='Sort by DB field')
+        parser.add_argument('q', type=unicode, help='Search query')
+        self.args = parser.parse_args()
+
+    @login_required
+    def get(self, id):
+        d = Dataset.query.filter_by(id=id).first()
+        dataset = DatasetSerializer(d).data
+
+        words = self.args["q"].split(",")
+        results = get_data_by_search_word(dataset, words)
+
+        return results
 
 # class DatasetEsView(restful.Resource) :
 #     @login_required

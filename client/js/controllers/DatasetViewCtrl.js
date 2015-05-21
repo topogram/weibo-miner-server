@@ -63,37 +63,37 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $interval, $location, R
 
 
     // Topograms
-    // $scope.topogram = [];
-    // Restangular.one('datasets',$routeParams.datasetId).getList('topograms').then(function(topograms) {
-    //         // console.log(topograms);
-    //         $scope.topograms = topograms;
-    // });
+    $scope.topogram = [];
+    Restangular.one('datasets',$routeParams.datasetId).getList('topograms').then(function(topograms) {
+            // console.log(topograms);
+            $scope.topograms = topograms;
+    });
 
-    // $scope.deleteTopogram = function(topogram) {
-    //     var modalOptions = {
-    //         closeButtonText: 'Cancel',
-    //         actionButtonText: 'Delete',
-    //         headerText: 'Delete',
-    //         bodyText: 'Are you sure you want to delete this topogram?',
-    //         waitModal : false
-    //     };
+    $scope.deleteTopogram = function(topogram) {
+        var modalOptions = {
+            closeButtonText: 'Cancel',
+            actionButtonText: 'Delete',
+            headerText: 'Delete',
+            bodyText: 'Are you sure you want to delete this topogram?',
+            waitModal : false
+        };
 
-    //     modalService.showModal({}, modalOptions).then(function (deleted) {
-    //         console.log("deleted", deleted);
-    //         topogram.remove().then(function() {
+        modalService.showModal({}, modalOptions).then(function (deleted) {
+            console.log("deleted", deleted);
+            topogram.remove().then(function() {
 
-    //             // remove from scope
-    //             var index = $scope.topograms.indexOf(topogram);
-    //             if (index > -1) $scope.topograms.splice(index, 1);
+                // remove from scope
+                var index = $scope.topograms.indexOf(topogram);
+                if (index > -1) $scope.topograms.splice(index, 1);
 
-    //             // notify user
-    //             $timeout(function() { flash.success = "Topogram deleted" })
-    //         });
-    //     }, function () {
-    //         // TODO : hit cancel
-    //         console.info('Modal dismissed at: ' + new Date());
-    //     });
-    // }
+                // notify user
+                $timeout(function() { flash.success = "Topogram deleted" })
+            });
+        }, function () {
+            // TODO : hit cancel
+            console.info('Modal dismissed at: ' + new Date());
+        });
+    }
 
      /* 
     REGEXPS

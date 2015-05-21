@@ -3,8 +3,6 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     // Initialize the scope defaults.
     $scope.topogram = {};
     $scope.topogram.stopwords = [];
-    $scope.topogram.excludeWords = [];
-    $scope.topogram.includeWords = [];
 
     // $scope.messages = [];
     // $scope.rows = [];     // An array of messages results to display
@@ -41,19 +39,32 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           });
     });
 
+    // init socket.io
+    socket.on('connect', function () {
+          console.log('connect');
+    });
 
-        // init socket.io
-        socket.on('connect', function () {
-              console.log('connect');
-        });
+    socket.on('progress', function (data) {
+        console.log(data);
+        // var d=JSON.parse(data)
+        // console.log(typeof(data), typeof(d));
+        // $scope.loadingNetworks=JSON.parse(data);
+    });
 
-        socket.on('progress', function (data) {
-            console.log(data);
-            // var d=JSON.parse(data)
-            // console.log(typeof(data), typeof(d));
-            // $scope.loadingNetworks=JSON.parse(data);
-        });
-      
+
+      $scope.topogram.searchTerm;
+      $scope.searchResultsCount = 0;
+     $scope.search = function() {
+        // console.log($scope.topogram.searchTerm);
+        Restangular.one('datasets',$routeParams.datasetId).one("search").get({"q" : $scope.topogram.searchTerm}).then(function(results) {
+            console.log( results );
+            $scope.searchResultsCount = results.count;
+        }) 
+      }
+
+     // $scope.$watch("searchTerm", function(newVal, oldVal){
+     //      console.log(newVal);
+     //  });
 
       $scope.recordOffset = 0;
       $scope.recordStep = 100;
@@ -83,17 +94,15 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       // most frequent words 
       $scope.topogram.frequent_words_limit = 50;
       $scope.getMostFrequentWords = function() {
-          Restangular.one('datasets',$routeParams.datasetId).one("frequentWords").one(String($scope.topogram.frequent_words_limit)).get().then(function(frequentWords) {
+          Restangular.one('datasets',$routeParams.datasetId).one("frequentWords").one(String($scope.topogram.frequent_words_limit)).get({"q" : $scope.topogram.searchTerm, "stopwords" : JSON.stringify($scope.topogram.stopwords) }).then(function(frequentWords) {
                 // console.log(frequentWords);
-                $scope.frequentWords = frequentWords;
+                $scope.topogram.frequentWords = frequentWords;
           });
       }
 
     // word graph
     $scope.topogram.words_limit = 0;
     $scope.wordsGraphLoading = false;
-
-    
     $scope.getWordsGraph = function() {
         $scope.wordsGraphLoading = true; // display loader
         $scope.wordsGraphTooBig = false;
@@ -102,37 +111,32 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
         var data = { "dataset": $scope.dataset , "words_limit" : $scope.topogram.words_limit  }
         console.log(data);
 
-         Restangular.one('datasets',$routeParams.datasetId).one("words").one(String($scope.topogram.words_limit)).get().then(function(wordsGraph) {
+         Restangular.one('datasets',$routeParams.datasetId).one("words").one(String($scope.topogram.words_limit)).get({"q" : $scope.topogram.searchTerm , "stopwords" :  JSON.stringify($scope.topogram.stopwords)}).then(function(wordsGraph) {
             if (wordsGraph.top_words.length > 250) {
               $scope.wordsGraphTooBig = true;
               $scope.wordsGraphLoading = false;
-
             } else {
               $scope.wordsGraph=wordsGraph;
               $scope.wordsForceStarted = true;
               console.log($scope.wordsGraph);
               $scope.wordsGraphLoading = false;
+              
+              // $scope.topogram.words = JSON.stringify($scope.wordsGraph);
             }
             
         });
-        
     }
-
-    
-
-       
-
-
 
     // time series
     $scope.getTimeSeries = function() {
-        Restangular.one('datasets',$routeParams.datasetId).one("timeSeries").get().then(function(timeSeries) {
-            console.log(timeSeries);
+          Restangular.one('datasets',$routeParams.datasetId).one("timeSeries").get({"q" : $scope.topogram.searchTerm , "stopwords" :  JSON.stringify($scope.topogram.stopwords) }).then(function(timeSeries) {
+
             $scope.start=timeSeries[0].time;
             $scope.end=timeSeries[timeSeries.length-1].time;
             $scope.timeData = timeSeries.map(function(d){
                 return { "count" : d.count, "time" : new Date(d.time*1000)};
             });
+            $scope.topogram.timeSeries  = $scope.timeData;
         });
     }
 
@@ -220,15 +224,21 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
         return str;
     }
 
-    /*
     $scope.saveTopogram = function () {
+        console.log($scope.topogram);
 
-      $scope.topogram.dataset_id = $routeParams.datasetId;
-      $scope.topogram.es_query = $scope.searchTerm;
-      $scope.topogram.es_index_name = $scope.index;
-      $scope.topogram.stopwords = $scope.topogram.stopwords.toString();
+        $scope.topogram.dataset_id =  $routeParams.datasetId;
 
-      console.log($scope.topogram);
+        Restangular.all('topograms').post($scope.topogram).then(function(topogram) {
+              console.log(data);
+              flash.success = "New topogram saved !"
+              }, function (error){
+                  console.log(error);
+                  flash.error = error.data;
+              });
+    }
+    /*
+    
 
       Restangular.all('topograms').post($scope.topogram).then(function(topogram) {
             $timeout(function() {
@@ -290,7 +300,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       console.log($scope);
 
       var topogram = {
-        "es_query" : $scope.searchTerm,
+        "es_query" : $scope.topogram.searchTerm,
         "es_index_name" : $scope.index,
         "description" : $scope.description,
         "dataset_id" : $routeParams.datasetId,
