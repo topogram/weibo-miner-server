@@ -5,8 +5,6 @@ window.Topogram = angular.module('Topogram', [
                                  'angular-flash.service',
                                  'angular-flash.flash-alert-directive',
                                  'angularFileUpload',
-                                 'oc.lazyLoad',
-                                 'elasticsearch',
                                  "ui.bootstrap",
                                  "ui.bootstrap-slider",
                                  "ngTable"
@@ -54,12 +52,3 @@ Topogram.filter("round", function () {
         };
     });
 
-// load other scripts
-Topogram.config(['$ocLazyLoadProvider',function ($ocLazyLoadProvider) {
-
-    $ocLazyLoadProvider.config({
-      debug:false,
-      events:true,
-    });
-
-}]);

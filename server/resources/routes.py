@@ -37,8 +37,13 @@ def js_static_proxy(path):
 
 @app.route('/css/<path:path>')
 def css_static_proxy(path):
-    print os.path.join('css', path)
+    # print os.path.join('css', path)
     return app.send_static_file(os.path.join('css', path))
+
+@app.route('/dist/<path:path>')
+def dist_static_proxy(path):
+    # print os.path.join('css', path)
+    return app.send_static_file(os.path.join('dist', path))
 
 @app.route('/bower_components/<path:path>')
 def libs_static_proxy(path):

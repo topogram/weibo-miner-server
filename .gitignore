@@ -1,7 +1,7 @@
 coverage
 
 tests/oldies
-
+node_modules
 
 venv
 bower_components
@@ -26,7 +26,6 @@ env/
 bin/
 build/
 develop-eggs/
-dist/
 eggs/
 lib64/
 parts/
