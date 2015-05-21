@@ -933,7 +933,7 @@ function SessionDestroyCtrl($scope, $timeout, $location, flash, AuthService) {
     }
 }
 
-function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, searchService, socket, $timeout, $interval) {
+function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, socket, $timeout, $interval) {
 
     // Initialize the scope defaults.
     $scope.topogram = {};
@@ -1244,7 +1244,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
         $scope.processData = function() {
           var topoInfo = {
-            "es_query" : $scope.searchTerm,
+            "es_query" : $scope.providerhTerm,
             "es_index_name" : $scope.index,
             "dataset_id" : $routeParams.datasetId,
             "topotype_id" : $scope.dataset.topotype_id,
