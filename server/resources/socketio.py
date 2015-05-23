@@ -36,9 +36,11 @@ def job_info(message):
         jobs=[]
         for job_key in job_keys:
             job_key = str(job_key).replace("rq:job:", "")
-            job = Job.fetch(job_key, connection=conn)
-            # print job
-            jobs.append(job.is_finished)
+            try : 
+                job = Job.fetch(job_key, connection=conn)
+                jobs.append(job.is_finished)
+            except :
+                raise ValueError("job key doesn't exist")
         # print jobs
         socket.emit("job_progress", jobs)
 

@@ -18,23 +18,26 @@
               <!-- <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p> -->
           </form>
     </div>
-    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-            <p ng-hide="searchResultsCount == 0"> {{ searchResultsCount}} results</p>
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <p class="well">Current search term : {{ topogram.searchTerm }} 
+            <b class="pull-right" ng-hide="searchResultsCount == 0">  {{ searchResultsCount}} results </b></p>
     </div>
+    <!-- <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4"> -->
+    <!-- </div> -->
   </div>
   
 </section>
 <hr>
 <section  id="filter-words">
-  <h4>Filters
-    <small>Include or exclude specific items</small>
+  <h4>Exclude
+    <small>Filter out specific words</small>
   </h4>
   <div class="row">
   <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
       <div class="active">
           <div class="form-inline">
                   <p>
-                      Excluded Words<small>({{topogram.excludeWords.length}})</small>
+                      Excluded Words <small>({{topogram.stopwords.length}})</small>
                   </p>
                   <input type="text" class="form-control" ng-model="addedStopWord" placeholder="Add stopword">
                   <a  type="submit" class="btn btn-default" ng-click="addWord()">Add</a>
@@ -42,17 +45,29 @@
       </div>
   </div>
   <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-      <p class="help-block">Those words will be ignored :</p>
-      <p><span class="badge"ng-repeat="stopword in topogram.stopwords">{{ stopword }}</span></p>
+      <p class="help-block"><em>Click on the word to remove it from the list.</em></p>
+      <p> 
+        <a  title="remove {{stopword}} "ng-click="removeStopword(stopword)" class="btn btn-xs btn-info" ng-repeat="stopword in topogram.stopwords">
+          {{ stopword }}
+          <span class="badge" >X</span> 
+        </a>
+      </p>
   </div>
   </div>
 </section>
 <hr>
 <section id="timeseries">
         <h4>Time series  <small>Quantity of data over time</small></h4>
-        <p>
+        <div class="form-group form-inline">
             <a class="btn btn-sm btn-primary" ng-click="getTimeSeries()">Update Time Series</a> 
-        </p>
+        
+              <select ng-selected="topogram.timeScale" ng-model="topogram.timeScale" class="form-control">
+                <option value="day">Days</option>
+                <option value="hour">Hours</option>
+                <option value="minute">Minutes</option>
+              </select>
+
+            </div>
         <timeseries ng-hide="!timeData" timeseries="" time-data="timeData" start="start" end="end"></timeseries>
 
         <p ng-hide="!timeData"><a href="#" type="button" ng-click="saveTimeSeries(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>  or hit <small> Shift+T</small></p>
@@ -124,15 +139,17 @@
 
      <div> 
 
-     <p>Minimum degree in the graph <small>({{topogram.words_limit}})</small>  </p>
+     <p>Number of nodes  in the graph <small>({{topogram.nodes_count}})</small>  </p>
     <div class="form-inline" >
         <div class="form-group">
-              <a class="btn btn-default btn-xs" ng-click="topogram.words_limit = topogram.words_limit-0 + 10">+</a>
-              <input type="text" class="form-control" ng-model="topogram.words_limit">
-              <a class="btn btn-default btn-xs" ng-click="topogram.words_limit = topogram.words_limit - 10">-</a>
+           <slider ng-model="topogram.nodes_count" min="0" step="10" max="1000" value="{{topogram.nodes_count}}" data-slider-orientation="horizontal" id="nodes_count"></slider>
           </div>
-        <!-- <slider ng-model="topogram.words_limit" min="0" step="10" max="{{topogram.words_limit*2}}" value="{{topogram.words_limit}}" data-slider-orientation="horizontal" id="wordsLimit"></slider> -->
-        <p class="help-block">Max words in the graph : 250</p>
+        <p class="help-block">Max words in the graph : 1000</p>
+        <p>Minimum edge weight in the graph ({{ topogram.min_edge_weight }}) </p>
+        <div class="form-group">
+          <slider ng-model="topogram.min_edge_weight" min="0" step="10" max="1000" value="{{topogram.min_edge_weight}}" data-slider-orientation="horizontal" id="min_edge_weight"></slider>
+        </div>
+          
     </div>
 
     <div class="row" ng-hide="!wordsForceStarted">
@@ -187,6 +204,15 @@
         <li data-ng-click="getNextRecords()"><a>&raquo;</a></li>
         </p>
     </ul>
+    Filters : Sort by
+    <ul class="pagination" id="sort-messages">
+      <li ng-repeat="column in columns">
+          <a href="" ng-click="sortMessagesBy(column)" ng-class="{'active': sortMessages.column == column}" class="btn-primary"> {{column}} 
+        <span ng-show="sortMessages.column == column && sortMessages.order == -1" class="caret"></span>
+        <span ng-show="sortMessages.column == column && sortMessages.order == 1"  class="dropup"/><span class="caret caret-reversed"></span></a>
+        </a>
+    </li>
+    </ul>
 
     <div class="messages" ng-hide="!messages.length" style="height:500px; overflow:auto;">
           <table  class="table table-condensed">
@@ -194,7 +220,7 @@
               <tr>
               <th>Index</th>
                 <th ng-repeat="column in columns" class="text-center sortable"
-                >  {{column.field }}
+                >  {{column }}
               </th>
             </tr>
           </thead>
@@ -202,7 +228,7 @@
             <tr ng-repeat="row in messages">
             <td>{{$index}}</td>
               <td ng-repeat="column in columns" tooltip-append-to-body="true">
-                {{row[column.field] }}
+                {{row[column] }}
               </td>
             </tr>
           </tbody>

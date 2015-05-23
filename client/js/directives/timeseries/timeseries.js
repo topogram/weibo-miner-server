@@ -32,25 +32,31 @@ Topogram.directive('timeseries', function () {
                     .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+            // tooltip
+            var tooltip = d3.select(element[0])
+                .append("g")
+                .style("position", "absolute")
+                .style("z-index", "10")
+                .style("visibility", "hidden")
+                .text("a simple tooltip");
+
             $scope.$watch('timeData', function(updatedTimeData, oldVal) {
 
                 if(updatedTimeData != undefined && $scope.start!= undefined && $scope.end!= undefined) {
 
-                    console.log(updatedTimeData);
+                    d3.selectAll(".axis").remove();
+                    d3.selectAll(".timebar").remove();
 
                     var _data=updatedTimeData;
 
                     // Scales.
                     var x = d3.time.scale().range([time_width/_data.length/2, time_width-time_width/_data.length/2]);
-                    // var x = d3.scale.ordinal().rangeRoundBands([0, time_width], .05);
                     var y = d3.scale.linear().range([time_height, 0]);
-
 
                     // X-axis.
                     var xAxis = d3.svg.axis()
                         .scale(x)
                         .orient("bottom")
-                        .ticks(10)
                         .tickFormat(d3.time.format("%d %B"));
 
                     var yAxis = d3.svg.axis()
@@ -71,7 +77,6 @@ Topogram.directive('timeseries', function () {
                         .ease(ease)
                         .call(xAxis);
 
-                    
                     // Draw bars. 
                     bars = svg.append("g")
                         .attr("class","timebar")
@@ -94,16 +99,34 @@ Topogram.directive('timeseries', function () {
                         .attr("y", function(d) { return y(d.count); })
                         .attr("height", function(d) { return time_height - y(d.count);});
 
-                    bars.enter().append("rect")
+                    var bars_enter =  bars.enter().append("rect")
                         .attr("class", "count")
                         .attr("width", time_width / _data.length)
                         .attr("x", function(d) { return x(d.time) - (time_width/_data.length)/2; })
                         .attr("y", time_height)
                         .attr("height", 0)
-                        .style("fill", function(d){ return (d.selected)?"steelblue":"#CCC"})
-                        .transition().duration(1000)
+                        
+                    bars_enter.transition().duration(1000)
                         .attr("y", function(d) { return y(d.count); })
-                        .attr("height", function(d) { return time_height - y(d.count);});
+                        .attr("height", function(d) { return time_height - y(d.count) })
+                        .style("fill", function(d,i){ return "steelblue" });
+                        // .style("fill", function(d){ return (d.selected) ? "black" : "#CCC"})
+
+                    var format = d3.time.format("%d-%m-%Y %H:%m");
+
+                    bars_enter
+                        .on("mouseover",function(d,i,event){
+                            d3.select(this).style("fill", "red");
+                            tooltip.text(format(d.time))
+                            tooltip.style("visibility", "visible");
+                        })
+                        .on("mousemove", function(){
+                            return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");
+                        })
+                        .on("mouseout",function(d,i){
+                            d3.select(this).style("fill", "steelblue");
+                            return tooltip.style("visibility", "hidden");
+                        });
 
                     svg.append("g")
                         .attr("class", "x axis")
@@ -152,7 +175,6 @@ Topogram.directive('timeseries', function () {
                     duration = 500;
 
                     function updateChart() {
-                        // console.log($scope);
                       bars.data($scope.timeData)
                         .style("fill", function(d){ 
                             return (d.selected)?"steelblue":"#CCC"})

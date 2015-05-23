@@ -92,7 +92,17 @@ def index_csv_2_db(dataset):
 
         job_done("parsing csv")
 
-def process_words_co_occurences(dataset):
+def process_words_co_occurences(dataset, nodes_count=1000, min_edge_weight=50):
+    """
+    Extract words coocurences from a data set stored mongo and store the resulting graph in another mongo document 
+
+        dataset : a dict representation from a Dataset instance
+        nodes_count : maximum number of nodes in the final graph
+        min_edge_weight : minimum weight for edges to be kept
+
+        returns : nothing (this function is intended to run on a worker thread)
+    """
+
     with app.app_context() :
         topogram = get_topogram(dataset)
 
@@ -105,9 +115,7 @@ def process_words_co_occurences(dataset):
         i=0
         records= mongo.db[dataset["index_name"]].find()
         for i,record in enumerate(records):
-            # print i
-            # if i == 100 : break;
-            keywords = set(record["text_column"]) # set to avoid repetitions
+            keywords = set(record["keywords"]) # set() to avoid repetitions
 
             # compute word graph 
             for word in list(permutations(keywords, 2)) : # pair the words
@@ -116,8 +124,11 @@ def process_words_co_occurences(dataset):
         print "computing graph ok"
         print "reducing graph size"
 
-        words = topogram.get_words_network(10) # reduce size under 5
-        mongo.db["wordGraphs"].insert({ "name" : dataset["index_name"], "words" :words})
+        words_graph = topogram.get_words_network(nodes_count=1000, min_edge_weight=50)
+        words_graph_json = topogram.export_to_json(words_graph)
+
+        mongo.db["wordGraphs"].insert({ "name" : dataset["index_name"], "words" :words_graph_json})
+
         print "graph saved in db"
         
         # change the state to done
@@ -126,7 +137,7 @@ def process_words_co_occurences(dataset):
 
         job_done("doing nasty stuff")
 
-def get_words_co_occurences(dataset, words_limit, q=None, stopwords=None):
+def get_words_co_occurences(dataset, nodes_count=0, min_edge_weight=0, q=None, stopwords=None):
 
     topogram = get_topogram(dataset)
     words = mongo.db["wordGraphs"].find_one({ "name" : dataset["index_name"]})
@@ -146,7 +157,7 @@ def get_words_co_occurences(dataset, words_limit, q=None, stopwords=None):
         words_network = topogram.words.subgraph(nodes)
 
     if stopwords is not None :
-        print words_network.nodes()
+        # print words_network.nodes()
         for w in stopwords: 
             print any2unicode(w) in words_network.nodes() 
 
@@ -155,9 +166,10 @@ def get_words_co_occurences(dataset, words_limit, q=None, stopwords=None):
         for w in stopwords: 
             print any2unicode(w) in words_network.nodes() 
 
-    print "reduce graph size"
-    g= topogram.limit_node_network(words_network, words_limit) # filter out the 
-
+    # get only the number of nodes  
+    g= topogram.get_node_network(words_network, nodes_count=nodes_count, min_edge_weight=min_edge_weight) 
+    print len(g.nodes())
+    
     data = {}
     data["words"] = topogram.export_to_json(g)
     data["density"] = topogram.get_words_density()
@@ -174,23 +186,19 @@ def get_most_frequent_words(dataset, words_limit, q=None, stopwords=None):
 
     keywords = []
     for record in records:
-        keywords += record["text_column"]
+        keywords += record["keywords"]
 
     most_common = [ { "word" : c[0], "count" : c[1]}for c in Counter(keywords).most_common(words_limit)]
 
     return most_common
 
-def get_time_series(dataset, q=None, stopwords=None):
+def get_time_series(dataset, q=None, stopwords=None, time_scale="hour"):
 
     collection_name = dataset["index_name"]
-    time_range = 'hour'
-
     time_series = []
-
     filters = build_query(q, stopwords)
 
-    # TODO : add query to other time series (only hour implemented)
-    if time_range == 'minute':
+    if time_scale == 'minute':
 
         query = [
             { "$group" : { "_id" : { 
@@ -214,7 +222,7 @@ def get_time_series(dataset, q=None, stopwords=None):
             dt = datetime( int(dt['year']),int(dt['month']),int(dt['day']), int(dt['hour']), int(dt['minute']))
             time_series.append( {"time" : time.mktime(dt.timetuple()), "count" : int(t['count'])})
 
-    if time_range == 'hour':
+    if time_scale == 'hour':
         query = [
             { "$group" : { "_id" : { 
                 "year" : { "$year" : "$time_column"}, 
@@ -235,7 +243,7 @@ def get_time_series(dataset, q=None, stopwords=None):
             dt= datetime( int(dt['year']),int(dt['month']),int(dt['day']), int(dt['hour']) )
             time_series.append( {"time" : time.mktime(dt.timetuple()), "count" : int(t['count'])} )
 
-    if time_range == 'day':
+    if time_scale == 'day':
 
         query = [
             { "$group" : { "_id" : { 
@@ -262,10 +270,10 @@ def build_query(q, stopwords):
     query_and = []
 
     if q is not None : 
-        query_and.append({"text_column" : { "$in" : [ any2utf8(w) for w in q ] }})
+        query_and.append({"keywords" : { "$in" : [ any2utf8(w) for w in q ] }})
 
     if stopwords is not None : 
-        query_and.append({"text_column" : { "$nin" : stopwords }})
+        query_and.append({"keywords" : { "$nin" : stopwords }})
 
     if stopwords is not None or q is not None : 
          query = {"$and": query_and }

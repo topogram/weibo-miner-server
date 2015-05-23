@@ -9,6 +9,7 @@ from flask_login import login_required, current_user
 from werkzeug import secure_filename
 from bson import json_util
 
+from pymongo import DESCENDING, ASCENDING
 from server import app, restful, db, mongo
 
 from server.models.dataset import Dataset 
@@ -206,20 +207,27 @@ class DatasetSizeView(restful.Resource) :
 class DatasetPaginateView(restful.Resource) :
     def __init__(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('sort', type=str, help='Sort by DB field')
+        parser.add_argument('sort_order', type=str, help='Sort value (1 is up, -1 is down)')
+        parser.add_argument('sort_column', type=str, help='Sort DB field')
         self.args = parser.parse_args()
 
     @login_required
     def get(self, id, start, qty):
         d = Dataset.query.filter_by(id=id).first()
         dataset = DatasetSerializer(d).data
-        sort_col = "_id"
-        try :
-            sort_col = self.args["sort"]
-            print sort_col
-            results = mongo.db[dataset["index_name"]].find().sort({ sort_col: -1}).skip(start).limit(start+qty)
-        except TypeError:
+        sort_column = "_id" # default value
+
+        sort_column = self.args["sort_column"]
+        sort_order_num = self.args["sort_order"]
+
+        if sort_order_num  == "1" : sort_order = ASCENDING
+        else : sort_order = DESCENDING
+
+        if sort_column is None : 
             results = mongo.db[dataset["index_name"]].find().skip(start).limit(start+qty)
+        else : 
+            results = mongo.db[dataset["index_name"]].find().sort(sort_column, sort_order).skip(start).limit(start+qty)
+
         return json_util.dumps(results)
 
 class DatasetSearchWordView(restful.Resource): 
@@ -234,10 +242,11 @@ class DatasetSearchWordView(restful.Resource):
     def get(self, id):
         d = Dataset.query.filter_by(id=id).first()
         dataset = DatasetSerializer(d).data
-
-        words = self.args["q"].split(",")
-        results = get_data_by_search_word(dataset, words)
-
+        if self.args["q"] is None : 
+            return {}
+        else :
+            q = self.args["q"].split(",")
+            results = get_data_by_search_word(dataset, q)
         return results
 
 # class DatasetEsView(restful.Resource) :

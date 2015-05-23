@@ -70,10 +70,12 @@ class TopogramWordsView(restful.Resource):
         parser.add_argument('sort', type=str, help='Sort by DB field')
         parser.add_argument('q', type=unicode, help='Search query')
         parser.add_argument('stopwords', type=unicode, help='Words to exclude')
+        parser.add_argument('nodes_count', type=int, help='Max number of nodes')
+        parser.add_argument('min_edge_weight', type=int, help='Min weight of graph edges ')
         self.args = parser.parse_args()
 
     @login_required
-    def get(self, dataset_id, words_limit):
+    def get(self, dataset_id):
 
         d = Dataset.query.filter_by(id=dataset_id).first()
         dataset = DatasetSerializer(d).data
@@ -86,7 +88,12 @@ class TopogramWordsView(restful.Resource):
         stopwords =self.args["stopwords"]
         if stopwords is not None : stopwords = eval(stopwords)
 
-        words = get_words_co_occurences(dataset, words_limit, q=q, stopwords=stopwords)
+        # 
+        nodes_count = self.args["nodes_count"]
+        min_edge_weight = self.args["min_edge_weight"]
+        print min_edge_weight
+
+        words = get_words_co_occurences(dataset, nodes_count=nodes_count, min_edge_weight=min_edge_weight, q=q, stopwords=stopwords)
 
         return words
 
@@ -145,6 +152,7 @@ class TopogramTimeSeries(restful.Resource):
         parser.add_argument('sort', type=str, help='Sort by DB field')
         parser.add_argument('q', type=unicode, help='Search query')
         parser.add_argument('stopwords', help='Words to exclude')
+        parser.add_argument('time_scale', help='Granularity of time')
         self.args = parser.parse_args()
 
     def get(self, dataset_id):
@@ -159,7 +167,10 @@ class TopogramTimeSeries(restful.Resource):
         stopwords =self.args["stopwords"]
         if stopwords is not None : stopwords = eval(stopwords)
 
-        time_series = get_time_series(dataset, q=q, stopwords=stopwords)
+        # time scale
+        time_scale =self.args["time_scale"]
+
+        time_series = get_time_series(dataset, q=q, stopwords=stopwords, time_scale=time_scale)
         return time_series
 
 class TopogramTimeFramesView(restful.Resource):
