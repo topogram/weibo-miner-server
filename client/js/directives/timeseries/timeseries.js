@@ -38,7 +38,9 @@ Topogram.directive('timeseries', function () {
                 .style("position", "absolute")
                 .style("z-index", "10")
                 .style("visibility", "hidden")
-                .text("a simple tooltip");
+                .text("a simple tooltip")
+                .style("font-size",9)
+                .style("color", "#404040");
 
             $scope.$watch('timeData', function(updatedTimeData, oldVal) {
 
@@ -112,21 +114,29 @@ Topogram.directive('timeseries', function () {
                         .style("fill", function(d,i){ return "steelblue" });
                         // .style("fill", function(d){ return (d.selected) ? "black" : "#CCC"})
 
-                    var format = d3.time.format("%d-%m-%Y %H:%m");
+                    var format = d3.time.format("%A %d %B - %H:%m");
+                    var graphClicked = false;
+
 
                     bars_enter
                         .on("mouseover",function(d,i,event){
                             d3.select(this).style("fill", "red");
-                            tooltip.text(format(d.time))
+                            tooltip.text(d.count  + " on " +   format(d.time) )
                             tooltip.style("visibility", "visible");
                         })
                         .on("mousemove", function(){
                             return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");
                         })
                         .on("mouseout",function(d,i){
-                            d3.select(this).style("fill", "steelblue");
-                            return tooltip.style("visibility", "hidden");
-                        });
+                            if (!graphClicked) {
+                                d3.select(this).style("fill", "steelblue");
+                                return tooltip.style("visibility", "hidden");
+                            }
+                        })
+                        .on("click",function(d,i){
+                            graphClicked = (graphClicked) ? false : true;
+                            console.log(graphClicked);
+                        })
 
                     svg.append("g")
                         .attr("class", "x axis")

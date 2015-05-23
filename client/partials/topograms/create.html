@@ -4,98 +4,83 @@
   
 </div>
 
-<section  id="search">
-  <h4>Search
-    <small>Find a specific words in the whole dataset</small>
-  </h4>
-  <div class="row">
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-          <p>Search for words</p>
-          <form class="form-inline" ng-submit="search()" role="form">
-              <input ng-model="topogram.searchTerm" type="search" name="title" class="form-control" ng-required='true'/>
-              <button type="submit" class="btn btn-default">Get results</button>
-              <p  class="help-block">Search specific words</p>
-              <!-- <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p> -->
-          </form>
-    </div>
-    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-            <p class="well">Current search term : {{ topogram.searchTerm }} 
-            <b class="pull-right" ng-hide="searchResultsCount == 0">  {{ searchResultsCount}} results </b></p>
-    </div>
-    <!-- <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4"> -->
-    <!-- </div> -->
-  </div>
-  
-</section>
-<hr>
-<section  id="filter-words">
-  <h4>Exclude
-    <small>Filter out specific words</small>
-  </h4>
-  <div class="row">
-  <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-      <div class="active">
-          <div class="form-inline">
-                  <p>
-                      Excluded Words <small>({{topogram.stopwords.length}})</small>
-                  </p>
-                  <input type="text" class="form-control" ng-model="addedStopWord" placeholder="Add stopword">
-                  <a  type="submit" class="btn btn-default" ng-click="addWord()">Add</a>
-          </div>
-      </div>
-  </div>
-  <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-      <p class="help-block"><em>Click on the word to remove it from the list.</em></p>
-      <p> 
-        <a  title="remove {{stopword}} "ng-click="removeStopword(stopword)" class="btn btn-xs btn-info" ng-repeat="stopword in topogram.stopwords">
-          {{ stopword }}
-          <span class="badge" >X</span> 
-        </a>
-      </p>
-  </div>
-  </div>
-</section>
-<hr>
-<section id="timeseries">
-        <h4>Time series  <small>Quantity of data over time</small></h4>
+<section id="timeseries" ng-hide="!timeData">
+
         <div class="form-group form-inline">
-            <a class="btn btn-sm btn-primary" ng-click="getTimeSeries()">Update Time Series</a> 
-        
-              <select ng-selected="topogram.timeScale" ng-model="topogram.timeScale" class="form-control">
+            <p>
+            <span><strong>Time series</strong> Quantity of data over time</span>
+
+              <select ng-selected="topogram.timeScale" ng-model="topogram.timeScale" class="form-control input-sm">
                 <option value="day">Days</option>
                 <option value="hour">Hours</option>
                 <option value="minute">Minutes</option>
               </select>
 
-            </div>
+              <a class="btn btn-sm btn-default" ng-click="getTimeSeries()">Update</a> 
+    
+              <a href="#" type="button" ng-click="saveTimeSeries(); $event.preventDefault()" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-save"></span> Save as PNG (Shift+T)</a> 
+        </div>
         <timeseries ng-hide="!timeData" timeseries="" time-data="timeData" start="start" end="end"></timeseries>
-
-        <p ng-hide="!timeData"><a href="#" type="button" ng-click="saveTimeSeries(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>  or hit <small> Shift+T</small></p>
-
 </section>
-<hr>
-<section  class="frequent-words">
 
-      <h4>Most frequent words
-          <small>Display the most used  words in the dataset.</small>
+<div class="main-controls row">
+    <section  id="search"  class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+      <h4>Search
+        <small>Find a specific words in the whole dataset</small>
       </h4>
-      <div class="row">
-          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-              <button class="btn btn-sm btn-primary" ng-click="getMostFrequentWords()">Most Frequent Words</button>
 
-              <form class="form-inline">
-                    <label>Word count : </label>
-                    <div class="form-group">
-                      <a class="btn btn-default btn-xs" ng-click="topogram.frequent_words_limit = topogram.frequent_words_limit + 10">+</a>
-                      <input type="text" class="form-control" ng-model="topogram.frequent_words_limit">
-                      <a class="btn btn-default btn-xs" ng-click="topogram.frequent_words_limit = topogram.frequent_words_limit - 10">-</a>
-                    </div>
-                    <p class="help-block">Select the number of words you want.</p>
-              </form>
-          </div>
+      <p>Search for words</p>
+      <form class="form-inline" ng-submit="search()" role="form">
+          <input ng-model="topogram.searchTerm" type="search" name="title" class="form-control" ng-required='true'/>
+          <button type="submit" class="btn btn-default">Get results</button>
+          <p  class="help-block">Search specific words</p>
+          <!-- <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p> -->
+      </form>
+      <p class="well">Current search term : {{ topogram.searchTerm }} 
+      <b class="pull-right" ng-hide="searchResultsCount == 0">  {{ searchResultsCount}} results </b></p>
+
+       <p>Number of nodes  in the graph <small>({{topogram.nodes_count}})</small>  </p>
+
+        <div class="form-inline" >
+            <div class="form-group">
+               <slider ng-model="topogram.nodes_count" min="0" step="10" max="1000" value="{{topogram.nodes_count}}" data-slider-orientation="horizontal" id="nodes_count"></slider>
+              </div>
+            <p class="help-block">Max words in the graph : 1000</p>
+            <p>Minimum edge weight in the graph ({{ topogram.min_edge_weight }}) </p>
+            <div class="form-group">
+              <slider ng-model="topogram.min_edge_weight" min="0" step="10" max="1000" value="{{topogram.min_edge_weight}}" data-slider-orientation="horizontal" id="min_edge_weight"></slider>
+            </div>
+        </div>
+
+        <div> 
+            <button ng-click="getWordsGraph()" ng-disabled="wordsGraphLoading"  class="btn btn-sm btn-primary">Compute Word Graph</button>
+            <img ng-hide="!wordsGraphLoading" src="/img/circle-loader.gif" alt="">
+        </div>
+        <p ng-hide="!wordsGraphLoading" class="help-block">This operation make take some time. Thanks !</p>
+
+    </section>
+
+    <section  id="frequent-words" class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+
+          <h4>Most frequent words
+              <small>Display the most used  words in the dataset.</small>
+          </h4>
+
+
+          <form class="form-inline">
+                <label>Word count : </label>
+                <div class="form-group">
+                  <a class="btn btn-default btn-xs" ng-click="topogram.frequent_words_limit = topogram.frequent_words_limit + 10">+</a>
+                  <input type="text" class="form-control" ng-model="topogram.frequent_words_limit">
+                  <a class="btn btn-default btn-xs" ng-click="topogram.frequent_words_limit = topogram.frequent_words_limit - 10">-</a>
+                  <button class="btn btn-sm btn-default" ng-click="getMostFrequentWords()">Update</button>
+                </div>
+                <p class="help-block">Select the number of words you want.</p>
+          </form>
+
           <p ng-hide="!frequentWords.length"><a href="#" type="button" ng-click='downloadAsCSV(topogram.frequentWords, "frequent_words"); $event.preventDefault()' class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span> Download as CSV</a></p>
 
-          <div ng-hide="!topogram.frequentWords.length" id="frequent-words" class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+          <div ng-hide="!topogram.frequentWords.length" id="frequent-words">
               <div style="height:250px; overflow:auto">
                   <table show-filter="true" class="table table-condensed">
                       <thead>
@@ -103,54 +88,67 @@
                           <th></th>
                           <th>Word</th>
                           <th>Count</th>
+                          <th></th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-style="{color: wordColors(row.degree)}" ng-repeat="word in topogram.frequentWords">
+                      <tr ng-style="topogram.stopwords.indexOf(word.word) == -1 ? { } : { 'color': '#CCC' }" ng-repeat="word in topogram.frequentWords">
                         <td>{{$index + 1}}</td>
                         <td>{{word.word }}</td>
                         <td>{{word.count }}</td>
+                        <td>
+
+                          <a ng-hide="topogram.stopwords.indexOf(word.word) != -1" ng-click="addWord(word.word)" class="btn btn-xs">
+                            Add to stopwords <i class="fa fa-plus"></i>
+                          </a>
+                          <a disabled ng-hide="topogram.stopwords.indexOf(word.word) == -1" class="btn btn-xs">
+                            Added to stopwords
+                          </a>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
               </div>
           </div>
+    </section>
+
+    <section  id="filter-words"  class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+      <h4>Exclude
+        <small>Filter out specific words</small>
+      </h4>
+
+      <div class="active">
+          <div class="form-inline">
+                  <p>
+                      Excluded Words <small>({{topogram.stopwords.length}})</small>
+                  </p>
+                  <input type="text" class="form-control" ng-model="addedStopWord" placeholder="Add stopword">
+                  <a  type="submit" class="btn btn-default" ng-click="addWord(addedStopWord)">Add</a>
+          </div>
       </div>
-</section>
+
+      <div>
+          <p ng-hide="topogram.stopwords.length ==0" class="help-block"><em>Click on the word to remove it from the list.</em></p>
+          <p> 
+            <a  title="remove {{stopword}} "ng-click="removeStopword(stopword)" class="btn btn-xl btn-default" ng-repeat="stopword in topogram.stopwords">
+              {{ stopword }}
+              <span>&times;</span>
+            </a>
+          </p>
+      </div>
+    </section>
+
+
+</div>
 <hr>
-<!-- <section class="words-graph">
-    <div class="row">
-        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-        </div>
-    </div>
-</section> -->
 
-<section id="words">
+<section id="words" class="row">
     <h4>Semantic graph <small>Co-occurences of words in the datasets</small></h4>
-     <button ng-click="getWordsGraph()" ng-disabled="wordsGraphLoading"  class="btn btn-sm btn-primary">Compute Word Graph</button>
-     <img ng-hide="!wordsGraphLoading" src="/img/circle-loader.gif" alt=""></div>
-    <p ng-hide="!wordsGraphLoading" class="help-block">This operation make take some time. Thanks !</p>
-
     <span ng-hide="!wordsGraphTooBig" class="alert-danger" >
         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
         <span class="sr-only">Error:</span>
         The graph is too big to be displayed. Please  adjust the minimum threshold for  words
     </span>
-
-     <div> 
-
-     <p>Number of nodes  in the graph <small>({{topogram.nodes_count}})</small>  </p>
-    <div class="form-inline" >
-        <div class="form-group">
-           <slider ng-model="topogram.nodes_count" min="0" step="10" max="1000" value="{{topogram.nodes_count}}" data-slider-orientation="horizontal" id="nodes_count"></slider>
-          </div>
-        <p class="help-block">Max words in the graph : 1000</p>
-        <p>Minimum edge weight in the graph ({{ topogram.min_edge_weight }}) </p>
-        <div class="form-group">
-          <slider ng-model="topogram.min_edge_weight" min="0" step="10" max="1000" value="{{topogram.min_edge_weight}}" data-slider-orientation="horizontal" id="min_edge_weight"></slider>
-        </div>
-          
-    </div>
 
     <div class="row" ng-hide="!wordsForceStarted">
           <div class="col-xs-3 col-sm-3">

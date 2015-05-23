@@ -18,17 +18,22 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           if(dataset.additional_columns) {
             var addCol = dataset.additional_columns.split(",")
             for (i in addCol) {
-              $scope.columns.push({ "title": addCol[i] ,"field": addCol[i]});
+              $scope.columns.push(addCol[i]);
             }
           }
 
-          // load data
-          Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
-                // console.log($scope.dataset);
-                $scope.dataset.size = datasetSize.count;
-                // load number of posts to estimate the size of the graph 
-                $scope.topogram.words_limit = Math.round(datasetSize.count / 25); // for now, arbitrary value 
-          });
+          // init
+          $scope.getTimeSeries();
+          $scope.getMostFrequentWords();
+
+          // // load data
+          // Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
+          //       // console.log($scope.dataset);
+          //       $scope.dataset.size = datasetSize.count;
+          //       // load number of posts to estimate the size of the graph 
+          //       $scope.topogram.words_limit = Math.round(datasetSize.count / 25); // for now, arbitrary value 
+          // });
+
     });
 
     // init socket.io
@@ -117,7 +122,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
     // word graph
     $scope.topogram.nodes_count = 250;
-    $scope.topogram.min_edge_weight = 50;
+    $scope.topogram.min_edge_weight = 150;
     $scope.wordsGraphLoading = false;
 
     $scope.getWordsGraph = function() {
@@ -144,7 +149,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     }
 
     // time series
-     $scope.topogram.timeScale = "day";
+     $scope.topogram.timeScale = "minute";
     $scope.$watch("topogram.timeScale", function(newVal,oldVal) {
       if(newVal != undefined && newVal != oldVal) {
         console.log(newVal);
@@ -172,12 +177,10 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     */
 
     // stopwords
-    $scope.addWord =function() {
-          if($scope.addedStopWord){
-            // console.log($scope.addedStopWord);
-            $scope.topogram.stopwords.push(this.addedStopWord);
-            $scope.addedStopWord= '';
-          }
+    $scope.addWord =function(addedStopWord) {
+            console.log(addedStopWord);
+            $scope.topogram.stopwords.push(addedStopWord);
+            $scope.addedStopWord = "";
     }
 
     $scope.removeStopword = function(stopword) {
