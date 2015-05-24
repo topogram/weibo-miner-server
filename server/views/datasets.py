@@ -16,6 +16,7 @@ from server.models.dataset import Dataset
 from server.forms.dataset import DatasetCreateForm, DatasetUpdateForm
 from server.serializers.dataset import DatasetSerializer
 from server.lib.queue import JobQueue
+from server.lib.db_indexer import build_query
 
 # from server.lib.indexer import csv2elastic, get_index_info, delete_index, get_index_name
 
@@ -209,6 +210,8 @@ class DatasetPaginateView(restful.Resource) :
         parser = reqparse.RequestParser()
         parser.add_argument('sort_order', type=str, help='Sort value (1 is up, -1 is down)')
         parser.add_argument('sort_column', type=unicode, help='Sort DB field')
+        parser.add_argument('q', type=unicode, help='Search query')
+        parser.add_argument('stopwords', type=unicode, help='Words to exclude')
         self.args = parser.parse_args()
 
     @login_required
@@ -217,6 +220,17 @@ class DatasetPaginateView(restful.Resource) :
         dataset = DatasetSerializer(d).data
         sort_column = "_id" # default value
 
+        # search term
+        q =self.args["q"]
+        if q is not None : q.split(",")
+
+        # stopwords
+        stopwords =self.args["stopwords"]
+        if stopwords is not None : stopwords = eval(stopwords)
+
+        query = build_query(q, stopwords)
+
+        # sorting
         sort_column = self.args["sort_column"]
         sort_order_num = self.args["sort_order"]
 
@@ -226,9 +240,9 @@ class DatasetPaginateView(restful.Resource) :
         print sort_column
 
         if sort_column is None : 
-            results = mongo.db[dataset["index_name"]].find().skip(start).limit(start+qty)
+            results = mongo.db[dataset["index_name"]].find(query).skip(start).limit(start+qty)
         else : 
-            results = mongo.db[dataset["index_name"]].find().sort(sort_column, sort_order).skip(start).limit(start+qty)
+            results = mongo.db[dataset["index_name"]].find(query).sort(sort_column, sort_order).skip(start).limit(start+qty)
 
         return json_util.dumps(results)
 
@@ -238,18 +252,30 @@ class DatasetSearchWordView(restful.Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('sort', type=str, help='Sort by DB field')
         parser.add_argument('q', type=unicode, help='Search query')
+        parser.add_argument('stopwords', type=unicode, help='Words to exclude')
         self.args = parser.parse_args()
 
     @login_required
     def get(self, id):
         d = Dataset.query.filter_by(id=id).first()
         dataset = DatasetSerializer(d).data
-        if self.args["q"] is None : 
-            return {}
-        else :
-            q = self.args["q"].split(",")
-            results = get_data_by_search_word(dataset, q)
-        return results
+
+        # search term
+        q =self.args["q"]
+        if q is not None : q.split(",")
+
+        # stopwords
+        stopwords =self.args["stopwords"]
+        if stopwords is not None : stopwords = eval(stopwords)
+
+        query = build_query(q, stopwords)
+
+        records = mongo.db[dataset["index_name"]].find(query)
+
+        data = {}
+        data["count"] = records.count()
+
+        return data
 
 # class DatasetEsView(restful.Resource) :
 #     @login_required

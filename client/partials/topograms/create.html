@@ -37,7 +37,9 @@
           <!-- <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p> -->
       </form>
       <p class="well">Current search term : {{ topogram.searchTerm }} 
-      <b class="pull-right" ng-hide="searchResultsCount == 0">  {{ searchResultsCount}} results </b></p>
+      <b class="pull-right" ng-hide="searchResultsCount == 0">  {{ searchResultsCount}} results </b>
+      <button class="btn btn-default btn-sm" ng-click="clearSearch()">Clear</button>
+      </p>
 
     </section>
 
