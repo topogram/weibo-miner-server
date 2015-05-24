@@ -42,8 +42,8 @@ module.exports = function(grunt) {
                     ],
               'client/dist/jquery-bootstrap.js': [
                     'client/bower_components/jquery/dist/jquery.js', 
-                    'bower_components/bootstrap/dist/js/bootstrap.js',
-                    'bower_components/bootstrap-slider/bootstrap-slider.js'
+                    'client/bower_components/bootstrap/dist/js/bootstrap.js',
+                    'client/bower_components/bootstrap-slider/bootstrap-slider.js'
               ],
               "client/dist/other-libs.js" : [
                     "client/bower_components/simg/src/simg.js",

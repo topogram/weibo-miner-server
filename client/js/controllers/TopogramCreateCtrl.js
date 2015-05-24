@@ -3,6 +3,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     // Initialize the scope defaults.
     $scope.topogram = {};
     $scope.topogram.stopwords = [];
+    $scope.columns = [];
 
     // max size for networks
     $scope.topogram.citations_limit=5;

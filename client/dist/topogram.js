@@ -342,37 +342,37 @@ function DatasetViewCtrl($scope, $routeParams, $timeout, $interval, $location, R
 
 
     // Topograms
-    // $scope.topogram = [];
-    // Restangular.one('datasets',$routeParams.datasetId).getList('topograms').then(function(topograms) {
-    //         // console.log(topograms);
-    //         $scope.topograms = topograms;
-    // });
+    $scope.topogram = [];
+    Restangular.one('datasets',$routeParams.datasetId).getList('topograms').then(function(topograms) {
+            // console.log(topograms);
+            $scope.topograms = topograms;
+    });
 
-    // $scope.deleteTopogram = function(topogram) {
-    //     var modalOptions = {
-    //         closeButtonText: 'Cancel',
-    //         actionButtonText: 'Delete',
-    //         headerText: 'Delete',
-    //         bodyText: 'Are you sure you want to delete this topogram?',
-    //         waitModal : false
-    //     };
+    $scope.deleteTopogram = function(topogram) {
+        var modalOptions = {
+            closeButtonText: 'Cancel',
+            actionButtonText: 'Delete',
+            headerText: 'Delete',
+            bodyText: 'Are you sure you want to delete this topogram?',
+            waitModal : false
+        };
 
-    //     modalService.showModal({}, modalOptions).then(function (deleted) {
-    //         console.log("deleted", deleted);
-    //         topogram.remove().then(function() {
+        modalService.showModal({}, modalOptions).then(function (deleted) {
+            console.log("deleted", deleted);
+            topogram.remove().then(function() {
 
-    //             // remove from scope
-    //             var index = $scope.topograms.indexOf(topogram);
-    //             if (index > -1) $scope.topograms.splice(index, 1);
+                // remove from scope
+                var index = $scope.topograms.indexOf(topogram);
+                if (index > -1) $scope.topograms.splice(index, 1);
 
-    //             // notify user
-    //             $timeout(function() { flash.success = "Topogram deleted" })
-    //         });
-    //     }, function () {
-    //         // TODO : hit cancel
-    //         console.info('Modal dismissed at: ' + new Date());
-    //     });
-    // }
+                // notify user
+                $timeout(function() { flash.success = "Topogram deleted" })
+            });
+        }, function () {
+            // TODO : hit cancel
+            console.info('Modal dismissed at: ' + new Date());
+        });
+    }
 
      /* 
     REGEXPS
@@ -933,21 +933,12 @@ function SessionDestroyCtrl($scope, $timeout, $location, flash, AuthService) {
     }
 }
 
-function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, socket, $timeout, $interval) {
+function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, socket, $timeout, $interval, $filter) {
 
     // Initialize the scope defaults.
     $scope.topogram = {};
     $scope.topogram.stopwords = [];
-    $scope.topogram.excludeWords = [];
-    $scope.topogram.includeWords = [];
-
-    // $scope.messages = [];
-    // $scope.rows = [];     // An array of messages results to display
-    // $scope.page = 0;        // A counter to keep track of our current page
-    // $scope.allResults = false;  // Whether or not all results have been found.
-    // $scope.totalResults=0 // All messages matching the query
-
-    $scope.columns = [{"title": "Text", 'field': "text_column"}, {"title": "Creation Date", 'field': "time_column"},{"title": "Author", 'field': "source_column"} ]; 
+    $scope.columns = [];
 
     // max size for networks
     $scope.topogram.citations_limit=5;
@@ -963,43 +954,89 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           if(dataset.additional_columns) {
             var addCol = dataset.additional_columns.split(",")
             for (i in addCol) {
-              $scope.columns.push({ "title": addCol[i] ,"field": addCol[i]});
+              $scope.columns.push(addCol[i]);
             }
           }
 
-          // load data
-          Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
-                // console.log($scope.dataset);
-                $scope.dataset.size = datasetSize.count;
-                // load number of posts to estimate the size of the graph 
-                $scope.topogram.words_limit = Math.round(datasetSize.count / 25); // for now, arbitrary value 
-          });
+          // init
+          $scope.getTimeSeries();
+          $scope.getMostFrequentWords();
+          $scope.getWordsGraph();
+
+          // // load data
+          // Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
+          //       // console.log($scope.dataset);
+          //       $scope.dataset.size = datasetSize.count;
+          //       // load number of posts to estimate the size of the graph 
+          //       $scope.topogram.words_limit = Math.round(datasetSize.count / 25); // for now, arbitrary value 
+          // });
+
+    });
+
+    // init socket.io
+    socket.on('connect', function () {
+          console.log('connect');
+    });
+
+    socket.on('progress', function (data) {
+        console.log(data);
+        // var d=JSON.parse(data)
+        // console.log(typeof(data), typeof(d));
+        // $scope.loadingNetworks=JSON.parse(data);
     });
 
 
-        // init socket.io
-        socket.on('connect', function () {
-              console.log('connect');
-        });
+      $scope.topogram.searchTerm;
+      $scope.searchResultsCount = 0;
+     $scope.search = function() {
+        // console.log($scope.topogram.searchTerm);
+        Restangular.one('datasets',$routeParams.datasetId).one("search").get({"q" : $scope.topogram.searchTerm}).then(function(results) {
+            console.log( results );
+            $scope.searchResultsCount = results.count;
+        }) 
+      }
 
-        socket.on('progress', function (data) {
-            console.log(data);
-            // var d=JSON.parse(data)
-            // console.log(typeof(data), typeof(d));
-            // $scope.loadingNetworks=JSON.parse(data);
-        });
-      
+     // $scope.$watch("searchTerm", function(newVal, oldVal){
+     //      console.log(newVal);
+     //  });
 
       $scope.recordOffset = 0;
       $scope.recordStep = 100;
-      
+      // sorting 
+      $scope.sortMessages = {};
+      $scope.sortMessages.order = "1"; // 1 is up, -1 is down
+      $scope.sortMessages.column = null;
+
       $scope.getRecords = function(start,qty) {
-          Restangular.one('datasets',$routeParams.datasetId).one("from", $scope.recordOffset).one("qty",$scope.recordStep ).get().then(function(datasample) {
+          Restangular.one('datasets',$routeParams.datasetId).one("from", $scope.recordOffset).one("qty",$scope.recordStep ).get({"sort_order" : $scope.sortMessages.order, "sort_column" : $scope.sortMessages.column }).then(function(datasample) {
+
               var data = JSON.parse( JSON.parse(datasample));
-              // console.log(data);
-              $scope.messages = data;
+
+              $scope.messages = data.map(function(d) {
+                  var date = new Date(d.time_column.$date);
+                  delete(d.time_column);
+                  d.time_column = $filter('date')(date, "EEE dd MMM yyyy -  HH:mm:ss Z"); 
+                  delete(d.keywords);
+                  delete(d._id);
+                  return d;
+              });
+
+              $scope.columns = Object.keys(data[0]);
+
           });
         }
+
+      $scope.sortMessagesBy = function(column) {
+          if(column == null) {
+            $scope.sortMessages.column = null;
+          } else {
+            $scope.sortMessages.column = column;
+            $scope.sortMessages.order = ($scope.sortMessages.order == "1") ? -1 : 1;
+          }
+          $scope.recordOffset = 0;
+          $scope.getRecords(0, $scope.recordStep);
+
+      }
 
       $scope.getNextRecords =function() {
         if ($scope.recordOffset + $scope.recordStep >  $scope.dataset.size) return
@@ -1018,56 +1055,77 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       // most frequent words 
       $scope.topogram.frequent_words_limit = 50;
       $scope.getMostFrequentWords = function() {
-          Restangular.one('datasets',$routeParams.datasetId).one("frequentWords").one(String($scope.topogram.frequent_words_limit)).get().then(function(frequentWords) {
+          Restangular.one('datasets',$routeParams.datasetId).one("frequentWords").one(String($scope.topogram.frequent_words_limit)).get({"q" : $scope.topogram.searchTerm, "stopwords" : JSON.stringify($scope.topogram.stopwords) }).then(function(frequentWords) {
                 // console.log(frequentWords);
-                $scope.frequentWords = frequentWords;
+                $scope.topogram.frequentWords = frequentWords;
           });
       }
 
+      //
+      $scope.getWordDegree = function(word) {
+        if($scope.topogram.wordsGraph != undefined) {
+          if( $scope.topogram.wordsGraph.data != undefined ) {
+             for (var i = 0; i < $scope.topogram.wordsGraph.data.top_words.length; i++) {
+               if ($scope.topogram.wordsGraph.data.top_words[i].node == word) {
+                return $scope.topogram.wordsGraph.data.top_words[i].degree;
+               }
+               }
+             }
+         }
+      }
+
     // word graph
-    $scope.topogram.words_limit = 0;
+    $scope.topogram.nodes_count = 250;
+    $scope.topogram.min_edge_weight = 150;
     $scope.wordsGraphLoading = false;
 
-    
+    $scope.topogram.wordsGraph = {};
+    $scope.topogram.wordsGraph.linkDistance = 250;
+    $scope.topogram.wordsGraph.charge = -1500;
+    $scope.topogram.wordsGraph.gravity =.3;
+
     $scope.getWordsGraph = function() {
+        // $scope.wordsGraphTooBig = false;
         $scope.wordsGraphLoading = true; // display loader
-        $scope.wordsGraphTooBig = false;
-        
+
         // require graph to server
-        var data = { "dataset": $scope.dataset , "words_limit" : $scope.topogram.words_limit  }
-        console.log(data);
+         Restangular.one('datasets',$routeParams.datasetId).one("words")
+         .get({
+            "q" : $scope.topogram.searchTerm , 
+            "stopwords" :  JSON.stringify($scope.topogram.stopwords), 
+            "nodes_count" : $scope.topogram.nodes_count,
+            "min_edge_weight" : $scope.topogram.min_edge_weight
+            }).then(function(wordsGraph) {
 
-         Restangular.one('datasets',$routeParams.datasetId).one("words").one(String($scope.topogram.words_limit)).get().then(function(wordsGraph) {
-            if (wordsGraph.top_words.length > 250) {
-              $scope.wordsGraphTooBig = true;
-              $scope.wordsGraphLoading = false;
+              $scope.topogram.wordsGraph.data=wordsGraph;
 
-            } else {
-              $scope.wordsGraph=wordsGraph;
               $scope.wordsForceStarted = true;
-              console.log($scope.wordsGraph);
               $scope.wordsGraphLoading = false;
-            }
-            
+
         });
-        
     }
 
-    
-
-       
-
-
-
     // time series
+     $scope.topogram.timeScale = "minute";
+    $scope.$watch("topogram.timeScale", function(newVal,oldVal) {
+      if(newVal != undefined && newVal != oldVal) {
+        console.log(newVal);
+        $scope.getTimeSeries();
+      }
+    });
+
     $scope.getTimeSeries = function() {
-        Restangular.one('datasets',$routeParams.datasetId).one("timeSeries").get().then(function(timeSeries) {
-            console.log(timeSeries);
+          Restangular.one('datasets',$routeParams.datasetId).one("timeSeries").get({
+            "q" : $scope.topogram.searchTerm , 
+            "stopwords" :  JSON.stringify($scope.topogram.stopwords), 
+            "time_scale" : $scope.topogram.timeScale 
+          }).then(function(timeSeries) {
             $scope.start=timeSeries[0].time;
             $scope.end=timeSeries[timeSeries.length-1].time;
             $scope.timeData = timeSeries.map(function(d){
                 return { "count" : d.count, "time" : new Date(d.time*1000)};
             });
+            $scope.topogram.timeSeries  = $scope.timeData;
         });
     }
 
@@ -1076,12 +1134,15 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     */
 
     // stopwords
-    $scope.addWord =function() {
-          if($scope.addedStopWord){
-            // console.log($scope.addedStopWord);
-            $scope.topogram.stopwords.push(this.addedStopWord);
-            $scope.addedStopWord= '';
-          }
+    $scope.addWord =function(addedStopWord) {
+            console.log(addedStopWord);
+            $scope.topogram.stopwords.push(addedStopWord);
+            $scope.addedStopWord = "";
+    }
+
+    $scope.removeStopword = function(stopword) {
+      $scope.topogram.stopwords.pop(stopword);
+
     }
 
     /* SAVE IMAGES */
@@ -1155,15 +1216,21 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
         return str;
     }
 
-    /*
     $scope.saveTopogram = function () {
+        console.log($scope.topogram);
 
-      $scope.topogram.dataset_id = $routeParams.datasetId;
-      $scope.topogram.es_query = $scope.searchTerm;
-      $scope.topogram.es_index_name = $scope.index;
-      $scope.topogram.stopwords = $scope.topogram.stopwords.toString();
+        $scope.topogram.dataset_id =  $routeParams.datasetId;
 
-      console.log($scope.topogram);
+        Restangular.all('topograms').post($scope.topogram).then(function(topogram) {
+              console.log(data);
+              flash.success = "New topogram saved !"
+              }, function (error){
+                  console.log(error);
+                  flash.error = error.data;
+              });
+    }
+    /*
+    
 
       Restangular.all('topograms').post($scope.topogram).then(function(topogram) {
             $timeout(function() {
@@ -1225,7 +1292,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       console.log($scope);
 
       var topogram = {
-        "es_query" : $scope.searchTerm,
+        "es_query" : $scope.topogram.searchTerm,
         "es_index_name" : $scope.index,
         "description" : $scope.description,
         "dataset_id" : $routeParams.datasetId,
@@ -3107,12 +3174,13 @@ Topogram.directive("words", function () {
      return {
         replace: false,
         scope: { 
-              wordsGraph: '=wordsGraph',
-              wordsForceStarted :'=wordsForceStarted'
-        },
-        link: function ($scope, element, attrs) {
-
-            console.log("$scope.wordsGraph");
+        wordsGraph: '=wordsGraph',
+        wordsForceStarted :'=wordsForceStarted',
+        linkDistance : "=linkDistance",
+        charge :  "=charge",
+        gravity :  "=gravity"
+    },
+    link: function ($scope, element, attrs) {
 
             //SVG Setup
             var w=900,
@@ -3140,6 +3208,15 @@ Topogram.directive("words", function () {
                         .attr("transform", "translate("+(100)+","+(h-200)+")");
 
             // data 
+            // $scope.$watch("wordsGraph.linkDistance", function(newVal,oldVal){
+
+            //     if(newVal == undefined && newVal == oldVal) return // prevent error
+                
+            //     // linkDistance
+            //     // charge
+            //     // gravity
+            // })
+
             $scope.$watch("wordsGraph.words", function(newVal,oldVal){
                 console.log(newVal);
                 if(newVal == undefined && newVal == oldVal) return // prevent error
@@ -3204,10 +3281,22 @@ Topogram.directive("words", function () {
                         .nodes(wordsData.nodes)
                         .links(wordsData.links)
                         .size([w,h])
-                        .linkDistance(250)
-                        .charge(-1500)
-                        .gravity(.3)
+                        .linkDistance($scope.linkDistance)
+                        .charge($scope.charge)
+                        .gravity($scope.gravity)
                         .on("tick", tickWord);
+
+                // drag
+                var wordDrag = wordForce.drag()
+                    .on("dragstart", dragstart);
+
+                function dragstart(d) {
+                  d3.select(this).classed("fixed", d.fixed = true);
+                }
+
+                function dblclick(d) {
+                  d3.select(this).classed("fixed", d.fixed = false);
+                }
 
                 var wordPath=wordEdges.selectAll(".word-link")
                         .data(wordForce.links())
@@ -3225,8 +3314,11 @@ Topogram.directive("words", function () {
                     
                 if($scope.wordsForceStarted) {
                     wordForce.start();
-                    wordNodes.call(wordForce.drag);
                 }
+
+                wordNodes
+                    .call(wordDrag)
+                    .on("dblclick", dblclick);
 
                 drawWords(); // init
 
@@ -3339,7 +3431,7 @@ Topogram.directive("words", function () {
                         } else return 1 // wordScaleOpacity(d.children.length);
                     });
 
-                    tickWordPath();
+                    if($scope.wordsForceStarted) tickWordPath();
                 }
 
                 function tickWordPath() {
@@ -3512,25 +3604,33 @@ Topogram.directive('timeseries', function () {
                     .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+            // tooltip
+            var tooltip = d3.select(element[0])
+                .append("g")
+                .style("position", "absolute")
+                .style("z-index", "10")
+                .style("visibility", "hidden")
+                .text("a simple tooltip")
+                .style("font-size",9)
+                .style("color", "#404040");
+
             $scope.$watch('timeData', function(updatedTimeData, oldVal) {
 
                 if(updatedTimeData != undefined && $scope.start!= undefined && $scope.end!= undefined) {
 
-                    console.log(updatedTimeData);
+                    d3.selectAll(".axis").remove();
+                    d3.selectAll(".timebar").remove();
 
                     var _data=updatedTimeData;
 
                     // Scales.
                     var x = d3.time.scale().range([time_width/_data.length/2, time_width-time_width/_data.length/2]);
-                    // var x = d3.scale.ordinal().rangeRoundBands([0, time_width], .05);
                     var y = d3.scale.linear().range([time_height, 0]);
-
 
                     // X-axis.
                     var xAxis = d3.svg.axis()
                         .scale(x)
                         .orient("bottom")
-                        .ticks(10)
                         .tickFormat(d3.time.format("%d %B"));
 
                     var yAxis = d3.svg.axis()
@@ -3551,7 +3651,6 @@ Topogram.directive('timeseries', function () {
                         .ease(ease)
                         .call(xAxis);
 
-                    
                     // Draw bars. 
                     bars = svg.append("g")
                         .attr("class","timebar")
@@ -3574,16 +3673,42 @@ Topogram.directive('timeseries', function () {
                         .attr("y", function(d) { return y(d.count); })
                         .attr("height", function(d) { return time_height - y(d.count);});
 
-                    bars.enter().append("rect")
+                    var bars_enter =  bars.enter().append("rect")
                         .attr("class", "count")
                         .attr("width", time_width / _data.length)
                         .attr("x", function(d) { return x(d.time) - (time_width/_data.length)/2; })
                         .attr("y", time_height)
                         .attr("height", 0)
-                        .style("fill", function(d){ return (d.selected)?"steelblue":"#CCC"})
-                        .transition().duration(1000)
+                        
+                    bars_enter.transition().duration(1000)
                         .attr("y", function(d) { return y(d.count); })
-                        .attr("height", function(d) { return time_height - y(d.count);});
+                        .attr("height", function(d) { return time_height - y(d.count) })
+                        .style("fill", function(d,i){ return "steelblue" });
+                        // .style("fill", function(d){ return (d.selected) ? "black" : "#CCC"})
+
+                    var format = d3.time.format("%A %d %B - %H:%m");
+                    var graphClicked = false;
+
+
+                    bars_enter
+                        .on("mouseover",function(d,i,event){
+                            d3.select(this).style("fill", "red");
+                            tooltip.text(d.count  + " on " +   format(d.time) )
+                            tooltip.style("visibility", "visible");
+                        })
+                        .on("mousemove", function(){
+                            return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");
+                        })
+                        .on("mouseout",function(d,i){
+                            if (!graphClicked) {
+                                d3.select(this).style("fill", "steelblue");
+                                return tooltip.style("visibility", "hidden");
+                            }
+                        })
+                        .on("click",function(d,i){
+                            graphClicked = (graphClicked) ? false : true;
+                            console.log(graphClicked);
+                        })
 
                     svg.append("g")
                         .attr("class", "x axis")
@@ -3632,7 +3757,6 @@ Topogram.directive('timeseries', function () {
                     duration = 500;
 
                     function updateChart() {
-                        // console.log($scope);
                       bars.data($scope.timeData)
                         .style("fill", function(d){ 
                             return (d.selected)?"steelblue":"#CCC"})
