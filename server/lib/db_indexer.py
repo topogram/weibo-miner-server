@@ -173,7 +173,7 @@ def get_words_co_occurences(dataset, nodes_count=0, min_edge_weight=0, q=None, s
     data = {}
     data["words"] = topogram.export_to_json(g)
     data["density"] = topogram.get_words_density()
-    data["top_words"] = topogram.get_nodes_degree(words_network)
+    data["top_words"] = topogram.get_nodes_degree(topogram.words)
 
     return data
 

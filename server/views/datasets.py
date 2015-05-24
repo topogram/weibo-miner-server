@@ -208,7 +208,7 @@ class DatasetPaginateView(restful.Resource) :
     def __init__(self):
         parser = reqparse.RequestParser()
         parser.add_argument('sort_order', type=str, help='Sort value (1 is up, -1 is down)')
-        parser.add_argument('sort_column', type=str, help='Sort DB field')
+        parser.add_argument('sort_column', type=unicode, help='Sort DB field')
         self.args = parser.parse_args()
 
     @login_required
@@ -222,6 +222,8 @@ class DatasetPaginateView(restful.Resource) :
 
         if sort_order_num  == "1" : sort_order = ASCENDING
         else : sort_order = DESCENDING
+
+        print sort_column
 
         if sort_column is None : 
             results = mongo.db[dataset["index_name"]].find().skip(start).limit(start+qty)

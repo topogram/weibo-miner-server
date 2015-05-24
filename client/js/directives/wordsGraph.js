@@ -2,12 +2,13 @@ Topogram.directive("words", function () {
      return {
         replace: false,
         scope: { 
-              wordsGraph: '=wordsGraph',
-              wordsForceStarted :'=wordsForceStarted'
-        },
-        link: function ($scope, element, attrs) {
-
-            console.log("$scope.wordsGraph");
+        wordsGraph: '=wordsGraph',
+        wordsForceStarted :'=wordsForceStarted',
+        linkDistance : "=linkDistance",
+        charge :  "=charge",
+        gravity :  "=gravity"
+    },
+    link: function ($scope, element, attrs) {
 
             //SVG Setup
             var w=900,
@@ -35,6 +36,15 @@ Topogram.directive("words", function () {
                         .attr("transform", "translate("+(100)+","+(h-200)+")");
 
             // data 
+            // $scope.$watch("wordsGraph.linkDistance", function(newVal,oldVal){
+
+            //     if(newVal == undefined && newVal == oldVal) return // prevent error
+                
+            //     // linkDistance
+            //     // charge
+            //     // gravity
+            // })
+
             $scope.$watch("wordsGraph.words", function(newVal,oldVal){
                 console.log(newVal);
                 if(newVal == undefined && newVal == oldVal) return // prevent error
@@ -99,10 +109,22 @@ Topogram.directive("words", function () {
                         .nodes(wordsData.nodes)
                         .links(wordsData.links)
                         .size([w,h])
-                        .linkDistance(250)
-                        .charge(-1500)
-                        .gravity(.3)
+                        .linkDistance($scope.linkDistance)
+                        .charge($scope.charge)
+                        .gravity($scope.gravity)
                         .on("tick", tickWord);
+
+                // drag
+                var wordDrag = wordForce.drag()
+                    .on("dragstart", dragstart);
+
+                function dragstart(d) {
+                  d3.select(this).classed("fixed", d.fixed = true);
+                }
+
+                function dblclick(d) {
+                  d3.select(this).classed("fixed", d.fixed = false);
+                }
 
                 var wordPath=wordEdges.selectAll(".word-link")
                         .data(wordForce.links())
@@ -120,8 +142,11 @@ Topogram.directive("words", function () {
                     
                 if($scope.wordsForceStarted) {
                     wordForce.start();
-                    wordNodes.call(wordForce.drag);
                 }
+
+                wordNodes
+                    .call(wordDrag)
+                    .on("dblclick", dblclick);
 
                 drawWords(); // init
 
@@ -234,7 +259,7 @@ Topogram.directive("words", function () {
                         } else return 1 // wordScaleOpacity(d.children.length);
                     });
 
-                    tickWordPath();
+                    if($scope.wordsForceStarted) tickWordPath();
                 }
 
                 function tickWordPath() {

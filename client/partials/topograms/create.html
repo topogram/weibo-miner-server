@@ -39,25 +39,6 @@
       <p class="well">Current search term : {{ topogram.searchTerm }} 
       <b class="pull-right" ng-hide="searchResultsCount == 0">  {{ searchResultsCount}} results </b></p>
 
-       <p>Number of nodes  in the graph <small>({{topogram.nodes_count}})</small>  </p>
-
-        <div class="form-inline" >
-            <div class="form-group">
-               <slider ng-model="topogram.nodes_count" min="0" step="10" max="1000" value="{{topogram.nodes_count}}" data-slider-orientation="horizontal" id="nodes_count"></slider>
-              </div>
-            <p class="help-block">Max words in the graph : 1000</p>
-            <p>Minimum edge weight in the graph ({{ topogram.min_edge_weight }}) </p>
-            <div class="form-group">
-              <slider ng-model="topogram.min_edge_weight" min="0" step="10" max="1000" value="{{topogram.min_edge_weight}}" data-slider-orientation="horizontal" id="min_edge_weight"></slider>
-            </div>
-        </div>
-
-        <div> 
-            <button ng-click="getWordsGraph()" ng-disabled="wordsGraphLoading"  class="btn btn-sm btn-primary">Compute Word Graph</button>
-            <img ng-hide="!wordsGraphLoading" src="/img/circle-loader.gif" alt="">
-        </div>
-        <p ng-hide="!wordsGraphLoading" class="help-block">This operation make take some time. Thanks !</p>
-
     </section>
 
     <section  id="frequent-words" class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
@@ -88,6 +69,7 @@
                           <th></th>
                           <th>Word</th>
                           <th>Count</th>
+                          <th>Degree</th>
                           <th></th>
                       </tr>
                     </thead>
@@ -96,14 +78,14 @@
                         <td>{{$index + 1}}</td>
                         <td>{{word.word }}</td>
                         <td>{{word.count }}</td>
+                        <td>{{ getWordDegree(word.word) }} </td>
                         <td>
-
-                          <a ng-hide="topogram.stopwords.indexOf(word.word) != -1" ng-click="addWord(word.word)" class="btn btn-xs">
-                            Add to stopwords <i class="fa fa-plus"></i>
-                          </a>
-                          <a disabled ng-hide="topogram.stopwords.indexOf(word.word) == -1" class="btn btn-xs">
-                            Added to stopwords
-                          </a>
+                              <a ng-hide="topogram.stopwords.indexOf(word.word) != -1" ng-click="addWord(word.word)" class="btn btn-xs">
+                                Exclude <i class="fa fa-plus"></i>
+                              </a>
+                              <a disabled ng-hide="topogram.stopwords.indexOf(word.word) == -1" class="btn btn-xs">
+                                Excluded
+                              </a>
                         </td>
                       </tr>
                     </tbody>
@@ -143,57 +125,111 @@
 <hr>
 
 <section id="words" class="row">
-    <h4>Semantic graph <small>Co-occurences of words in the datasets</small></h4>
+    <h4>Semantic graph 
+        <small>Co-occurences of words in the datasets
+            <a data-toggle="popover" popover-placement="bottom" popover-title="Help - Read the Semantic Graph" popover="
+                    Stroke weight represents link intensity between 2 words.
+                    Size represent the degree of each words.
+                    Colors represent the degree of each words.
+                    "  popover-append-to-body="true">
+                    (How to read the graph)
+            </a>
+
+        <a href="#" type="button" ng-click="saveWords(); $event.preventDefault()" class="btn btn-sm btn-default">
+            <span class="glyphicon glyphicon-save"></span>Save (Shift+W)
+        </a>   
+
+      </small>
+    </h4>
     <span ng-hide="!wordsGraphTooBig" class="alert-danger" >
         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
         <span class="sr-only">Error:</span>
         The graph is too big to be displayed. Please  adjust the minimum threshold for  words
     </span>
 
-    <div class="row" ng-hide="!wordsForceStarted">
-          <div class="col-xs-3 col-sm-3">
-              <div class="well">
-                    <h4><small><a data-toggle="popover" popover-placement="right" popover-title="Help - Read the Semantic Graph" tooltip-html-unsafe="true" popover="
-                    Stroke weight represents link intensity between 2 words.
-                    Size represent the degree of each words.
-                    Colors represent the degree of each words.
-                    "  popover-append-to-body="true">Help</a></small></h4>
+    <div class="row">
+          <div class="col-xs-2 col-sm-2">
+                <p ng-hide="!wordsGraphLoading" class="help-block">This operation make take some time. Thanks !</p>
 
-                    <p class="help-block">This graph represents the co-occurence of words quoted in the corpus.</p>
+                <p>Nodes count <small>({{topogram.nodes_count}})</small>  
+                    <a data-toggle="tooltip" tooltip-placement="right" tooltip="Total number of nodes in the graph." tooltip-append-to-body="true">
+                            <i class="fa fa-question-circle"></i>
+                    </a>
+                </p>
+                <div>
+                    <div class="form-group">
+                       <slider ng-model="topogram.nodes_count" min="0" step="10" max="1000" value="{{topogram.nodes_count}}" data-slider-orientation="horizontal" id="nodes_count"></slider>
+                    </div>
+                    <p> 
+                        Filter edges <small>({{ topogram.min_edge_weight }}) </small>
+                     <a data-toggle="tooltip" tooltip-placement="right" tooltip="
+                       Diplay only edges with a weight of more than this value. " tooltip-append-to-body="true">
+                        <i class="fa fa-question-circle"></i>
+                       </a>
+                      </p>
+                    <div class="form-group">
+                      <slider ng-model="topogram.min_edge_weight" min="0" step="10" max="1000" value="{{topogram.min_edge_weight}}" data-slider-orientation="horizontal" id="min_edge_weight"></slider>
+                    </div>
+                    <div  class="form-group"> 
+                        <button ng-click="getWordsGraph()" ng-disabled="wordsGraphLoading"  class="btn btn-sm btn-primary">Refresh Graph</button>
+                        <img ng-hide="!wordsGraphLoading" src="/img/circle-loader.gif" alt="">
+                    </div>
+                </div>
+  
+                <hr>
+                <b>Display options</b>
+                <a ng-click="wordsForceStarted = !wordsForceStarted"class="btn btn-default btn-sm"> 
+                      <i class="fa fa-{{ (wordsForceStarted)? 'stop' : 'play' }}"></i> 
+                      {{ (wordsForceStarted)? "Stop" : "Start" }} graph 
+                  </a>
+                <div  class="form-group row">
+                  <div  class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                          <a data-toggle="popover" tooltip-placement="bottom" tooltip="
+                        Median distance beween the nodes" >
+                          <label for="words-graph-link-distance">Link
+                          </label>
+                        </a>
 
-                    <p><a href="#" type="button" ng-click="saveWords(); $event.preventDefault()" class="btn-sm btn-default btn-save btn-save-png"><span class="glyphicon glyphicon-save"></span>Save</a>   or hit <small> Shift+W</small></p>
-              </div>
-              <h5>Most connected words</h5>
-              <!-- <a class="btn btn-xs" ng-click="prevTopWords()"><< prev</a> 
-              {{ wordsListStart }} | {{wordsListEnd}}<a class="btn btn-xs" ng-click="nextTopWords()">next >></a> -->
-              <div style="height:220px; overflow:auto;">
-                  <table show-filter="true" class="table table-condensed" style="height:220px; overflow:scroll">
-                      <thead>
-                        <tr>
-                          <th></th>
-                          <th>Word</th>
-                          <th>Degree</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr ng-style="{color: wordColors(row.degree)}" ng-repeat="row in wordsGraph.top_words.slice(wordsListStart,wordsListEnd)">
-                        <td>{{$index + 1}}</td>
-                        <td>{{row.node }}</td>
-                        <td>{{row.degree }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-              </div>
+                        <slider ng-model="topogram.wordsGraph.linkDistance" min="0" step="10" max="500" value="{{topogram.wordsGraph.linkDistance}}" data-slider-orientation="vertical" id="wordsGraph"></slider>
+                  </div>
+                  <div  class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                      <a data-toggle="popover" tooltip-placement="right" tooltip="
+                        A negative value results in node repulsion, while a positive value results in node attraction. " tooltip-append-to-body="true">
+                          <label for="words-graph-charge">Charge
+                          </label>
+                      </a>
+                        <slider ng-model="topogram.wordsGraph.charge" min="-2000" step="25" max="2000" value="{{topogram.wordsGraph.charge}}" data-slider-orientation="vertical" id="wordsGraph"></slider>
+                  </div>
+                  <div  class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                      <a data-toggle="popover" tooltip-placement="right" tooltip="
+                       Near the center of the layout, the gravitational strength is almost zero. The gravitational strength becomes stronger in linear proportion to the distance.. " tooltip-append-to-body="true">
+                        <label for="words-graph-link-distance">Gravity
+                        </label>
+                    </a>
+                        <slider ng-model="topogram.wordsGraph.gravity" min="0" step=".1" max="10" value="{{topogram.wordsGraph.gravity}}" data-slider-orientation="vertical" id="wordsGraph"></slider>
+                  </div>
+                </div>
           </div>
+          <div class="col-xs-10 col-sm-10">
+                <words words="" 
+                    words-graph="topogram.wordsGraph.data" 
+                    words-force-started="wordsForceStarted" 
+                    link-distance="topogram.wordsGraph.linkDistance"
+                    charge="topogram.wordsGraph.charge"
+                    gravity="topogram.wordsGraph.gravity"
+                    start="start" 
+                    end="end" 
+                    class="words-container"
+                  >
+                </words>
 
-          <div class="col-xs-9 col-sm-9">
-                <words words="" words-graph="wordsGraph" words-force-started="wordsForceStarted" start="start" end="end" class="words-container"></words>
           </div>
     </div>
 </section>
 <hr>
 <section ng-hide="" class="recipe">
     <h4>Messages <small> {{ dataset.size }} results  from the datasets</small></h4>
+
     <ul class="pagination">
         <p><li data-ng-click="getPrevRecords()"><a>&laquo;</a></li>
         <!-- <li data-ng-click="changePage(page.pageOffset)" data-ng-repeat="page in pageObjs"><a>{{page.pageNumber + 1}}</a>
@@ -202,15 +238,17 @@
         <li data-ng-click="getNextRecords()"><a>&raquo;</a></li>
         </p>
     </ul>
-    Filters : Sort by
-    <ul class="pagination" id="sort-messages">
-      <li ng-repeat="column in columns">
-          <a href="" ng-click="sortMessagesBy(column)" ng-class="{'active': sortMessages.column == column}" class="btn-primary"> {{column}} 
-        <span ng-show="sortMessages.column == column && sortMessages.order == -1" class="caret"></span>
-        <span ng-show="sortMessages.column == column && sortMessages.order == 1"  class="dropup"/><span class="caret caret-reversed"></span></a>
-        </a>
-    </li>
-    </ul>
+  
+    <ul class="pagination">
+        <li ng-repeat="column in columns"  href="" ng-click="sortMessagesBy(column)" ng-class="{'active': sortMessages.column == column}"> 
+          <a class="btn btn-default"  ng-class="{ 'dropup' : sortMessages.order == -1 } ">
+              {{column}} 
+              <span class="caret"></span>
+              </span>
+            </a>
+        </li>
+        <li><a href="" ng-click="sortMessagesBy(null)">Clear</a></li>
+      </ul>
 
     <div class="messages" ng-hide="!messages.length" style="height:500px; overflow:auto;">
           <table  class="table table-condensed">

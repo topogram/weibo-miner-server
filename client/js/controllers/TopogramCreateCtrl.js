@@ -25,6 +25,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           // init
           $scope.getTimeSeries();
           $scope.getMostFrequentWords();
+          $scope.getWordsGraph();
 
           // // load data
           // Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
@@ -90,8 +91,12 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
         }
 
       $scope.sortMessagesBy = function(column) {
-          $scope.sortMessages.column = column;
-          $scope.sortMessages.order = ($scope.sortMessages.order == "1") ? -1 : 1;
+          if(column == null) {
+            $scope.sortMessages.column = null;
+          } else {
+            $scope.sortMessages.column = column;
+            $scope.sortMessages.order = ($scope.sortMessages.order == "1") ? -1 : 1;
+          }
           $scope.recordOffset = 0;
           $scope.getRecords(0, $scope.recordStep);
 
@@ -120,10 +125,28 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           });
       }
 
+      //
+      $scope.getWordDegree = function(word) {
+        if($scope.topogram.wordsGraph != undefined) {
+          if( $scope.topogram.wordsGraph.data != undefined ) {
+             for (var i = 0; i < $scope.topogram.wordsGraph.data.top_words.length; i++) {
+               if ($scope.topogram.wordsGraph.data.top_words[i].node == word) {
+                return $scope.topogram.wordsGraph.data.top_words[i].degree;
+               }
+               }
+             }
+         }
+      }
+
     // word graph
     $scope.topogram.nodes_count = 250;
     $scope.topogram.min_edge_weight = 150;
     $scope.wordsGraphLoading = false;
+
+    $scope.topogram.wordsGraph = {};
+    $scope.topogram.wordsGraph.linkDistance = 250;
+    $scope.topogram.wordsGraph.charge = -1500;
+    $scope.topogram.wordsGraph.gravity =.3;
 
     $scope.getWordsGraph = function() {
         // $scope.wordsGraphTooBig = false;
@@ -137,12 +160,10 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
             "nodes_count" : $scope.topogram.nodes_count,
             "min_edge_weight" : $scope.topogram.min_edge_weight
             }).then(function(wordsGraph) {
-              
-              console.log(wordsGraph);
 
-              $scope.wordsGraph=wordsGraph;
+              $scope.topogram.wordsGraph.data=wordsGraph;
+
               $scope.wordsForceStarted = true;
-              console.log($scope.wordsGraph);
               $scope.wordsGraphLoading = false;
 
         });
