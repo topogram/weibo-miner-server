@@ -60,8 +60,8 @@ def get_topogram(dataset):
 
 def process_dataset(dataset):
 
-    job1 = q.enqueue(index_csv_2_db, dataset,  timeout=500)
-    job2 = q.enqueue(process_words_co_occurences, dataset, timeout=500)
+    job1 = q.enqueue(index_csv_2_db, dataset,  timeout=2000)
+    job2 = q.enqueue(process_words_co_occurences, dataset, timeout=2000)
 
     return { "jobs" : [job1.key, job2.key]}
 
@@ -260,7 +260,7 @@ def get_time_series(dataset, q=None, stopwords=None, time_scale="hour"):
         for t in times['result']:
             dt = t['_id']
             dt= datetime( int(dt['year']),int(dt['month']),int(dt['day']) )
-            time_series.append( {"time" : time.mktime(dt.timetuple())*1000, "count" : int(t['count'])} )
+            time_series.append( {"time" : time.mktime(dt.timetuple()), "count" : int(t['count'])} )
 
     return time_series
 

@@ -17,10 +17,10 @@
               </select>
 
               <a class="btn btn-sm btn-default" ng-click="getTimeSeries()">Update</a> 
-    
-              <a href="#" type="button" ng-click="saveTimeSeries(); $event.preventDefault()" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-save"></span> Save as PNG (Shift+T)</a> 
+              <a class="btn btn-sm btn-default" ng-click="downloadTimeSeries()"><span class="glyphicon glyphicon-save"></span> Download as CSV</a> 
+              <a href="#" type="button" ng-click="saveTimeSeries(); $event.preventDefault()" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-save"></span> Save Image (Shift+T)</a> 
         </div>
-        <timeseries ng-hide="!timeData" timeseries="" time-data="timeData" start="start" end="end"></timeseries>
+        <timeseries class="timeseries" ng-hide="!timeData" timeseries="" time-data="timeData" start="start" end="end"></timeseries>
 </section>
 
 <div class="main-controls row">

@@ -210,6 +210,12 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
         });
     }
 
+    $scope.downloadTimeSeries = function() {
+      $scope.downloadAsCSV($scope.timeData.sort(function(a,b){
+            return new Date(b.time) - new Date(a.time);
+        }));
+    }
+
     /*
     STOPWORDS
     */
@@ -237,7 +243,8 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
     $scope.saveTimeSeries = function(){
       var fn="time_"+$scope.dataset.title;
-      $scope.downloadPNG($("#timeseries  svg")[0], fn);
+      console.log(fn);
+      $scope.downloadPNG($(".timeseries svg")[0], fn);
       // var sv=new Simg($("#timeseries  svg")[0]);
       // sv.download();
     }
