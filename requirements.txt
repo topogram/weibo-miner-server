@@ -29,7 +29,7 @@ flask-restful-swagger
 -e git://github.com/jcrafford/flask-elasticsearch.git#egg=Flask-ElasticSearch-dev
 Flask-PyMongo==0.3.0
 pymongo==2.7
--e git://github.com/topogram/topogram.git#egg=topogram
+-e git://github.com/topogram/topogram.git@c4c156fba8b444eed23026825839240d59e1979d#egg=topogram
 Flask-Migrate
 Flask-Script
 Flask-Login
