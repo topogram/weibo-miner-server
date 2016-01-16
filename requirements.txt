@@ -38,7 +38,7 @@ Flask-Principal
 Flask-Admin
 Flask-rq
 pymysql
-MySQL-python
+MySQL-python==1.2.5
 redis
 coverage
 colour-runner
