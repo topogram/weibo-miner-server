@@ -42,7 +42,7 @@ db = SQLAlchemy(app)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
-    db.session.remove()
+    db.session.close()
 
 # flask-bcrypt
 bcrypt = Bcrypt(app)
