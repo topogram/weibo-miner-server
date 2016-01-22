@@ -40,6 +40,10 @@ except OSError, e:
 # flask-sqlalchemy
 db = SQLAlchemy(app)
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()
+
 # flask-bcrypt
 bcrypt = Bcrypt(app)
 
@@ -54,7 +58,6 @@ principals = Principal(app)
 # mongo
 app.config['MONGO_URI'] = MONGO_URL
 mongo = PyMongo(app)
-
 
 import server.resources.admin
 import server.resources.routes
