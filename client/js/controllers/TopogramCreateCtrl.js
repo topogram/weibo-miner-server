@@ -5,6 +5,14 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     $scope.topogram.stopwords = [];
     $scope.columns = [];
 
+    // show/hide UI parts
+    $scope.searchWordsAreVisible = true;
+    $scope.timeSeriesAreVisible = true;
+    $scope.topWordsAreVisible = true;
+    $scope.messagesAreVisible = true;
+
+    $scope.topWordsSize=[10,50,100,200,500];
+
     // max size for networks
     $scope.topogram.citations_limit=5;
 
@@ -30,8 +38,8 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           // Restangular.one('datasets',$routeParams.datasetId).one("size").get().then(function(datasetSize) {
           //       // console.log($scope.dataset);
           //       $scope.dataset.size = datasetSize.count;
-          //       // load number of posts to estimate the size of the graph 
-          //       $scope.topogram.words_limit = Math.round(datasetSize.count / 25); // for now, arbitrary value 
+          //       // load number of posts to estimate the size of the graph
+          //       $scope.topogram.words_limit = Math.round(datasetSize.count / 25); // for now, arbitrary value
           // });
 
     });
@@ -42,7 +50,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           $scope.getTimeSeries();
           $scope.getMostFrequentWords();
           $scope.getWordsGraph();
-          $scope.getRecords(0, $scope.recordQty); 
+          $scope.getRecords(0, $scope.recordQty);
     }
 
     // init socket.io
@@ -57,7 +65,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
       $scope.topogram.searchTerm;
       $scope.searchResultsCount = 0;
-     
+
      $scope.search = function() {
         Restangular.one('datasets',$routeParams.datasetId).one("search").get({
           "q" : $scope.topogram.searchTerm,
@@ -68,7 +76,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
               $scope.initView();
             }
             $scope.searchResultsCount = results.count;
-        }) 
+        })
       }
 
       $scope.clearSearch =function () {
@@ -78,7 +86,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
       $scope.recordOffset = 0;
       $scope.recordStep = 100;
-      // sorting 
+      // sorting
       $scope.sortMessages = {};
       $scope.sortMessages.order = "1"; // 1 is up, -1 is down
       $scope.sortMessages.column = null;
@@ -86,7 +94,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       $scope.getRecords = function(start,qty) {
 
           Restangular.one('datasets',$routeParams.datasetId).one("from", $scope.recordOffset).one("qty",$scope.recordStep ).get({
-                    "sort_order" : $scope.sortMessages.order, 
+                    "sort_order" : $scope.sortMessages.order,
                     "sort_column" : $scope.sortMessages.column,
                     "q" : $scope.topogram.searchTerm,
                     "stopwords" :  JSON.stringify($scope.topogram.stopwords)
@@ -97,7 +105,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
               $scope.messages = data.map(function(d) {
                   var date = new Date(d.time_column.$date);
                   delete(d.time_column);
-                  d.time_column = $filter('date')(date, "EEE dd MMM yyyy -  HH:mm:ss Z"); 
+                  d.time_column = $filter('date')(date, "EEE dd MMM yyyy -  HH:mm:ss Z");
                   delete(d.keywords);
                   delete(d._id);
                   return d;
@@ -133,7 +141,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       }
 
 
-      // most frequent words 
+      // most frequent words
       $scope.topogram.frequent_words_limit = 50;
       $scope.getMostFrequentWords = function() {
           Restangular.one('datasets',$routeParams.datasetId).one("frequentWords").one(String($scope.topogram.frequent_words_limit)).get({"q" : $scope.topogram.searchTerm, "stopwords" : JSON.stringify($scope.topogram.stopwords) }).then(function(frequentWords) {
@@ -172,8 +180,8 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
         // require graph to server
          Restangular.one('datasets',$routeParams.datasetId).one("words")
          .get({
-            "q" : $scope.topogram.searchTerm , 
-            "stopwords" :  JSON.stringify($scope.topogram.stopwords), 
+            "q" : $scope.topogram.searchTerm ,
+            "stopwords" :  JSON.stringify($scope.topogram.stopwords),
             "nodes_count" : $scope.topogram.nodes_count,
             "min_edge_weight" : $scope.topogram.min_edge_weight
             }).then(function(wordsGraph) {
@@ -197,9 +205,9 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
     $scope.getTimeSeries = function() {
           Restangular.one('datasets',$routeParams.datasetId).one("timeSeries").get({
-            "q" : $scope.topogram.searchTerm , 
-            "stopwords" :  JSON.stringify($scope.topogram.stopwords), 
-            "time_scale" : $scope.topogram.timeScale 
+            "q" : $scope.topogram.searchTerm ,
+            "stopwords" :  JSON.stringify($scope.topogram.stopwords),
+            "time_scale" : $scope.topogram.timeScale
           }).then(function(timeSeries) {
             $scope.start=timeSeries[0].time;
             $scope.end=timeSeries[timeSeries.length-1].time;
@@ -318,7 +326,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
               });
     }
     /*
-    
+
 
       Restangular.all('topograms').post($scope.topogram).then(function(topogram) {
             $timeout(function() {
@@ -375,7 +383,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
      // });
 
 
-    /* 
+    /*
     $scope.saveTopogram = function () {
       console.log($scope);
 
@@ -387,7 +395,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
         "topotype_id" : $scope.dataset.topotype_id
         // ,
         // "words"     : JSON.stringify($scope.words),
-        // "citations" : JSON.stringify($scope.citations) 
+        // "citations" : JSON.stringify($scope.citations)
       };
       console.log($scope.words, $scope.citations);
 
@@ -408,9 +416,9 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           };
 
           // process data if any results
-          if (results.total !=0) { 
+          if (results.total !=0) {
               $scope.loadingNetworks.percent = 1;
-              
+
               Restangular.all('topograms').all('networks').post(topoInfo).then(function(topogram) {
 
                 $scope.loadingNetworks.current = results.total;
@@ -419,14 +427,14 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
                 $scope.readyToSave = true;
 
                 console.log("all data is ok ! ");
-                
+
                 // words
                 if (topogram.words.index.length !=0) {
                   $scope.words=topogram.words;
                   if(data.words.index!=undefined) $scope.wordsLength=topogram.words.index.length;
                   $scope.wordForceStarted = true;
                 }
-                
+
                 // citations
                 console.log(topogram);
                 if (topogram.citations.index.length !=0) {
