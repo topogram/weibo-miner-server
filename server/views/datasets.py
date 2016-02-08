@@ -12,7 +12,7 @@ from bson import json_util
 from pymongo import DESCENDING, ASCENDING
 from server import app, restful, db, mongo
 
-from server.models.dataset import Dataset 
+from server.models.dataset import Dataset
 from server.forms.dataset import DatasetCreateForm, DatasetUpdateForm
 from server.serializers.dataset import DatasetSerializer
 from server.lib.queue import JobQueue
@@ -23,7 +23,7 @@ from server.lib.db_indexer import build_query
 from server.lib.db_indexer import process_dataset, get_index_name, get_data_by_search_word
 
 from topogram.utils import any2utf8
-from topogram.corpora.csv_file import CSVCorpus 
+from topogram.corpora.csv_file import CSVCorpus
 
 class DatasetListView(restful.Resource):
 
@@ -36,7 +36,8 @@ class DatasetListView(restful.Resource):
     @login_required
     def get(self):
         datasets =  current_user.datasets.all()
-        return DatasetSerializer(datasets, many=True).data
+        datasets_pointing_to_existing_files = [d for d in datasets if os.path.isfile(d.filepath) ]
+        return DatasetSerializer(datasets_pointing_to_existing_files, many=True).data
 
     @login_required
     def post(self):
@@ -44,7 +45,7 @@ class DatasetListView(restful.Resource):
         if not form.validate_on_submit():
             return form.errors, 422
 
-        # add file 
+        # add file
         fileName = secure_filename(form.dataset.data.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], fileName)
         form.dataset.data.save(file_path)
@@ -57,15 +58,15 @@ class DatasetListView(restful.Resource):
         except TypeError:
             return "Bad file encoding. Please use UTF-8 for better compatibility.", 422
 
-        #  elasticsearch index 
+        #  elasticsearch index
         index_state = "raw"
         es_index_name = get_index_name(fileName)
 
-        dataset = Dataset(form.title.data, 
-                          form.description.data, 
+        dataset = Dataset(form.title.data,
+                          form.description.data,
                           str(file_path),
-                          es_index_name, 
-                          index_state, 
+                          es_index_name,
+                          index_state,
                           source_column=form.source_column.data, text_column=form.text_column.data, time_column=form.time_column.data, time_pattern=form.time_pattern.data)
         db.session.add(dataset)
         db.session.commit()
@@ -103,7 +104,7 @@ class DatasetView(restful.Resource):
         # check rights
         if dataset.user.id != current_user.id : return 401
 
-        if len(form.additional_columns.data) : 
+        if len(form.additional_columns.data) :
             additional_columns =  any2utf8(form.additional_columns.data)
         else :
             additional_columns = None
@@ -121,7 +122,7 @@ class DatasetView(restful.Resource):
         except ValueError, e:
             return e.message, 422
 
-        # add new values 
+        # add new values
         dataset.source_column = form.source_column.data
         dataset.text_column = form.text_column.data
         dataset.time_column = form.time_column.data
@@ -133,12 +134,12 @@ class DatasetView(restful.Resource):
         # get the modified version
         dataset = Dataset.query.filter_by(id=id).first()
 
-        return 204, 
+        return 204,
 
     @login_required
     def get(self, id):
         """
-        GET 
+        GET
         a Single dataset per ID
 
         """
@@ -150,7 +151,7 @@ class DatasetView(restful.Resource):
         if d.user.id != current_user.id : return 401
 
         dataset= DatasetSerializer(d).data
-        
+
         # add file info
         csv_corpus = CSVCorpus(dataset["filepath"])
 
@@ -170,8 +171,8 @@ class DatasetSampleView(restful.Resource):
     @login_required
     def get(self, id):
         """
-        GET 
-        return a sample of x lines from a dataset (default is 10) 
+        GET
+        return a sample of x lines from a dataset (default is 10)
 
         args : Dataset ID (required), optional
         returns : a dict
@@ -186,7 +187,7 @@ class DatasetSampleView(restful.Resource):
 class DatasetProcessView(restful.Resource) :
     @login_required
     def get(self, id):
-        """ 
+        """
         Use user-defined model to index data into the db
         """
 
@@ -239,14 +240,14 @@ class DatasetPaginateView(restful.Resource) :
 
         print sort_column
 
-        if sort_column is None : 
+        if sort_column is None :
             results = mongo.db[dataset["index_name"]].find(query).skip(start).limit(start+qty)
-        else : 
+        else :
             results = mongo.db[dataset["index_name"]].find(query).sort(sort_column, sort_order).skip(start).limit(start+qty)
 
         return json_util.dumps(results)
 
-class DatasetSearchWordView(restful.Resource): 
+class DatasetSearchWordView(restful.Resource):
 
     def __init__(self):
         parser = reqparse.RequestParser()
@@ -280,18 +281,18 @@ class DatasetSearchWordView(restful.Resource):
 # class DatasetEsView(restful.Resource) :
 #     @login_required
 #     def get(self, id):
-#         """" 
+#         """"
 #         Index data into elasticsearch
 #         Works as a state machine based on a job queue
 #         """
-        
+
 #         d = Dataset.query.filter_by(id=id).first()
 #         dataset = DatasetSerializer(d).data
 
 #         index_state = dataset["index_state"]
 
 #         # ensure that the index exists, if not reset state and recreate
-#         try : 
+#         try :
 #             get_index_info(dataset["index_name"])
 #         except :
 #             index_state ="raw"
