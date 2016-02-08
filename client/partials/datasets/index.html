@@ -1,10 +1,10 @@
 <div class="header">
 <h3>Your Datasets</h3>
 </div>
-<p> 
+<p>
 <span p class="pull-right">Total Datasets : {{posts.length}} </span>
-<a href="#/datasets/create" role="button" class="btn btn-xs btn-primary"> Add New Dataset  <i class="fa fa-plus-circle"></i></a> 
-</p> 
+<a href="#/datasets/create" role="button" class="btn btn-xs btn-primary"> Add New Dataset  <i class="fa fa-plus-circle"></i></a>
+</p>
 
 <table ng-table="" class="table table-striped">
   <tbody>
@@ -18,8 +18,9 @@
       <td data-title="'created_at'" sortable="'created_at'">{{post.created_at | date:'medium'}}</td>
       <!-- <td data-title="'records_count'" sortable="'records_count'">{{post.records_count}}</td> -->
       <!-- <td data-title="'modified_at'" sortable="'modified_at'">{{post.modified_at | date:'medium'}}</td> -->
-      <td data-title="'Modify'"><a href="#/datasets/{{post.id}}" role="button" class="btn btn-default btn-sm">View</a></td>
-      <td data-title="'Delete'"><a  ng-click="delete(post)" role="button" class="btn btn-primary btn-sm">Delete</a></td>
+      <td data-title="'Topogram'"><a href="#/datasets/{{ post.id }}/topograms/create" class="btn btn-primary">Create <i class="fa fa-icon fa-plus"></i></a></td>
+      <!-- <td data-title="'Modify'"><a href="#/datasets/{{post.id}}" role="button" class="btn btn-default btn-sm">View</a></td> -->
+      <td data-title="'Delete'"><a  ng-click="delete(post)" role="button" class="btn btn-default btn-sm">Delete</a></td>
     </tr>
   </tbody>
 </table>
