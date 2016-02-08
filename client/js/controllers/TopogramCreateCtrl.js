@@ -1,16 +1,12 @@
 function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash, socket, $timeout, $interval, $filter) {
 
+
     // Initialize the scope defaults.
     $scope.topogram = {};
     $scope.topogram.stopwords = [];
     $scope.columns = [];
 
-    // show/hide UI parts
-    $scope.searchWordsAreVisible = true;
-    $scope.timeSeriesAreVisible = true;
-    $scope.topWordsAreVisible = true;
-    $scope.messagesAreVisible = true;
-
+    // top words select values
     $scope.topWordsSize=[10,50,100,200,500];
 
     // max size for networks
