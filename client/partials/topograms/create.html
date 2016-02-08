@@ -1,7 +1,7 @@
 <div class="page-header">
   <h3>Create Topogram <small>{{dataset.name}} - {{ dataset.filename}}</small></h3>
-  <a href="" ng-click="saveTopogram()" role="button" class="btn btn-xs btn-primary"> Save Topogram  <i class="fa fa-plus-circle"></i></a> 
-  
+  <a href="" ng-click="saveTopogram()" role="button" class="btn btn-xs btn-primary"> Save Topogram  <i class="fa fa-plus-circle"></i></a>
+
 </div>
 
 <section id="timeseries" ng-hide="!timeData">
@@ -16,9 +16,9 @@
                 <option value="minute">Minutes</option>
               </select>
 
-              <a class="btn btn-sm btn-default" ng-click="getTimeSeries()">Update</a> 
-              <a class="btn btn-sm btn-default" ng-click="downloadTimeSeries()"><span class="glyphicon glyphicon-save"></span> Download as CSV</a> 
-              <a href="#" type="button" ng-click="saveTimeSeries(); $event.preventDefault()" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-save"></span> Save Image (Shift+T)</a> 
+              <a class="btn btn-sm btn-default" ng-click="getTimeSeries()">Update</a>
+              <a class="btn btn-sm btn-default" ng-click="downloadTimeSeries()"><span class="glyphicon glyphicon-save"></span> Download as CSV</a>
+              <a href="#" type="button" ng-click="saveTimeSeries(); $event.preventDefault()" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-save"></span> Save Image (Shift+T)</a>
         </div>
         <timeseries class="timeseries" ng-hide="!timeData" timeseries="" time-data="timeData" start="start" end="end"></timeseries>
 </section>
@@ -36,7 +36,7 @@
           <p  class="help-block">Search specific words</p>
           <!-- <p class="help-block">Use operators AND, OR and quotes for more precise queries <a href="http://lucene.apache.org/core/2_9_4/queryparsersyntax.html" target="_blank">[help]</a></p> -->
       </form>
-      <p class="well">Current search term : {{ topogram.searchTerm }} 
+      <p class="well">Current search term : {{ topogram.searchTerm }}
       <b class="pull-right" ng-hide="searchResultsCount == 0">  {{ searchResultsCount}} results </b>
       <button class="btn btn-default btn-sm" ng-click="clearSearch()">Clear</button>
       </p>
@@ -113,7 +113,7 @@
 
       <div>
           <p ng-hide="topogram.stopwords.length ==0" class="help-block"><em>Click on the word to remove it from the list.</em></p>
-          <p> 
+          <p>
             <a  title="remove {{stopword}} "ng-click="removeStopword(stopword)" class="btn btn-xl btn-default" ng-repeat="stopword in topogram.stopwords">
               {{ stopword }}
               <span>&times;</span>
@@ -127,7 +127,7 @@
 <hr>
 
 <section id="words" class="row">
-    <h4>Semantic graph 
+    <h4>Semantic graph
         <small>Co-occurences of words in the datasets
             <a data-toggle="popover" popover-placement="bottom" popover-title="Help - Read the Semantic Graph" popover="
                     Stroke weight represents link intensity between 2 words.
@@ -139,7 +139,7 @@
 
         <a href="#" type="button" ng-click="saveWords(); $event.preventDefault()" class="btn btn-sm btn-default">
             <span class="glyphicon glyphicon-save"></span>Save (Shift+W)
-        </a>   
+        </a>
 
       </small>
     </h4>
@@ -153,7 +153,7 @@
           <div class="col-xs-2 col-sm-2">
                 <p ng-hide="!wordsGraphLoading" class="help-block">This operation make take some time. Thanks !</p>
 
-                <p>Nodes count <small>({{topogram.nodes_count}})</small>  
+                <p>Nodes count <small>({{topogram.nodes_count}})</small>
                     <a data-toggle="tooltip" tooltip-placement="right" tooltip="Total number of nodes in the graph." tooltip-append-to-body="true">
                             <i class="fa fa-question-circle"></i>
                     </a>
@@ -162,7 +162,7 @@
                     <div class="form-group">
                        <slider ng-model="topogram.nodes_count" min="0" step="10" max="1000" value="{{topogram.nodes_count}}" data-slider-orientation="horizontal" id="nodes_count"></slider>
                     </div>
-                    <p> 
+                    <p>
                         Filter edges <small>({{ topogram.min_edge_weight }}) </small>
                      <a data-toggle="tooltip" tooltip-placement="right" tooltip="
                        Diplay only edges with a weight of more than this value. " tooltip-append-to-body="true">
@@ -172,19 +172,19 @@
                     <div class="form-group">
                       <slider ng-model="topogram.min_edge_weight" min="0" step="10" max="1000" value="{{topogram.min_edge_weight}}" data-slider-orientation="horizontal" id="min_edge_weight"></slider>
                     </div>
-                    <div  class="form-group"> 
+                    <div  class="form-group">
                         <button ng-click="getWordsGraph()" ng-disabled="wordsGraphLoading"  class="btn btn-sm btn-primary">Refresh Graph</button>
                         <img ng-hide="!wordsGraphLoading" src="/img/circle-loader.gif" alt="">
                     </div>
                 </div>
-  
+
                 <hr>
                 <b>Display options</b>
-                <a ng-click="wordsForceStarted = !wordsForceStarted"class="btn btn-default btn-sm"> 
-                      <i class="fa fa-{{ (wordsForceStarted)? 'stop' : 'play' }}"></i> 
-                      {{ (wordsForceStarted)? "Stop" : "Start" }} graph 
+                <a ng-click="wordsForceStarted = !wordsForceStarted"class="btn btn-default btn-sm">
+                      <i class="fa fa-{{ (wordsForceStarted)? 'stop' : 'play' }}"></i>
+                      {{ (wordsForceStarted)? "Stop" : "Start" }} graph
                   </a>
-                <div  class="form-group row">
+                <div  class="form-group row" style="display:none">
                   <div  class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                           <a data-toggle="popover" tooltip-placement="bottom" tooltip="
                         Median distance beween the nodes" >
@@ -213,14 +213,14 @@
                 </div>
           </div>
           <div class="col-xs-10 col-sm-10">
-                <words words="" 
-                    words-graph="topogram.wordsGraph.data" 
-                    words-force-started="wordsForceStarted" 
+                <words words=""
+                    words-graph="topogram.wordsGraph.data"
+                    words-force-started="wordsForceStarted"
                     link-distance="topogram.wordsGraph.linkDistance"
                     charge="topogram.wordsGraph.charge"
                     gravity="topogram.wordsGraph.gravity"
-                    start="start" 
-                    end="end" 
+                    start="start"
+                    end="end"
                     class="words-container"
                   >
                 </words>
@@ -240,11 +240,11 @@
         <li data-ng-click="getNextRecords()"><a>&raquo;</a></li>
         </p>
     </ul>
-  
+
     <ul class="pagination">
-        <li ng-repeat="column in columns"  href="" ng-click="sortMessagesBy(column)" ng-class="{'active': sortMessages.column == column}"> 
+        <li ng-repeat="column in columns"  href="" ng-click="sortMessagesBy(column)" ng-class="{'active': sortMessages.column == column}">
           <a class="btn btn-default"  ng-class="{ 'dropup' : sortMessages.order == -1 } ">
-              {{column}} 
+              {{column}}
               <span class="caret"></span>
               </span>
             </a>
@@ -276,21 +276,21 @@
 </section>
 
 
-<!-- 
+<!--
   <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
       <div class="active">
           <div class="form-inline">
                   <h4>
                       Included Words<small>({{topogram.includeWords.length}})</small>
                   </h4>
-                  
+
                   <input type="text" class="form-control" ng-model="addedStopWord" placeholder="Add stopword">
                   <a  type="submit" class="btn btn-default" ng-click="addWord()">Add</a>
           </div>
           <p class="help-block">Those words will be ignored</p>
           <p><span class="badge"ng-repeat="stopword in topogram.stopwords">{{ stopword }}</span></p>
       </div>
-  </div>  
+  </div>
 </section> -->
 
 <!--     <div class="form-group" >
@@ -298,9 +298,9 @@
         <slider ng-model="topogram.citations_limit" min="0" step="1" max="50" data-slider-orientation="horizontal" id="citationsLimit"></slider>
         <p class="help-block">Maximum number of citations in the graph.</p>
     </div>
- -->    
+ -->
 
-<!-- 
+<!--
       <div ng-hide="loadingNetworks.percent==0 || loadingNetworks.percent==100">
             <p>Now processing...</p>
             <progressbar class="progress-striped active" max="100" value=" loadingNetworks.percent" type="danger"><i>{{ loadingNetworks.current}} / {{ totalResults}}</i></progressbar>
@@ -315,11 +315,8 @@
               </div>
       </div>
   </div> -->
- 
+
   <!-- <section class="results"> -->
     <!-- <h3 ng-hide="messages.length" class="no-recipes">No results</h3> -->
-    
+
   <!-- </section> -->
-
-    
-
