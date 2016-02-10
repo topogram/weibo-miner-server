@@ -3,7 +3,7 @@ Topogram.directive('timeseries', function () {
     return {
         replace: false,
         // templateUrl:'js/directives/timeseries/timeseries.html',
-        scope: { 
+        scope: {
             timeData: '=timeData',
             start: '=start',
             end: '=end',
@@ -17,7 +17,7 @@ Topogram.directive('timeseries', function () {
                         gap = 0,
                         ease = 'cubic-in-out',
                         bars;
-            
+
             var duration = 500;
 
             var time_width = width - margin.left - margin.right,
@@ -34,12 +34,12 @@ Topogram.directive('timeseries', function () {
 
             // tooltip
             var tooltip = d3.select(element[0])
+                .select("svg")
                 .append("g")
-                .style("position", "absolute")
-                .style("z-index", "10")
-                .style("visibility", "hidden")
-                .text("a simple tooltip")
-                .style("font-size",9)
+                .attr("transform","translate(" + (time_width-150) +",30)")
+                .append("text")
+                .text("")
+                .style("font-size",11)
                 .style("color", "#404040");
 
             $scope.$watch('timeData', function(updatedTimeData, oldVal) {
@@ -66,20 +66,20 @@ Topogram.directive('timeseries', function () {
                         .orient("left")
                         .ticks(10);
 
-                    // Set scale domains. 
+                    // Set scale domains.
                     x.domain(d3.extent(_data, function(d) { return d.time; }));
                     y.domain([0, d3.max(_data, function(d) { return d.count; })]);
-                    
+
                     svg.transition().duration(duration).attr({width: width, height: height})
-                    
-                    // Call x-axis. 
+
+                    // Call x-axis.
                     d3.select(".x.axis")
                         .transition()
                         .duration(duration)
                         .ease(ease)
                         .call(xAxis);
 
-                    // Draw bars. 
+                    // Draw bars.
                     bars = svg.append("g")
                         .attr("class","timebar")
                         .selectAll(".timebar")
@@ -107,35 +107,24 @@ Topogram.directive('timeseries', function () {
                         .attr("x", function(d) { return x(d.time) - (time_width/_data.length)/2; })
                         .attr("y", time_height)
                         .attr("height", 0)
-                        
+
                     bars_enter.transition().duration(1000)
                         .attr("y", function(d) { return y(d.count); })
                         .attr("height", function(d) { return time_height - y(d.count) })
                         .style("fill", function(d,i){ return "steelblue" });
                         // .style("fill", function(d){ return (d.selected) ? "black" : "#CCC"})
 
-                    var format = d3.time.format("%A %d %B - %H:%m");
+                    var format = d3.time.format("%Y %B %d, %H:%m");
                     var graphClicked = false;
 
 
                     bars_enter
                         .on("mouseover",function(d,i,event){
                             d3.select(this).style("fill", "red");
-                            tooltip.text(d.count  + " on " +   format(d.time) )
-                            tooltip.style("visibility", "visible");
-                        })
-                        .on("mousemove", function(){
-                            return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");
+                            tooltip.text(format(d.time) + " -- " + d.count + " messages" )
                         })
                         .on("mouseout",function(d,i){
-                            if (!graphClicked) {
-                                d3.select(this).style("fill", "steelblue");
-                                return tooltip.style("visibility", "hidden");
-                            }
-                        })
-                        .on("click",function(d,i){
-                            graphClicked = (graphClicked) ? false : true;
-                            console.log(graphClicked);
+                            d3.select(this).style("fill", "steelblue");
                         })
 
                     svg.append("g")
@@ -150,7 +139,7 @@ Topogram.directive('timeseries', function () {
                             .attr("dx", "-.8em")
                             .attr("dy", ".15em")
                             .attr("transform", function(d) {
-                                return "rotate(-65)" 
+                                return "rotate(-65)"
                                 })
                             // .attr("transform", "rotate(-90)" );
 
@@ -162,20 +151,20 @@ Topogram.directive('timeseries', function () {
                             .attr("font-family", "sans-serif")
                             .attr("fill", "#4B4B4B")
                             .attr("font-size", 10)
-                    
+
                     svg.select(".y")
                         .append("text") // caption
                             .attr("transform", "rotate(-90)")
                             .attr("y", 6)
                             .attr("dy", ".71em")
                             .style("text-anchor", "end")
-                            .attr("text-anchor", "middle")  
+                            .attr("text-anchor", "middle")
                             .attr("font-family", "sans-serif")
                             .attr("fill", "#4B4B4B")
-                            // .style("text-decoration", "bold")  
+                            // .style("text-decoration", "bold")
                             .attr("font-size", 10)
                             .text("Qty per day (tweets)")
-                  
+
                     svg.selectAll(".domain")
                         .attr("fill", "none")
                         .attr("stroke", "#000")
@@ -186,19 +175,19 @@ Topogram.directive('timeseries', function () {
 
                     function updateChart() {
                       bars.data($scope.timeData)
-                        .style("fill", function(d){ 
+                        .style("fill", function(d){
                             return (d.selected)?"steelblue":"#CCC"})
                     }
 
                     $scope.$watch('start', function(newStart, oldVal) {
                         if (newStart!=undefined) updateChart();
-                        
+
                     })
                     $scope.$watch('end', function(newEnd, oldVal) {
                         if (newEnd!=undefined) updateChart();
-                        
+
                     })
-                    
+
                 }
             })
         }
