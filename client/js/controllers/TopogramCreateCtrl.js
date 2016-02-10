@@ -241,14 +241,15 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
 
     // stopwords
     $scope.addWord =function(addedStopWord) {
-            console.log(addedStopWord);
-            $scope.topogram.stopwords.push(addedStopWord);
-            $scope.addedStopWord = "";
+      console.log(addedStopWord);
+      $scope.topogram.stopwords.push(addedStopWord);
+      $scope.addedStopWord = "";
+      $scope.getWordsGraph();
     }
 
     $scope.removeStopword = function(stopword) {
       $scope.topogram.stopwords.pop(stopword);
-
+      $scope.getWordsGraph();
     }
 
     /* SAVE IMAGES */
