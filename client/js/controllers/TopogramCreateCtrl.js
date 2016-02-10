@@ -206,7 +206,7 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     }
 
     // time series
-     $scope.topogram.timeScale = "minute";
+    $scope.topogram.timeScale = "minute";
     $scope.$watch("topogram.timeScale", function(newVal,oldVal) {
       if(newVal != undefined && newVal != oldVal) {
         console.log(newVal);
@@ -261,37 +261,67 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
           else if (e.which==65 && e.shiftKey==true) $scope.saveAll()
     });
 
+    $scope.getCleanFileTitle = function() {
+      var fn = $scope.dataset.filename;
+      if($scope.topogram.searchTerm) fn += "_"+$scope.topogram.searchTerm;
+      return fn;
+    };
+
     $scope.saveTimeSeries = function(){
-      var fn="time_"+$scope.dataset.title;
-      console.log(fn);
-      $scope.downloadPNG($(".timeseries svg")[0], fn);
-      // var sv=new Simg($("#timeseries  svg")[0]);
-      // sv.download();
+      var name="time_"+$scope.getCleanFileTitle();
+      $scope.downloadPNG(".timeseries-real svg", name);
+      // console.log(fn);
     }
 
     $scope.saveWords = function(){
-      var name ="words_"+$scope.dataset.title;
-      $scope.downloadPNG($(".words-container svg")[0], name);
-       // var sv=new Simg($(".words-container svg")[0]);
-       // sv.download();
+      var name ="words_"+$scope.getCleanFileTitle();
+      $scope.downloadPNG(".words-container svg", name);
     }
 
     $scope.downloadPNG=function(container, name) {
 
-        var sv=new Simg(container);
-        // console.log(sv);
-        // sv.download();
-        // sv.downloadWithName(name);
 
-        // rewrite download function
-         sv.toImg(function(img){
-           var a = document.createElement("a");
-           a.download = name+".png";
-           a.href = img.getAttribute('src');
-           a.click();
-         });
+      var html = d3.select(container)
+        .attr("version", 1.1)
+        .attr("xmlns", "http://www.w3.org/2000/svg")
+        .node().parentNode.innerHTML;
 
-    } // end controller
+      var imgsrc = 'data:image/svg+xml;base64,'+ btoa(unescape(encodeURIComponent(html)));
+      var img = '<img src="'+imgsrc+'">';
+
+      var canvas = document.querySelector("canvas");
+      if(!canvas) canvas = document.createElement("canvas");
+
+    	context = canvas.getContext("2d");
+      var image = new Image;
+      image.src = imgsrc;
+
+      image.onload = function() {
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        context.drawImage(image, 0, 0);
+
+    	  var canvasdata = canvas.toDataURL("image/png");
+    	  var pngimg = '<img src="'+canvasdata+'">';
+
+        var a = document.createElement("a");
+    	  a.download = name+".png";
+    	  a.href = canvasdata;
+    	  a.click();
+      };
+
+
+    //   // rewrite download function
+    //  sv.toImg(function(img){
+    //    console.log(img);
+    //    var a = document.createElement("a");
+    //    a.download = name+".png";
+    //    a.href = img.getAttribute('src');
+    //    a.click();
+    //  });
+
+    } //
 
     $scope.downloadAsCSV = function(dataObject, filename) {
         // remove angular verbose stuff
