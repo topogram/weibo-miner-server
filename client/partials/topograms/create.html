@@ -72,7 +72,7 @@
                 </a>
                 </p>
 
-                 <slider ng-model="topogram.nodes_count" min="0" step="10" max="1000" value="{{topogram.nodes_count}}" data-slider-orientation="horizontal" id="nodes_count"></slider>
+                 <slider ng-model="topogram.nodes_count" min="0" step="10" max="1000" dragstop="true" value="{{topogram.nodes_count}}" data-slider-orientation="horizontal" id="nodes_count"></slider>
               </li>
               <li role="separator" class="divider"></li>
               <li style="padding:10px">
@@ -83,7 +83,7 @@
                     <i class="fa fa-question-circle"></i>
                    </a>
                   </p>
-                  <slider ng-model="topogram.min_edge_weight" min="0" step="10" max="1000" value="{{topogram.min_edge_weight}}" data-slider-orientation="horizontal" id="min_edge_weight"></slider>
+                  <slider dragstop="true" ng-model="topogram.min_edge_weight" min="0" step="10" max="1000" value="{{topogram.min_edge_weight}}" data-slider-orientation="horizontal" id="min_edge_weight"></slider>
 
               </li>
             </ul>

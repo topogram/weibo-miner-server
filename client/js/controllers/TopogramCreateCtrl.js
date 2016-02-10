@@ -169,6 +169,21 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
     $scope.topogram.wordsGraph.charge = -1500;
     $scope.topogram.wordsGraph.gravity =.3;
 
+    // watch nodes count changes
+    $scope.$watch('topogram.nodes_count', function(newValue, oldValue) {
+        if(newValue !== oldValue){
+            // console.log('slider value changed', newValue);
+            $scope.getWordsGraph();
+        }
+    });
+
+    $scope.$watch('topogram.min_edge_weight', function(newValue, oldValue) {
+        if(newValue !== oldValue){
+            // console.log('slider value changed', newValue);
+            $scope.getWordsGraph();
+        }
+    });
+
     $scope.getWordsGraph = function() {
         // $scope.wordsGraphTooBig = false;
         $scope.wordsGraphLoading = true; // display loader
