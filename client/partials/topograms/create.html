@@ -61,26 +61,34 @@
               {{ (wordsForceStarted)? "Stop" : "Start" }} graph
           </a>
         </li>
-          <li>
-            <p>Nodes count <small>({{topogram.nodes_count}})</small>
-              <a data-toggle="tooltip" tooltip-placement="right" tooltip="Total number of nodes in the graph." tooltip-append-to-body="true">
-                      <i class="fa fa-question-circle"></i>
-              </a>
-              </p>
+        <li class="dropdown dropup">
+            <a href="#" ng-click="$event.preventDefault()" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Filters <span class="caret"></span></a>
 
-               <slider ng-model="topogram.nodes_count" min="0" step="10" max="1000" value="{{topogram.nodes_count}}" data-slider-orientation="horizontal" id="nodes_count"></slider>
-          </li>
-          <li>
-            <p>
-                Filter edges <small>({{ topogram.min_edge_weight }}) </small>
-             <a data-toggle="tooltip" tooltip-placement="right" tooltip="
-               Diplay only edges with a weight of more than this value. " tooltip-append-to-body="true">
-                <i class="fa fa-question-circle"></i>
-               </a>
-              </p>
-              <slider ng-model="topogram.min_edge_weight" min="0" step="10" max="1000" value="{{topogram.min_edge_weight}}" data-slider-orientation="horizontal" id="min_edge_weight"></slider>
+           <ul class="dropdown-menu dropup">
+             <li style="padding:10px">
+                <p>Nodes count <small>({{topogram.nodes_count}})</small>
+                <a data-toggle="tooltip" tooltip-placement="right" tooltip="Total number of nodes in the graph." tooltip-append-to-body="true">
+                        <i class="fa fa-question-circle"></i>
+                </a>
+                </p>
 
+                 <slider ng-model="topogram.nodes_count" min="0" step="10" max="1000" value="{{topogram.nodes_count}}" data-slider-orientation="horizontal" id="nodes_count"></slider>
+              </li>
+              <li role="separator" class="divider"></li>
+              <li style="padding:10px">
+                <p>
+                    Filter edges <small>({{ topogram.min_edge_weight }}) </small>
+                 <a data-toggle="tooltip" tooltip-placement="right" tooltip="
+                   Diplay only edges with a weight of more than this value. " tooltip-append-to-body="true">
+                    <i class="fa fa-question-circle"></i>
+                   </a>
+                  </p>
+                  <slider ng-model="topogram.min_edge_weight" min="0" step="10" max="1000" value="{{topogram.min_edge_weight}}" data-slider-orientation="horizontal" id="min_edge_weight"></slider>
+
+              </li>
+            </ul>
           </li>
+
           <li>
             <a href="#" ng-click="getWordsGraph(); $event.preventDefault()" ng-disabled="wordsGraphLoading">
                 <span class="glyphicon glyphicon-refresh"></span>
