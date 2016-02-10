@@ -43,10 +43,10 @@ def get_topogram(dataset):
     else : additional_columns = dataset["additional_columns"]
 
     # open the corpus
-    csv_corpus = CSVCorpus(dataset["filepath"], 
-                            timestamp_column = dataset["time_column"], 
-                            time_pattern= dataset["time_pattern"], 
-                            text_column=dataset["text_column"], 
+    csv_corpus = CSVCorpus(dataset["filepath"],
+                            timestamp_column = dataset["time_column"],
+                            time_pattern= dataset["time_pattern"],
+                            text_column=dataset["text_column"],
                             source_column= dataset["source_column"],
                             additional_columns=additional_columns )
     # init NLP
@@ -78,7 +78,7 @@ def index_csv_2_db(dataset):
 
         for i, row in enumerate(topogram.process()):
             # if i == 10 : break
-            try : 
+            try :
                 row
             except ValueError,e :
                 d.index_state = "error line %s"%i
@@ -89,12 +89,13 @@ def index_csv_2_db(dataset):
         # change the state to done
         d.index_state = "done"
         db.session.commit()
+        db.session.close()
 
         job_done("parsing csv")
 
 def process_words_co_occurences(dataset, nodes_count=1000, min_edge_weight=50):
     """
-    Extract words coocurences from a data set stored mongo and store the resulting graph in another mongo document 
+    Extract words coocurences from a data set stored mongo and store the resulting graph in another mongo document
 
         dataset : a dict representation from a Dataset instance
         nodes_count : maximum number of nodes in the final graph
@@ -117,7 +118,7 @@ def process_words_co_occurences(dataset, nodes_count=1000, min_edge_weight=50):
         for i,record in enumerate(records):
             keywords = set(record["keywords"]) # set() to avoid repetitions
 
-            # compute word graph 
+            # compute word graph
             for word in list(permutations(keywords, 2)) : # pair the words
                 topogram.add_words_edge(word[0], word[1])
 
@@ -130,10 +131,11 @@ def process_words_co_occurences(dataset, nodes_count=1000, min_edge_weight=50):
         mongo.db["wordGraphs"].insert({ "name" : dataset["index_name"], "words" :words_graph_json})
 
         print "graph saved in db"
-        
+
         # change the state to done
         d.index_state = "done"
         db.session.commit()
+        db.session.close()
 
         job_done("doing nasty stuff")
 
@@ -147,9 +149,9 @@ def get_words_co_occurences(dataset, nodes_count=0, min_edge_weight=0, q=None, s
 
     # search term
     if q is not None:
-        nodes = [] 
-        for w in q : 
-            try : 
+        nodes = []
+        for w in q :
+            try :
                 nodes = topogram.words[w].keys()
             except KeyError:
                 pass
@@ -158,18 +160,18 @@ def get_words_co_occurences(dataset, nodes_count=0, min_edge_weight=0, q=None, s
 
     if stopwords is not None :
         # print words_network.nodes()
-        for w in stopwords: 
-            print any2unicode(w) in words_network.nodes() 
+        for w in stopwords:
+            print any2unicode(w) in words_network.nodes()
 
         words_network.remove_nodes_from([any2unicode(w) for w in stopwords])
 
-        for w in stopwords: 
-            print any2unicode(w) in words_network.nodes() 
+        for w in stopwords:
+            print any2unicode(w) in words_network.nodes()
 
-    # get only the number of nodes  
-    g= topogram.get_node_network(words_network, nodes_count=nodes_count, min_edge_weight=min_edge_weight) 
+    # get only the number of nodes
+    g= topogram.get_node_network(words_network, nodes_count=nodes_count, min_edge_weight=min_edge_weight)
     print len(g.nodes())
-    
+
     data = {}
     data["words"] = topogram.export_to_json(g)
     data["density"] = topogram.get_words_density()
@@ -201,15 +203,15 @@ def get_time_series(dataset, q=None, stopwords=None, time_scale="hour"):
     if time_scale == 'minute':
 
         query = [
-            { "$group" : { "_id" : { 
-                "year" : { "$year" : "$time_column"}, 
-                "month" : { "$month" : "$time_column"}, 
+            { "$group" : { "_id" : {
+                "year" : { "$year" : "$time_column"},
+                "month" : { "$month" : "$time_column"},
                 "day": { "$dayOfMonth" : "$time_column"},
                 "hour": { "$hour" : "$time_column"},
-                "minute": { "$minute" : "$time_column"} 
-                }, 
+                "minute": { "$minute" : "$time_column"}
+                },
                 "count" : { "$sum" : 1 } } },
-            { "$sort" : { "_id.year": 1, "_id.month" : 1, "_id.day" : 1, '_id.hour' : 1, 
+            { "$sort" : { "_id.year": 1, "_id.month" : 1, "_id.day" : 1, '_id.hour' : 1,
                 "_id.minute":1 } }
         ]
 
@@ -224,17 +226,17 @@ def get_time_series(dataset, q=None, stopwords=None, time_scale="hour"):
 
     if time_scale == 'hour':
         query = [
-            { "$group" : { "_id" : { 
-                "year" : { "$year" : "$time_column"}, 
-                "month" : { "$month" : "$time_column"}, 
+            { "$group" : { "_id" : {
+                "year" : { "$year" : "$time_column"},
+                "month" : { "$month" : "$time_column"},
                 "day": { "$dayOfMonth" : "$time_column"},
                 "hour": { "$hour" : "$time_column"}
-                }, 
-                "count" : { "$sum" : 1 } } 
+                },
+                "count" : { "$sum" : 1 } }
             },
             { "$sort" : { "_id.year": 1, "_id.month" : 1, "_id.day" : 1, '_id.hour' : 1 } }
         ]
-        
+
         if q is not None or stopwords is not None: query.insert(0, {"$match" : filters })
 
         times = mongo.db[collection_name].aggregate(query)
@@ -246,10 +248,10 @@ def get_time_series(dataset, q=None, stopwords=None, time_scale="hour"):
     if time_scale == 'day':
 
         query = [
-            { "$group" : { "_id" : { 
-                "year" : { "$year" : "$time_column"}, 
-                "month" : { "$month" : "$time_column"}, 
-                "day": { "$dayOfMonth" : "$time_column"} }, 
+            { "$group" : { "_id" : {
+                "year" : { "$year" : "$time_column"},
+                "month" : { "$month" : "$time_column"},
+                "day": { "$dayOfMonth" : "$time_column"} },
                 "count" : { "$sum" : 1 } } },
             { "$sort" : { "_id.year": 1, "_id.month" : 1, "_id.day" : 1 } }
         ]
@@ -269,13 +271,13 @@ def build_query(q, stopwords):
     query = {}
     query_and = []
 
-    if q is not None : 
+    if q is not None :
         query_and.append({"keywords" : { "$in" : [ any2utf8(w) for w in q ] }})
 
-    if stopwords is not None : 
+    if stopwords is not None :
         query_and.append({"keywords" : { "$nin" : stopwords }})
 
-    if stopwords is not None or q is not None : 
+    if stopwords is not None or q is not None :
          query = {"$and": query_and }
 
     return query
@@ -283,7 +285,7 @@ def build_query(q, stopwords):
 def get_data_by_search_word(dataset, q, stopwords=None) :
 
     if type(q) is not list : raise ValueError("words should be a list")
-    
+
     collection_name = dataset["index_name"]
     query = build_query(q, stopwords)
     records = mongo.db[dataset["index_name"]].find(query)
