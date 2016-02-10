@@ -160,13 +160,13 @@ function TopogramCreateCtrl($scope, $routeParams, $location, Restangular, flash,
       }
 
     // word graph
-    $scope.topogram.nodes_count = 250;
+    $scope.topogram.nodes_count = 150;
     $scope.topogram.min_edge_weight = 150;
     $scope.wordsGraphLoading = false;
 
     $scope.topogram.wordsGraph = {};
     $scope.topogram.wordsGraph.linkDistance = 250;
-    $scope.topogram.wordsGraph.charge = -1500;
+    $scope.topogram.wordsGraph.charge = -1000;
     $scope.topogram.wordsGraph.gravity =.3;
 
     // watch nodes count changes
