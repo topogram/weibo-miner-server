@@ -232,8 +232,13 @@ class DatasetPaginateView(restful.Resource) :
         query = build_query(q, stopwords)
 
         # sorting
-        sort_column = self.args["sort_column"]
+        if self.args["sort_column"] != None:
+            sort_column = self.args["sort_column"].encode('utf-8')
+        else :
+            sort_column = self.args["sort_column"]
+
         sort_order_num = self.args["sort_order"]
+
 
         if sort_order_num  == "1" : sort_order = ASCENDING
         else : sort_order = DESCENDING
