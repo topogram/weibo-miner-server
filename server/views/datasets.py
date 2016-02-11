@@ -238,8 +238,6 @@ class DatasetPaginateView(restful.Resource) :
         if sort_order_num  == "1" : sort_order = ASCENDING
         else : sort_order = DESCENDING
 
-        print sort_column
-
         if sort_column is None :
             results = mongo.db[dataset["index_name"]].find(query).skip(start).limit(start+qty)
         else :
