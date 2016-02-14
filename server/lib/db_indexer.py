@@ -144,33 +144,23 @@ def get_words_co_occurences(dataset, nodes_count=0, min_edge_weight=0, q=None, s
     topogram = get_topogram(dataset)
     words = mongo.db["wordGraphs"].find_one({ "name" : dataset["index_name"]})
     topogram.load_words_from_json(words["words"])
-
     words_network = topogram.words
 
+    nodes = []
     # search term
     if q is not None:
-        nodes = []
-        for w in q :
-            try :
-                nodes = topogram.words[w].keys()
-            except KeyError:
-                pass
-            nodes.append(w)
-        words_network = topogram.words.subgraph(nodes)
+        nodes = topogram.words[q].keys()
+        nodes.append(q)
 
     if stopwords is not None :
-        # print words_network.nodes()
         for w in stopwords:
-            print any2unicode(w) in words_network.nodes()
+            if any2unicode(w) in nodes :
+                nodes.remove(any2unicode(w))
 
-        words_network.remove_nodes_from([any2unicode(w) for w in stopwords])
-
-        for w in stopwords:
-            print any2unicode(w) in words_network.nodes()
+    words_network = topogram.words.subgraph(nodes)
 
     # get only the number of nodes
-    g= topogram.get_node_network(words_network, nodes_count=nodes_count, min_edge_weight=min_edge_weight)
-    print len(g.nodes())
+    g = topogram.get_node_network(words_network, nodes_count=nodes_count, min_edge_weight=min_edge_weight)
 
     data = {}
     data["words"] = topogram.export_to_json(g)
