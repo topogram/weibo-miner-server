@@ -146,18 +146,13 @@ def get_words_co_occurences(dataset, nodes_count=0, min_edge_weight=0, q=None, s
     topogram.load_words_from_json(words["words"])
     words_network = topogram.words
 
-    nodes = []
-    # search term
-    if q is not None:
+    if q is not None: # search term
         nodes = topogram.words[q].keys()
         nodes.append(q)
+        words_network = topogram.words.subgraph(nodes)
 
-    if stopwords is not None :
-        for w in stopwords:
-            if any2unicode(w) in nodes :
-                nodes.remove(any2unicode(w))
-
-    words_network = topogram.words.subgraph(nodes)
+    if stopwords is not None : # stopwords
+        words_network.remove_nodes_from([any2unicode(w) for w in stopwords])
 
     # get only the number of nodes
     g = topogram.get_node_network(words_network, nodes_count=nodes_count, min_edge_weight=min_edge_weight)
