@@ -257,7 +257,7 @@ def build_query(q, stopwords):
     query_and = []
 
     if q is not None :
-        query_and.append({"keywords" : { "$in" : [ any2utf8(w) for w in q ] }})
+        query_and.append({"keywords" : { "$in" : [ any2utf8(q)  ] }})
 
     if stopwords is not None :
         query_and.append({"keywords" : { "$nin" : stopwords }})
