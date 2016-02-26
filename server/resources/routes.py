@@ -3,10 +3,11 @@
 
 import os
 from flask import render_template, jsonify, send_from_directory, request, make_response
+from flask.ext.login import current_user
 
 from server import app, basedir
 
-# default 
+# default
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -76,4 +77,3 @@ def not_found(error=None):
     resp.status_code = 404
 
     return resp
-    

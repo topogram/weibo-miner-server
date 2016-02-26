@@ -1,0 +1,38 @@
+<h1>Change Password</h1>
+<form ng-submit="submitResetPasswordForm()" role="form" class="form-horizontal" name="resetPasswordFrom" novalidate>
+  <input type="hidden" name="token" ng-model="resetPasswordInfo.token">
+  <div class="form-group" data-ng-class="( resetPasswordFrom.email.$dirty ? (resetPasswordFrom.email.$valid ? 'has-success has-feedback' : 'has-error has-feedback' ) : ' ')">
+    <label for="inputEmail" class="col-sm-4 control-label">Email</label>
+    <div class="col-sm-4">
+      <input id="inputEmail" name="email" type="email" placeholder="Email" ng-model="resetPasswordInfo.email" class="form-control" required="true"/>
+      <span ng-show="resetPasswordFrom.email.$error.email && resetPasswordFrom.email.$dirty" class="bg-danger pad">Please enter valid email.</span>
+      <span class="help-block" data-ng-show="resetPasswordFrom.email.$error.required && resetPasswordFrom.email.$dirty">This is required.</span></div>
+      <span ng-if='resetPasswordFrom.email.$valid' class="glyphicon glyphicon-ok form-control-feedback"></span>
+    </div>
+    </div>
+  </div>
+
+  <div class="form-group"  data-ng-class="( resetPasswordFrom.password.$dirty ? (resetPasswordFrom.password.$valid ? 'has-success has-feedback' : 'has-error has-feedback' ) : ' ')">
+    <label for="inputPassword" class="col-sm-4 control-label">Password</label>
+    <div class="col-sm-4">
+      <input id="inputPassword" name="password" type="password" placeholder="Password" ng-model="resetPasswordInfo.password" class="form-control" required="true"/>
+      <span class="help-block" data-ng-show="resetPasswordFrom.password.$error.required && resetPasswordFrom.password.$dirty">This is required.</span></div>
+      <span ng-if='resetPasswordFrom.password.$valid' class="glyphicon glyphicon-ok form-control-feedback"></span>
+    </div>
+  </div>
+  <div class="form-group" data-ng-class="( resetPasswordFrom.passwordMatch.$dirty ? (resetPasswordFrom.passwordMatch.$valid ? 'has-success has-feedback' : 'has-error has-feedback' ) : ' ')">
+    <label for="inputPasswordMatch" class="col-sm-4 control-label">Confirm Password</label>
+    <div class="col-sm-4">
+      <input id="inputPasswordMatch" name="passwordMatch" type="password" placeholder="Password" match="resetPasswordInfo.password" ng-model="resetPasswordInfo.confirm" class="form-control" required="true"/>
+      <span class="help-block" data-ng-show="resetPasswordFrom.passwordMatch.$error.required && resetPasswordFrom.passwordMatch.$dirty">This is required.</span></div>
+      <span class="help-block" data-ng-show="resetPasswordFrom.passwordMatch.$error.mismatch && resetPasswordFrom.passwordMatch.$dirty">Password doesn't match.</span></div>
+      <span ng-if='resetPasswordFrom.passwordMatch.$valid' class="glyphicon glyphicon-ok form-control-feedback"></span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-sm-offset-4 col-sm-10">
+      <button type="submit" class="btn btn-default">Update Password</button>
+    </div>
+  </div>
+</form>

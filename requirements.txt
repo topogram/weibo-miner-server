@@ -44,3 +44,4 @@ coverage
 colour-runner
 chardet
 gevent
+requests

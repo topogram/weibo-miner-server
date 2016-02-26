@@ -4,8 +4,8 @@
 from flask.ext.restful import reqparse, Api
 from flask_restful_swagger import swagger
 
-from server import app 
-from server.views.users import UserView
+from server import app
+from server.views.users import UserView, UserResetPasswordView, UserNewPasswordView
 from server.views.sessions import SessionView
 from server.views.regexps import RegexpListView, RegexpView
 from server.views.datasets import DatasetListView, DatasetView, DatasetSampleView, DatasetProcessView,DatasetSizeView, DatasetPaginateView,DatasetSearchWordView
@@ -16,6 +16,8 @@ api = swagger.docs(Api(app), apiVersion='0.1', api_spec_url="/api/v1/spec", reso
 
 # users
 api.add_resource(UserView, '/api/v1/users')
+api.add_resource(UserResetPasswordView, '/api/v1/users/resetPassword')
+api.add_resource(UserNewPasswordView, '/api/v1/users/newPassword')
 api.add_resource(SessionView, '/api/v1/sessions')
 
 # datasets

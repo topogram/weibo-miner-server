@@ -1,6 +1,6 @@
 // routes
 Topogram.config(function($routeProvider, RestangularProvider) {
- 
+
 
     RestangularProvider.setBaseUrl('/api/v1');
 
@@ -8,36 +8,36 @@ Topogram.config(function($routeProvider, RestangularProvider) {
 
     var redirectIfAuthenticated = function(route) {
         return function($location, $q, AuthService) {
- 
+
             var deferred = $q.defer();
- 
+
             if (AuthService.isAuthenticated()) {
                 deferred.reject()
                 $location.path(route);
             } else {
                 deferred.resolve()
             }
- 
+
             return deferred.promise;
         }
     }
- 
+
     var redirectIfNotAuthenticated = function(route) {
         return function($location, $q, AuthService) {
- 
+
             var deferred = $q.defer();
- 
+
             if (! AuthService.isAuthenticated()) {
                 deferred.reject()
                 $location.path(route);
             } else {
                 deferred.resolve()
             }
- 
+
             return deferred.promise;
         }
     }
- 
+
     $routeProvider
         .when('/', {
             controller: 'HomeDetailCtrl',
@@ -57,6 +57,14 @@ Topogram.config(function($routeProvider, RestangularProvider) {
         .when('/users/create', {
             controller: 'UserCreateCtrl',
             templateUrl: partialsDir + '/user/create.html'
+        })
+        .when('/users/new-password', {
+            controller: 'NewPasswordCtrl',
+            templateUrl: partialsDir + '/user/password.html'
+        })
+        .when('/users/reset-password', {
+            controller: 'ResetPasswordCtrl',
+            templateUrl: partialsDir + '/user/reset.html'
         })
         .when('/datasets/create', {
             controller: 'DatasetCreateCtrl',
@@ -102,5 +110,3 @@ Topogram.config(function($routeProvider, RestangularProvider) {
         })
         ;
 })
-
-    
