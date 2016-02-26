@@ -12,3 +12,6 @@ SENDGRID_PASSWORD = ""
 ELASTICSEARCH_URL="http://localhost:9200"
 
 MONGO_URI = "mongodb://localhost:27017/topogram"
+
+MAILGUN_KEY = "key-XXX"
+MAILGUN_DOMAIN = "sandboxXXX.mailgun.org"

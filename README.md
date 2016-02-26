@@ -1,6 +1,6 @@
 # Topogram
 
-Web-based dashboard for visualization of data as networks (words, users, geo maps). 
+Web-based dashboard for visualization of data as networks (words, users, geo maps).
 
 * Social Media analysis (support for Twitter,  Sina Weibo, Tencent Weibo, etc.)
 * Scientific Papers citations
@@ -11,7 +11,7 @@ Website : [http://topogram.io](http://topogram.io)
 
 ## Features
 
-This dashboard provides a complete interface to create data visualizations by uploading CSV files, search keywords and create geographical and networks maps. It is based on the [topogram](https://github.com/topogram/topogram) lib. 
+This dashboard provides a complete interface to create data visualizations by uploading CSV files, search keywords and create geographical and networks maps. It is based on the [topogram](https://github.com/topogram/topogram) lib.
 
 Currently supported :
 
@@ -19,7 +19,7 @@ Currently supported :
 * Show relationships between keywords, users and places
 * Analyze the structure of discussions (interactions; number of comments, forwards)
 * Indexation for full-text search
-* Keywords extraction (Chinese and English language) 
+* Keywords extraction (Chinese and English language)
 * See the emergence of dynamics around words and users over time
 * Geo-location and tweets mapping
 
@@ -38,3 +38,7 @@ The first user created wil get admin rights and therefore will be able to access
 
     pip install -r dev_requirements.txt
     python manage.py tests
+
+### Emails
+
+Emailing is handle by [Mailgun](http://mailgun.com).
