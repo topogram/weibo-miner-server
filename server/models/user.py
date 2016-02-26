@@ -43,7 +43,7 @@ class User(db.Model, UserMixin):
 
     def __init__(self, email=None, password=None, is_active=True):
         self.email = email
-        self.password = create_password(password)
+        self.password = self.create_password(password)
         self.active = is_active
         self.role = "user"
 
