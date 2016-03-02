@@ -36,7 +36,7 @@ Topogram.directive('timeseries', function () {
             var tooltip = d3.select(element[0])
                 .select("svg")
                 .append("g")
-                .attr("transform","translate(" + (time_width-150) +",30)")
+                .attr("transform","translate(" + (time_width-150) +",15)")
                 .append("text")
                 .text("")
                 .style("font-size",11)
@@ -121,7 +121,18 @@ Topogram.directive('timeseries', function () {
                     bars_enter
                         .on("mouseover",function(d,i,event){
                             d3.select(this).style("fill", "red");
-                            tooltip.text(format(d.time) + " -- " + d.count + " messages" )
+                            tooltip.selectAll('.tooltip-content').remove()
+                            tooltip
+                              .append('svg:tspan')
+                              .attr("class","tooltip-content")
+                              .attr('x', 0)
+                              .attr('dy', 5)
+                              .text(format(d.time))
+                              .append('svg:tspan')
+                              .attr("class","tooltip-content")
+                              .attr('x', 0)
+                              .attr('dy', 15)
+                              .text(d.count + " messages")
                         })
                         .on("mouseout",function(d,i){
                             d3.select(this).style("fill", "steelblue");
